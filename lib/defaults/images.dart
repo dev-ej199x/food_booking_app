@@ -15,4 +15,5 @@ class Images {
   static const String restaurant = "assets/images/Pastry.png";
   static const String pastryShop = "assets/images/Restaurant.png";
   static const String sampleOrderBanner = "assets/images/MangInasal.png";
+  static const String orderBanner = "assets/images/Group 22.png";
 }
