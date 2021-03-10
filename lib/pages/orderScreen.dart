@@ -8,6 +8,7 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  String dropdownValue = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +129,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                   ),
                                 ),
                               ),
-                                 Padding(
+                              Padding(
                                 padding: EdgeInsets.all(2),
                                 child: TextButton(
                                   onPressed: () {},
@@ -142,7 +143,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                   ),
                                 ),
                               ),
-                                  Padding(
+                              Padding(
                                 padding: EdgeInsets.all(2),
                                 child: TextButton(
                                   onPressed: () {},
@@ -156,7 +157,33 @@ class _OrderScreenState extends State<OrderScreen> {
                                   ),
                                 ),
                               ),
-                            
+                              DropdownButton<String>(
+                                value: dropdownValue,
+                                icon: Icon(Icons.arrow_downward),
+                                iconSize: 24,
+                                elevation: 16,
+                                style: TextStyle(color: Colors.white),
+                                underline: Container(
+                                  height: 2,
+                                  color: Colors.orange[800],
+                                ),
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    dropdownValue = newValue;
+                                  });
+                                },
+                                items: <String>[
+                                  'One',
+                                  'Two',
+                                  'Free',
+                                  'Four'
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
                             ],
                           ),
                         ),
