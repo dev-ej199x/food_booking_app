@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
   final List _sampleOrderInfo = [
     {
       "name": "Open",
-      "vacancy": "Vacant",
+      "vacant": "Vacant",
       "time": "Time",
       "distance": "Km",
     }
@@ -148,8 +148,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               // Establishment Banner
-              SingleChildScrollView(
-                child: Expanded(
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
                       Padding(
@@ -244,6 +244,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+
                       Container(
                         height: 200.0,
                         width: 400.0,
@@ -252,126 +253,117 @@ class _HomePageState extends State<HomePage> {
                         //   onTap: () {
                         //     _createAlertDialog(context);
                         //   },
-                        child: Expanded(
-                          child: ListView.builder(
-                            itemCount: _sampleOrderInfo.length,
-                            itemBuilder: (BuildContext context, int index) =>
-                                Container(
-                              width: MediaQuery.of(context).size.width,
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 2 * Config.heightMultiplier,
-                                  horizontal: 3 * Config.widthMultiplier),
-                              child: Card(
-                                elevation: 5.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Container(
-                                  color: Color(0xff707070),
-                                  width: MediaQuery.of(context).size.width,
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 2 * Config.heightMultiplier,
-                                      horizontal: 3 * Config.widthMultiplier),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Container(
-                                            width:
-                                                2 * Config.imageSizeMultiplier,
-                                            height:
-                                                2 * Config.imageSizeMultiplier,
-                                            decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                    Images.sampleOrderBanner),
-                                              ),
+
+                        child: ListView.builder(
+                          itemCount: 1,
+                          itemBuilder: (BuildContext context, int index) =>
+                              Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: EdgeInsets.symmetric(
+                                vertical: 2 * Config.heightMultiplier,
+                                horizontal: 3 * Config.widthMultiplier),
+                            child: Card(
+                              elevation: 5.0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: Container(
+                                color: Color(0xff707070),
+                                width: MediaQuery.of(context).size.width,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 1* Config.heightMultiplier,
+                                    horizontal: 2 * Config.widthMultiplier),
+                                child: Row(
+                                  children: <Widget>[
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          width: 25 * Config.imageSizeMultiplier,
+                                          height:
+                                              25 * Config.imageSizeMultiplier,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: AssetImage(
+                                                  Images.sampleOrderBanner),
                                             ),
                                           ),
-                                          SizedBox(width: 5.0),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: <Widget>[
-                                              Row(
-                                                children: <Widget>[
-                                                  Text(
-                                                    _sampleOrderInfo[index]
-                                                        .name,
-                                                    style: TextStyle(
-                                                      fontSize: 1 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'At',
-                                                    style: TextStyle(
-                                                      fontSize: 1 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _sampleOrderInfo[index]
-                                                        .time,
-                                                    style: TextStyle(
-                                                      fontSize: 1 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Text(
-                                                _sampleOrderInfo[index].vacant,
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      1 * Config.textMultiplier,
-                                                  fontFamily: 'Segoe UI',
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle: FontStyle.normal,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      Align(
-                                        alignment: Alignment.bottomLeft,
+                                        ),
+                                        // SizedBox(width: 5.0),
+                                        // Column(
+                                        //   crossAxisAlignment:
+                                        //       CrossAxisAlignment.start,
+                                        //   children: <Widget>[
+                                        //     Row(
+                                        //       children: <Widget>[
+                                        //         Text(
+                                        //           _sampleOrderInfo[index]['name'],
+                                        //           style: TextStyle(
+                                        //             fontSize: 1 *
+                                        //                 Config.textMultiplier,
+                                        //             fontFamily: 'Segoe UI',
+                                        //             fontWeight: FontWeight.bold,
+                                        //             fontStyle: FontStyle.normal,
+                                        //           ),
+                                        //         ),
+                                        //         Text(
+                                        //           'At',
+                                        //           style: TextStyle(
+                                        //             fontSize: 1 *
+                                        //                 Config.textMultiplier,
+                                        //             fontFamily: 'Segoe UI',
+                                        //             fontWeight: FontWeight.bold,
+                                        //             fontStyle: FontStyle.normal,
+                                        //           ),
+                                        //         ),
+                                        //         Text(
+                                        //           _sampleOrderInfo[index]['time'],
+                                        //           style: TextStyle(
+                                        //             fontSize: 1 *
+                                        //                 Config.textMultiplier,
+                                        //             fontFamily: 'Segoe UI',
+                                        //             fontWeight: FontWeight.bold,
+                                        //             fontStyle: FontStyle.normal,
+                                        //           ),
+                                        //         ),
+                                        //       ],
+                                        //     ),
+                                        //     Text(
+                                        //       _sampleOrderInfo[index]['vacant'],
+                                        //       style: TextStyle(
+                                        //         fontSize:
+                                        //             1 * Config.textMultiplier,
+                                        //         fontFamily: 'Segoe UI',
+                                        //         fontWeight: FontWeight.bold,
+                                        //         fontStyle: FontStyle.normal,
+                                        //       ),
+                                        //     ),
+                                        //   ],
+                                        // ),
+                                      ],
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
                                       child: Row(
                                         children: <Widget>[
                                           SmoothStarRating(
+                                            starCount: 5,
                                           ),
                                           Text(
-                                                _sampleOrderInfo[index].distance,
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      1 * Config.textMultiplier,
-                                                  fontFamily: 'Segoe UI',
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle: FontStyle.normal,
-                                                ),
-                                              ),
+                                            _sampleOrderInfo[index]['distance'],
+                                            style: TextStyle(
+                                              fontSize:
+                                                  1 * Config.textMultiplier,
+                                              fontFamily: 'Segoe UI',
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                      )
-                                    ],
-                                  ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -381,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
