@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:food_booking_app/pages/LoginSample.dart';
+import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/address.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
-import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/navigation.dart';
 import 'package:food_booking_app/pages/signUp.dart';
 import 'package:food_booking_app/defaults/appbar.dart';
