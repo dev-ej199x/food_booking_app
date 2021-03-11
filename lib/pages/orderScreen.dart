@@ -8,6 +8,32 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  final List _orderLogo = [
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    },
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    },
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    },
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    },
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    },
+    {
+      "name": "Chicken Joy",
+      "image": "assets/images/OrderLogo.png",
+    }
+  ];
   String dropdownValue = '';
   @override
   Widget build(BuildContext context) {
@@ -190,6 +216,28 @@ class _OrderScreenState extends State<OrderScreen> {
                       )
                     ],
                   ),
+                ),
+
+                Padding(
+                  padding: EdgeInsets.only(top: 10 * Config.heightMultiplier),
+                  child: GridView.builder(
+                      itemCount: _orderLogo.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2),
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                          child: Hero(
+                            tag: _orderLogo[index]['name'],
+                            child: Material(
+                              child: InkWell(
+                                onTap: (){},
+                                child: GridTile(
+                                  child: Image.asset(_orderLogo[index]['image']),
+                                ),
+                              ),
+                            ),),
+                        );
+                      }),
                 ),
               ],
             ),
