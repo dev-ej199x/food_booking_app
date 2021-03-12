@@ -45,6 +45,10 @@ class _OrderScreenState extends State<OrderScreen> {
         child: AppBar(
           backgroundColor: Color(0xffeb4d4d),
           elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {},
+          ),
         ),
       ),
       body: Stack(
@@ -230,12 +234,14 @@ class _OrderScreenState extends State<OrderScreen> {
                             tag: _orderLogo[index]['name'],
                             child: Material(
                               child: InkWell(
-                                onTap: (){},
+                                onTap: () {},
                                 child: GridTile(
-                                  child: Image.asset(_orderLogo[index]['image']),
+                                  child:
+                                      Image.asset(_orderLogo[index]['image']),
                                 ),
                               ),
-                            ),),
+                            ),
+                          ),
                         );
                       }),
                 ),
