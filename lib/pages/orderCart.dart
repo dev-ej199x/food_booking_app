@@ -96,6 +96,153 @@ class _OrderCartState extends State<OrderCart> {
               ),
             ],
           ),
+          Padding(
+            padding:
+                EdgeInsets.symmetric(vertical: 5 * Config.heightMultiplier),
+            child: Container(
+              alignment: Alignment.bottomLeft,
+              height: 200.0,
+              width: 220.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color: Color(0xff393737),
+              ),
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 2 * Config.heightMultiplier),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: 1 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: 1 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 2 * Config.heightMultiplier),
+                      child: Container(
+                        height: 80,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: Colors.white,
+                        ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Note',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 5.0,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 2 * Config.heightMultiplier),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: 1 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: 1 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          Text(
+                            '',
+                            style: TextStyle(
+                              fontSize: 1 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: 10 * Config.heightMultiplier, horizontal: 5.0),
+            child: Container(
+              alignment: Alignment.bottomRight,
+              height: 20.0,
+              width: 40.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2.0),
+                color: Color(0xff393737),
+              ),
+              child: Text(
+                'Total Price',
+                style: TextStyle(
+                  fontSize: 4 * Config.textMultiplier,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.normal,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: 2 * Config.heightMultiplier,
+                horizontal: 3 * Config.widthMultiplier),
+            child: RaisedButton(
+              onPressed: () {},
+              color: Color(0xffFC4646),
+              child: Text(
+                '',
+                style: TextStyle(
+                  fontSize: 2 * Config.textMultiplier,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.normal,
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
