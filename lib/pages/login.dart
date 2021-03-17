@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
@@ -24,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   FocusNode _passwordFocus = FocusNode();
 
-  TextEditingController _emailController = TextEditingController();
+  TextEditingController _usernameController = TextEditingController();
 
   TextEditingController _passwordController = TextEditingController();
 
@@ -32,123 +33,167 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _check() async {
     FocusScope.of(context).unfocus();
-    if (_emailController.text.isNotEmpty &&
+    if (_usernameController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
       _login();
     } else {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text('Fill up fields properly',
-              textScaleFactor: .8,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Colors.white,
-                fontSize: 2.2 * Config.textMultiplier,
-              ))));
+          content: Text(
+            'Fill up fields properly',
+            textScaleFactor: .8,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+          // action: SnackBarAction(
+          //   label: 'Login',
+          //   onPressed: () {},
+          // ),
+        ),
+      );
     }
   }
 
   _login() async {
     Http().showLoadingOverlay(context);
     var response = await Http(url: 'login', body: {
-      'email': _emailController.text,
+      'username': _usernameController.text,
       'password': _passwordController.text
     }).postNoHeader();
-    print(response.body);
+    log(response.body);
 
     if (response is String) {
       Navigator.pop(context);
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(response,
-              textScaleFactor: .8,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 2.2 * Config.textMultiplier,
-              ))));
-    } else if (response is Response) {
+          content: Text(
+            response,
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ),
+      );
+    }
+    else if (response is Response) {
       if (response.statusCode != 200) {
         Navigator.pop(context);
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
             behavior: SnackBarBehavior.floating,
             backgroundColor: Color(0xFF323232),
-            content: Text(response.body,
+            content: Text(
+              response.body,
+              textScaleFactor: .8,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.white,
+                fontSize: 2.2 * Config.textMultiplier,
+              ),
+            ),
+          ),
+        );
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        if (body.containsKey('token')
+        // && body['user']['role'] == 'CUSTOMER'
+        ) {
+          _sharedPreferences.setString('token', body['token']);
+          _sharedPreferences.setInt(
+            'id',
+            int.parse(
+              body['user']['id'].toString(),
+            ),
+          );
+          _sharedPreferences.setString(
+              'username', body['user']['username']);
+          _sharedPreferences.setString('role', body['user']['role']);
+          // _sharedPreferences.setInt('role-id', body['user']['profile']['id']);
+          // await FirebaseSettings().updateToken();
+          Navigator.of(context).pop();
+          await _loadCustomerDetails();
+        } else if (!body.containsKey('token') &&
+            body.containsKey('message')) {
+          Navigator.of(context).pop();
+          _scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Color(0xFF323232),
+              content: Text(
+                body['message'],
                 textScaleFactor: .8,
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   color: Colors.white,
                   fontSize: 2.2 * Config.textMultiplier,
-                ))));
-      } else {
-        Map<String, dynamic> body = json.decode(response.body);
-        if (body['data'].containsKey('token') &&
-            body['data']['user']['role'] == 'CUSTOMER') {
-          _sharedPreferences.setString('token', body['data']['token']);
-          _sharedPreferences.setInt(
-              'id', int.parse(body['data']['user']['id'].toString()));
-          _sharedPreferences.setString(
-              'username', body['data']['user']['username']);
-          _sharedPreferences.setString('role', body['data']['user']['role']);
-          // _sharedPreferences.setInt('role-id', body['data']['user']['profile']['id']);
-          await FirebaseSettings().updateToken();
-          Navigator.of(context).pop();
-          await _loadCustomerDetails();
-        } else if (!body['data'].containsKey('token') &&
-            body.containsKey('message')) {
-          Navigator.of(context).pop();
-          _scaffoldKey.currentState.showSnackBar(SnackBar(
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Color(0xFF323232),
-              content: Text(body['message'],
-                  textScaleFactor: .8,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontSize: 2.2 * Config.textMultiplier,
-                  ))));
+                ),
+              ),
+            ),
+          );
         } else {
           Navigator.of(context).pop();
-          _scaffoldKey.currentState.showSnackBar(SnackBar(
+          _scaffoldKey.currentState.showSnackBar(
+            SnackBar(
               behavior: SnackBarBehavior.floating,
               backgroundColor: Color(0xFF323232),
-              content: Text('Invalid Credentials',
-                  textScaleFactor: .8,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontSize: 2.2 * Config.textMultiplier,
-                  ))));
+              content: Text(
+                'Invalid Credentials',
+                textScaleFactor: .8,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                ),
+              ),
+            ),
+          );
         }
       }
     }
   }
+
   _loadCustomerDetails() async {
     var response = await Http(url: 'customer', body: null).getWithHeader();
 
     if (response is String) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(response,
-              textScaleFactor: .8,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 2.2 * Config.textMultiplier,
-              ))));
+          content: Text(
+            response,
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ),
+      );
     } else if (response is Response) {
       Map<String, dynamic> list = json.decode(response.body);
-      _sharedPreferences.setString('name', list['data']['customer']['name']);
+      _sharedPreferences.setString('name', list['customer']['name']);
     }
     if (widget.from == 'cart')
       Navigator.pop(context);
     else
       Navigator.pushAndRemoveUntil(
-          context,
-          PageTransition(
-              type: PageTransitionType.rightToLeft, child: DashBoard()),
-          ModalRoute.withName('/'));
+        context,
+        PageTransition(
+          type: PageTransitionType.rightToLeft,
+          child: DashBoard(),
+        ),
+        ModalRoute.withName('/'),
+      );
   }
 
   _configure() async {
@@ -163,11 +208,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _configure();
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        // if (widget.from == 'cart') Navigator.pop(context);
+        if (widget.from == 'cart') Navigator.pop(context);
       },
       child: Scaffold(
         key: _scaffoldKey,
@@ -187,8 +233,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40.0),
-                      topRight: Radius.circular(40.0)),
+                    topLeft: Radius.circular(40.0),
+                    topRight: Radius.circular(40.0),
+                  ),
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
@@ -205,8 +252,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(40.0),
-                        topRight: Radius.circular(40.0)),
+                      topLeft: Radius.circular(40.0),
+                      topRight: Radius.circular(40.0),
+                    ),
                     color: Color(0xffeb4d4d),
                     boxShadow: [
                       BoxShadow(
@@ -218,12 +266,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
-                        horizontal: 8 * Config.widthMultiplier),
+                        vertical: 2 * Config.heightMultiplier,
+                        horizontal: 4 * Config.widthMultiplier),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: 33.0),
+                          padding: EdgeInsets.only(
+                              top: 2 * Config.heightMultiplier,
+                              bottom: 2 * Config.heightMultiplier),
                           child: Text(
                             'FOOD BOOKING',
                             textScaleFactor: 1,
@@ -235,16 +286,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Padding(
-                          padding:
-                              EdgeInsets.all(3 * Config.imageSizeMultiplier),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 1 * Config.heightMultiplier,
+                              horizontal: 4 * Config.widthMultiplier),
                           child: Container(
-                            width: 80 * Config.widthMultiplier,
-                            height: 37.0,
+                            width: 100 * Config.widthMultiplier,
+                            height: 6 * Config.heightMultiplier,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18.0),
+                              borderRadius: BorderRadius.circular(
+                                  10 * Config.imageSizeMultiplier),
                               color: const Color(0xffffffff),
                               border: Border.all(
-                                  width: 1.0, color: const Color(0x40707070)),
+                                width: 1.0,
+                                color: const Color(0x40707070),
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0x29000000),
@@ -266,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     textInputAction: TextInputAction.next,
-                                    controller: _emailController,
+                                    controller: _usernameController,
                                     onFieldSubmitted: (value) {
                                       FocusScope.of(context)
                                           .requestFocus(_passwordFocus);
@@ -288,12 +343,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         color: Colors.black,
                                         fontSize: 2.2 * Config.textMultiplier,
                                       ),
-                                      hintText: "Email",
+                                      hintText: "username",
                                       enabledBorder: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       border: InputBorder.none,
                                     ).copyWith(isDense: true),
-                                    keyboardType: TextInputType.emailAddress,
+                                    keyboardType: TextInputType.text,
                                   ),
                                 ),
                               ],
@@ -301,15 +356,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 1 * Config.heightMultiplier,
+                              horizontal: 4 * Config.widthMultiplier),
                           child: Container(
-                            width: 80 * Config.widthMultiplier,
-                            height: 37.0,
+                            width: 100 * Config.widthMultiplier,
+                            height: 6 * Config.heightMultiplier,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18.0),
+                              borderRadius: BorderRadius.circular(
+                                  10 * Config.imageSizeMultiplier),
                               color: const Color(0xffffffff),
                               border: Border.all(
-                                  width: 1.0, color: const Color(0x40707070)),
+                                width: 1.0,
+                                color: const Color(0x40707070),
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0x29000000),
@@ -367,8 +427,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(
-                              right: 1 * Config.widthMultiplier),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4 * Config.widthMultiplier),
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
@@ -383,29 +443,33 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
-                              vertical: 1 * Config.heightMultiplier),
-                          child: FlatButton(
-                            splashColor: Color(0xffeb4d4d),
-                            child: Container(
-                              width: 50 * Config.widthMultiplier,
-                              height: 40.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14.0),
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0x29000000),
+                              vertical: 1 * Config.heightMultiplier,
+                              horizontal: 4 * Config.widthMultiplier),
+                          child: ButtonTheme(
+                              height: 7 * Config.heightMultiplier,
+                              child: RaisedButton(
+                                onPressed: () {
+                                  _check();
+                                },
+                                color: Color(0xFF464444),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      10 * Config.imageSizeMultiplier),
+                                ),
+                                splashColor: Colors.white.withOpacity(.4),
+                                child: Container(
+                                  child: Center(
+                                    child: Text(
+                                      "Login",
+                                      textScaleFactor: 1,
+                                      style: TextStyle(
+                                          fontSize: 2.2 * Config.textMultiplier,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text("Login",
-                                    style: TextStyle(
-                                        color: Color(0x29000000),
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                          ),
+                                ),
+                              )),
                         ),
                         Padding(
                           padding: EdgeInsets.only(
@@ -416,30 +480,57 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {},
                               child: Text(
                                 'Login in with:',
+                                textScaleFactor: 1,
                                 style: TextStyle(
-                                    fontFamily: 'Poppins', color: Colors.white),
+                                    fontSize: 1.6 * Config.textMultiplier,
+                                    fontWeight: FontWeight.normal,
+                                    fontFamily: 'Poppins',
+                                    color: Colors.white),
                               ),
                             ),
                           ),
                         ),
                         Padding(
-                          padding:
-                              EdgeInsets.only(top: 1 * Config.heightMultiplier),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 1 * Config.heightMultiplier,
+                              horizontal: 4 * Config.widthMultiplier),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Image.asset(
-                                Images.fbIcon,
-                                width: 15 * Config.imageSizeMultiplier,
-                              ),
-                              Image.asset(
-                                Images.twitIcon,
-                                width: 15 * Config.imageSizeMultiplier,
-                              ),
-                              Image.asset(
-                                Images.googleIcon,
-                                width: 15 * Config.imageSizeMultiplier,
-                              ),
+                              Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1 * Config.widthMultiplier),
+                                  child: FlatButton(
+                                      onPressed: () {},
+                                      shape: CircleBorder(),
+                                      child: Image.asset(
+                                        Images.fbIcon,
+                                        width: 15 * Config.imageSizeMultiplier,
+                                        height: 15 * Config.imageSizeMultiplier,
+                                      ))),
+                              Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1 * Config.widthMultiplier),
+                                  child: FlatButton(
+                                      onPressed: () {},
+                                      shape: CircleBorder(),
+                                      child: Image.asset(
+                                        Images.twitIcon,
+                                        width: 15 * Config.imageSizeMultiplier,
+                                        height: 15 * Config.imageSizeMultiplier,
+                                      ))),
+                              Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1 * Config.widthMultiplier),
+                                  child: FlatButton(
+                                      onPressed: () {},
+                                      shape: CircleBorder(),
+                                      child: Image.asset(
+                                        Images.googleIcon,
+                                        width: 15 * Config.imageSizeMultiplier,
+                                        height: 15 * Config.imageSizeMultiplier,
+                                      ))),
                             ],
                           ),
                         ),
@@ -451,7 +542,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [
                                 Text(
                                   'Want to Create an Account?',
+                                  textScaleFactor: 1,
                                   style: TextStyle(
+                                      fontSize: 1.4 * Config.textMultiplier,
                                       fontFamily: 'Poppins',
                                       color: Colors.white),
                                 ),
@@ -459,7 +552,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   onPressed: () {},
                                   child: Text(
                                     'Click Here!',
+                                    textScaleFactor: 1,
                                     style: TextStyle(
+                                        fontSize: 1.4 * Config.textMultiplier,
                                         fontFamily: 'Poppins',
                                         color: Colors.white),
                                   ),

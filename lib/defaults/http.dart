@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'config.dart';
+
 class Http {
   SharedPreferences _sharedPreferences;
-  // String ip = 'http://192.168.1.109:8000';
+  String ip = 'http://192.168.1.75:8000';
   final String url;
   final dynamic body;
 
@@ -17,7 +19,7 @@ class Http {
     var _response;
     try {
       _sharedPreferences = await SharedPreferences.getInstance();
-      await http.post('https://reqres.in/api/$url', body: json.encode(body), headers: {
+      await http.post('$ip/api/v1/$url', body: json.encode(body), headers: {
         'Content-Type': 'application/json',
         'authorization': 'Bearer ' + _sharedPreferences.getString('token')
       }).then((response) {
@@ -32,7 +34,7 @@ class Http {
   postNoHeader() async {
     var _response;
     try {
-      await http.post('https://reqres.in/api/$url', body: body).then((response) {
+      await http.post('$ip/api/v1/$url', body: body).then((response) {
         _response = response;
       });
     } on SocketException {
@@ -45,7 +47,7 @@ class Http {
     var _response;
     try {
       _sharedPreferences = await SharedPreferences.getInstance();
-      await http.patch('https://reqres.in/api/$url', body: json.encode(body), headers: {
+      await http.patch('$ip/api/v1/$url', body: json.encode(body), headers: {
         'Content-Type': 'application/json',
         'authorization': 'Bearer ' + _sharedPreferences.getString('token')
       }).then((response) {
@@ -61,7 +63,7 @@ class Http {
     var _response;
     try {
       _sharedPreferences = await SharedPreferences.getInstance();
-      await http.put('https://reqres.in/api/$url', body: json.encode(body), headers: {
+      await http.put('$ip/api/v1/$url', body: json.encode(body), headers: {
         'Content-Type': 'application/json',
         'authorization': 'Bearer ' + _sharedPreferences.getString('token')
       }).then((response) {
@@ -76,7 +78,7 @@ class Http {
   putNoHeader() async {
     var _response;
     try {
-      await http.put('https://reqres.in/api/$url', body: body).then((response) {
+      await http.put('$ip/api/v1/$url', body: body).then((response) {
         _response = response;
       });
     } on SocketException {
@@ -89,7 +91,7 @@ class Http {
     var _response;
     try {
       _sharedPreferences = await SharedPreferences.getInstance();
-      await http.get('https://reqres.in/api/$url', headers: {
+      await http.get('$ip/api/v1/$url', headers: {
         'Accept': 'application/json',
         'authorization': 'Bearer ' + _sharedPreferences.getString('token')
       }).then((response) {
@@ -104,7 +106,7 @@ class Http {
   getNoHeader() async {
     var _response;
     try {
-      await http.get('https://reqres.in/api/$url').then((response) {
+      await http.get('$ip/api/v1/$url').then((response) {
         _response = response;
       });
     } on SocketException {
@@ -122,7 +124,19 @@ class Http {
               Navigator.pop(context);
             },
             child: Material(
-              type: MaterialType.transparency,
+              color: Colors.transparent,
+              child: Container(
+                height: 40 * Config.imageSizeMultiplier,
+                width: 20 * Config.imageSizeMultiplier,
+                color: Colors.transparent,
+                child: Center(
+                  child: Container(
+                    height: 10 * Config.imageSizeMultiplier,
+                    width: 10 * Config.imageSizeMultiplier,
+                    child: CircularProgressIndicator(),
+                  )
+                )
+              )
             )));
   }
 }

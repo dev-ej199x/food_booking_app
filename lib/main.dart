@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Food Booking',
-          home: OrderScreen(),
+          home: LoginScreen(from: null),
         );
       });
     });
