@@ -7,6 +7,7 @@ import 'package:food_booking_app/pages/notification.dart';
 import 'package:food_booking_app/pages/profile.dart';
 
 import 'cart.dart';
+import 'orderCart.dart';
 
 class DashBoard extends StatefulWidget {
   @override
@@ -57,7 +58,7 @@ class _DashBoardState extends State<DashBoard> {
         return HomePage();
         break;
       case 3:
-        return Cart();
+        return OrderCart();
         break;
       case 4:
         return Profile();

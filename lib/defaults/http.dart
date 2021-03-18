@@ -9,7 +9,7 @@ import 'config.dart';
 
 class Http {
   SharedPreferences _sharedPreferences;
-  String ip = 'http://192.168.1.75:8000';
+  String ip = 'http://192.168.1.109:8000';
   final String url;
   final dynamic body;
 
@@ -124,19 +124,16 @@ class Http {
               Navigator.pop(context);
             },
             child: Material(
-              color: Colors.transparent,
-              child: Container(
-                height: 40 * Config.imageSizeMultiplier,
-                width: 20 * Config.imageSizeMultiplier,
                 color: Colors.transparent,
-                child: Center(
-                  child: Container(
-                    height: 10 * Config.imageSizeMultiplier,
-                    width: 10 * Config.imageSizeMultiplier,
-                    child: CircularProgressIndicator(),
-                  )
-                )
-              )
-            )));
+                child: Container(
+                    height: 40 * Config.imageSizeMultiplier,
+                    width: 20 * Config.imageSizeMultiplier,
+                    color: Colors.transparent,
+                    child: Center(
+                        child: Container(
+                      height: 10 * Config.imageSizeMultiplier,
+                      width: 10 * Config.imageSizeMultiplier,
+                      child: CircularProgressIndicator(),
+                    ))))));
   }
 }

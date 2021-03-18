@@ -14,7 +14,7 @@ class Images {
   static const String coffeeShop = "assets/images/CoffeeShop.png";
   static const String restaurant = "assets/images/Pastry.png";
   static const String pastryShop = "assets/images/Restaurant.png";
-  static const String sampleOrderBanner = "assets/images/MangInasal.png";
+  static const String sampleRestaurant = "assets/images/MangInasal.png";
   static const String orderBanner = "assets/images/Group 22.png";
   static const String orderLogo = "assets/images/OrderLogo.png";
   static const String menuLogo = "assets/images/menuSample.png";

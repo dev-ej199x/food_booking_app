@@ -11,6 +11,10 @@ import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dashBoard.dart';
+import 'dashBoard.dart';
+import 'signUp.dart';
+
 class LoginScreen extends StatefulWidget {
   String from;
   LoginScreen({Key key, @required this.from});
@@ -24,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   SharedPreferences _sharedPreferences;
 
   FocusNode _passwordFocus = FocusNode();
+  FocusNode _usernameFocus = FocusNode();
 
   TextEditingController _usernameController = TextEditingController();
 
@@ -118,7 +123,13 @@ class _LoginScreenState extends State<LoginScreen> {
           // _sharedPreferences.setInt('role-id', body['user']['profile']['id']);
           // await FirebaseSettings().updateToken();
           Navigator.of(context).pop();
-          await _loadCustomerDetails();
+          Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: DashBoard(),
+            ),
+          );
         } else if (!body.containsKey('token') && body.containsKey('message')) {
           Navigator.of(context).pop();
           _scaffoldKey.currentState.showSnackBar(
@@ -156,41 +167,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     }
-  }
-
-  _loadCustomerDetails() async {
-    var response = await Http(url: 'customer', body: null).getWithHeader();
-
-    if (response is String) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: Text(
-            response,
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
-          ),
-        ),
-      );
-    } else if (response is Response) {
-      Map<String, dynamic> list = json.decode(response.body);
-      _sharedPreferences.setString('name', list['customer']['name']);
-    }
-    if (widget.from == 'cart')
-      Navigator.pop(context);
-    else
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: DashBoard(),
-        ),
-        ModalRoute.withName('/'),
-      );
   }
 
   _configure() async {
@@ -277,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             textScaleFactor: 1,
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 5 * Config.textMultiplier,
+                              fontSize: 4 * Config.textMultiplier,
                               color: const Color(0xffffffff),
                             ),
                           ),
@@ -319,6 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: TextFormField(
                                     textInputAction: TextInputAction.next,
                                     controller: _usernameController,
+                                    focusNode: _usernameFocus,
                                     onFieldSubmitted: (value) {
                                       FocusScope.of(context)
                                           .requestFocus(_passwordFocus);
@@ -340,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         color: Colors.black,
                                         fontSize: 2.2 * Config.textMultiplier,
                                       ),
-                                      hintText: "username",
+                                      hintText: "Username",
                                       enabledBorder: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       border: InputBorder.none,
@@ -428,19 +405,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               horizontal: 4 * Config.widthMultiplier),
                           child: Align(
                             alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'Forgot Password?',
-                                style: TextStyle(
-                                    fontFamily: 'Poppins', color: Colors.white),
+                            child: ButtonTheme(
+                              height: 0,
+                              minWidth: 0,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              padding: EdgeInsets.zero,
+                              child: TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      color: Colors.white),
+                                ),
                               ),
                             ),
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
-                              vertical: 1 * Config.heightMultiplier,
                               horizontal: 4 * Config.widthMultiplier),
                           child: ButtonTheme(
                               height: 7 * Config.heightMultiplier,
@@ -470,27 +454,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(
-                              right: 1 * Config.widthMultiplier),
+                              right: 1 * Config.widthMultiplier,
+                              top: 1 * Config.heightMultiplier),
                           child: Align(
                             alignment: Alignment.center,
-                            child: TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'Login in with:',
-                                textScaleFactor: 1,
-                                style: TextStyle(
-                                    fontSize: 1.6 * Config.textMultiplier,
-                                    fontWeight: FontWeight.normal,
-                                    fontFamily: 'Poppins',
-                                    color: Colors.white),
-                              ),
+                            child: Text(
+                              'Login with:',
+                              textScaleFactor: 1,
+                              style: TextStyle(
+                                  fontSize: 1.6 * Config.textMultiplier,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.white),
                             ),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 1 * Config.heightMultiplier,
-                              horizontal: 4 * Config.widthMultiplier),
+                          padding: EdgeInsets.only(
+                              left: 4 * Config.widthMultiplier,
+                              right: 4 * Config.widthMultiplier),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -532,8 +514,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Padding(
-                          padding:
-                              EdgeInsets.only(top: 0 * Config.heightMultiplier),
+                          padding: EdgeInsets.only(
+                              top: 0.3 * Config.heightMultiplier),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -546,7 +528,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: Colors.white),
                                 ),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.rightToLeft,
+                                        child: SignUpScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: Text(
                                     'Click Here!',
                                     textScaleFactor: 1,

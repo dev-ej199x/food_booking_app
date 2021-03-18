@@ -1,84 +1,158 @@
 // import 'package:carousel_pro/carousel_pro.dart';
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:http/http.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+
+import '../defaults/config.dart';
+import '../defaults/config.dart';
+import '../defaults/config.dart';
+import '../defaults/config.dart';
+import '../defaults/http.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-_createAlertDialog(BuildContext context) {
-  return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Color(0xff484545),
-          content: Container(
-            width: 80 * Config.widthMultiplier,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                  child: RaisedButton(
-                    onPressed: () {},
+class _HomePageState extends State<HomePage> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final List _sampleOrderInfo = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('HOY');
+    _getEstablishments();
+  }
+
+  _createAlertDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Color(0xff484545),
+            content: Container(
+              width: 80 * Config.widthMultiplier,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    child: RaisedButton(
+                      onPressed: () {},
+                      child: Text(
+                        'On the Go',
+                        style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins'),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
                     child: Text(
-                      'On the Go',
+                      'OR',
                       style: TextStyle(
                           fontSize: 15.0,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Poppins'),
                     ),
                   ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                  child: Text(
-                    'OR',
-                    style: TextStyle(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins'),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                  child: RaisedButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Book',
-                      style: TextStyle(
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins'),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    child: RaisedButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Book',
+                        style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins'),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  _getEstablishments() async {
+    // Http().showLoadingOverlay(context);
+    var response = await Http(url: 'restaurants', body: {}).getWithHeader();
+    log(response.body);
+    if (response is String) {
+      Navigator.pop(context);
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            response,
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        Navigator.pop(context);
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: Text(
+              response.body,
+              textScaleFactor: .8,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.white,
+                fontSize: 2.2 * Config.textMultiplier,
+              ),
             ),
           ),
         );
-      });
-}
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        body['restaurant'].forEach((restaurant) {
+          print({
+            "name": restaurant['name'],
+            "opentime": restaurant['opening_time'],
+            "closetime": restaurant['closing_time'],
+            "distance": restaurant['address'],
+          });
+          setState(() {
+            _sampleOrderInfo.add({
+              "name": restaurant['name'],
+              "opentime": restaurant['opening_time'],
+              "closetime": restaurant['closing_time'],
+              "distance": restaurant['address'],
+            });
+          });
+        });
+      }
+    }
+  }
 
-class _HomePageState extends State<HomePage> {
-  final List _sampleOrderInfo = [
-    {
-      "name": "Open",
-      "vacant": "Vacant",
-      "time": "Time",
-      "distance": "Km",
-    },
-  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
@@ -95,59 +169,75 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           child: Column(
             children: <Widget>[
-              Container(
-                height: 100.0,
-                width: double.infinity,
-                child: CarouselSlider(
-                  options: CarouselOptions(
-                    height: 150.0,
-                    enlargeCenterPage: false,
-                    viewportFraction: 1,
-                    autoPlay: true,
-                  ),
-                  items: [
-                    Image.asset(
-                      'assets/images/Mask Group 2.png',
-                      fit: BoxFit.fill,
-                      width: double.infinity,
+              Stack(
+                children: [
+                  Container(
+                    height: 100.0,
+                    width: double.infinity,
+                    child: CarouselSlider(
+                      options: CarouselOptions(
+                        height: 150.0,
+                        enlargeCenterPage: false,
+                        viewportFraction: 1,
+                        autoPlay: true,
+                      ),
+                      items: [
+                        Image.asset(
+                          'assets/images/Mask Group 2.png',
+                          fit: BoxFit.fill,
+                          width: double.infinity,
+                        ),
+                        Image.asset(
+                          'assets/images/Restaurant.jpg',
+                          fit: BoxFit.fill,
+                          width: double.infinity,
+                        ),
+                      ].map((i) {
+                        return Builder(
+                          builder: (BuildContext context) {
+                            return i;
+                          },
+                        );
+                      }).toList(),
                     ),
-                    Image.asset(
-                      'assets/images/Restaurant.jpg',
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                    ),
-                  ].map((i) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return i;
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.zero,
-                child: Container(
-                  height: 40.0,
-                  margin: EdgeInsets.only(top: 10.0),
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50.0),
-                    border: Border.all(color: Colors.grey[800]),
                   ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(Icons.search, color: Colors.grey[800]),
-                      hintText: ('Search Restaurant'),
-                      hintStyle: TextStyle(
-                        color: Colors.grey[800],
-                        fontFamily: 'Segoe UI',
+                  Align(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: EdgeInsets.zero,
+                      child: Container(
+                        height: 40.0,
+                        width: 80 * Config.widthMultiplier,
+                        margin: EdgeInsets.only(top: 80.0),
+                        padding: EdgeInsets.symmetric(horizontal: 20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                              2 * Config.imageSizeMultiplier),
+                          // border: Border.all(color: Colors.grey[800]),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.4),
+                              offset: Offset(0, 1),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(Icons.search, color: Colors.grey[800]),
+                            hintText: ('Search Restaurant'),
+                            hintStyle: TextStyle(
+                              color: Colors.grey[800],
+                              fontFamily: 'Segoe UI',
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  )
+                ],
               ),
               // Establishment Banner
               Expanded(
@@ -155,7 +245,10 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(
+                            top: 10.0,
+                            left: 8 * Config.widthMultiplier,
+                            right: 8 * Config.widthMultiplier),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
@@ -171,8 +264,9 @@ class _HomePageState extends State<HomePage> {
                               TextButton(
                                 child: Text(
                                   'See All Featured',
+                                  textScaleFactor: 1,
                                   style: TextStyle(
-                                      fontSize: 1 * Config.textMultiplier,
+                                      fontSize: 1.2 * Config.textMultiplier,
                                       fontFamily: 'Segoe UI',
                                       fontWeight: FontWeight.bold,
                                       fontStyle: FontStyle.normal,
@@ -183,7 +277,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                       // featured restaurant information
                       Padding(
-                        padding: EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(
+                          top: 10.0,
+                        ),
                         child: Container(
                           height: 150.0,
                           width: double.infinity,
@@ -217,7 +313,10 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(top: 10.0),
+                        padding: EdgeInsets.only(
+                            top: 5.0,
+                            left: 8 * Config.widthMultiplier,
+                            right: 8 * Config.widthMultiplier),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
@@ -235,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                               child: Text(
                                 'See All Nearby',
                                 style: TextStyle(
-                                    fontSize: 1 * Config.textMultiplier,
+                                    fontSize: 1.2 * Config.textMultiplier,
                                     fontFamily: 'Segoe UI',
                                     fontWeight: FontWeight.bold,
                                     fontStyle: FontStyle.normal,
@@ -245,122 +344,80 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
-
-                      FlatButton(
-                        minWidth: double.infinity,
-                        onPressed: () {
-                          setState(() {
-                            _sampleOrderInfo.add({
-                              "name": "Open",
-                              "vacant": "Vacant",
-                              "time": "Time",
-                              "distance": "Km",
-                            });
-                          });
-                          _createAlertDialog(context);
-                        },
-                        child: Container(
-                          height: 200.0,
-                          width: double.infinity,
-                          padding: EdgeInsets.all(5.0),
-                          // child: GestureDetector(
-                          //   onTap: () {
-                          //     _createAlertDialog(context);
-                          //   },
-
+                      Container(
+                        height: 200.0,
+                        width: double.infinity,
+                        padding: EdgeInsets.all(5.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            _createAlertDialog(context);
+                          },
                           child: ListView.builder(
                             itemCount: _sampleOrderInfo.length,
                             itemBuilder: (BuildContext context, int index) =>
-                                Container(
-                              width: MediaQuery.of(context).size.width,
+                                Padding(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 2 * Config.heightMultiplier,
-                                  horizontal: 3 * Config.widthMultiplier),
-                              child: Card(
-                                elevation: 5.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Container(
-                                  color: Color(0xff2D2A2A),
-                                  width: MediaQuery.of(context).size.width,
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 1 * Config.heightMultiplier,
-                                      horizontal: 1 * Config.widthMultiplier),
-                                  child: Column(
-                                    children: <Widget>[
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Container(
+                                  vertical: 1.1 * Config.heightMultiplier),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 1 * Config.heightMultiplier,
+                                    horizontal: 0.4 * Config.widthMultiplier),
+                                decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topRight,
+                                      end: Alignment.topLeft,
+                                      colors: [
+                                        Colors.orange.shade900,
+                                        Colors.white60
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                        2 * Config.imageSizeMultiplier)),
+                                child: Column(
+                                  children: <Widget>[
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 2 * Config.widthMultiplier),
+                                          child: Image(
+                                            image: AssetImage(
+                                                Images.sampleRestaurant),
+                                            fit: BoxFit.fill,
                                             width:
-                                                50 * Config.imageSizeMultiplier,
+                                                40 * Config.imageSizeMultiplier,
                                             height:
-                                                20 * Config.imageSizeMultiplier,
-                                            decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                    Images.sampleOrderBanner),
-                                              ),
-                                            ),
+                                                10 * Config.imageSizeMultiplier,
                                           ),
-                                          SizedBox(width: 5.0),
-                                          Column(
+                                        ),
+                                        // SizedBox(width: 27.0),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              right:
+                                                  1.8 * Config.widthMultiplier),
+                                          child: Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.end,
                                             children: <Widget>[
-                                              Row(
-                                                children: <Widget>[
-                                                  Text(
-                                                    _sampleOrderInfo[index]
-                                                        ['name'],
-                                                    style: TextStyle(
-                                                      fontSize: 2 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'At',
-                                                    style: TextStyle(
-                                                      fontSize: 2 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _sampleOrderInfo[index]
-                                                        ['time'],
-                                                    style: TextStyle(
-                                                      fontSize: 2 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Segoe UI',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
+                                              Text(
+                                                _sampleOrderInfo[index]['name'],
+                                                style: TextStyle(
+                                                  fontSize: 2.5 *
+                                                      Config.textMultiplier,
+                                                  fontFamily: 'Segoe UI',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontStyle: FontStyle.normal,
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                               Text(
-                                                _sampleOrderInfo[index]
-                                                    ['vacant'],
+                                                '${_sampleOrderInfo[index]['opentime']} - ${_sampleOrderInfo[index]['closetime']}',
                                                 style: TextStyle(
-                                                  fontSize:
-                                                      2 * Config.textMultiplier,
+                                                  fontSize: 1.4 *
+                                                      Config.textMultiplier,
                                                   fontFamily: 'Segoe UI',
                                                   fontWeight: FontWeight.bold,
                                                   fontStyle: FontStyle.normal,
@@ -369,10 +426,15 @@ class _HomePageState extends State<HomePage> {
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                      Align(
-                                        alignment: Alignment.bottomLeft,
+                                        ),
+                                      ],
+                                    ),
+                                    Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                2.5 * Config.widthMultiplier),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -394,9 +456,9 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           ],
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
