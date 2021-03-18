@@ -15,7 +15,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   FocusNode _passwordFocus = FocusNode();
 
-  TextEditingController _emailController = TextEditingController();
+  TextEditingController _username = TextEditingController();
 
   TextEditingController _lastnameContorller = TextEditingController();
 
@@ -268,7 +268,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 child: TextFormField(
                                                   textInputAction:
                                                       TextInputAction.next,
-                                                  controller: _emailController,
+                                                  controller: _username,
                                                   onFieldSubmitted: (value) {
                                                     FocusScope.of(context)
                                                         .requestFocus(

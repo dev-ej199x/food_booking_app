@@ -83,8 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
-    }
-    else if (response is Response) {
+    } else if (response is Response) {
       if (response.statusCode != 200) {
         Navigator.pop(context);
         _scaffoldKey.currentState.showSnackBar(
@@ -105,8 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Map<String, dynamic> body = json.decode(response.body);
         if (body.containsKey('token')
-        // && body['user']['role'] == 'CUSTOMER'
-        ) {
+            // && body['user']['role'] == 'CUSTOMER'
+            ) {
           _sharedPreferences.setString('token', body['token']);
           _sharedPreferences.setInt(
             'id',
@@ -114,15 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
               body['user']['id'].toString(),
             ),
           );
-          _sharedPreferences.setString(
-              'username', body['user']['username']);
+          _sharedPreferences.setString('username', body['user']['username']);
           _sharedPreferences.setString('role', body['user']['role']);
           // _sharedPreferences.setInt('role-id', body['user']['profile']['id']);
           // await FirebaseSettings().updateToken();
           Navigator.of(context).pop();
           await _loadCustomerDetails();
-        } else if (!body.containsKey('token') &&
-            body.containsKey('message')) {
+        } else if (!body.containsKey('token') && body.containsKey('message')) {
           Navigator.of(context).pop();
           _scaffoldKey.currentState.showSnackBar(
             SnackBar(

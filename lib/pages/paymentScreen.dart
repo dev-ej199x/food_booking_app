@@ -164,33 +164,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                       vertical: 3 * Config.heightMultiplier),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          RaisedButton(
-                          color: Color(0xffFC4646),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          onPressed: () {},
-                          child: Text("Submit",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      RaisedButton(
+                        color: Color(0xffFC4646),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100.0),
                         ),
-                        RaisedButton(
-                          color: Color(0xffFC4646),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          onPressed: () {},
-                          child: Text("Cancel",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                        ],
+                        onPressed: () {},
+                        child: Text("Submit",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
                       ),
+                      RaisedButton(
+                        color: Color(0xffFC4646),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        onPressed: () {},
+                        child: Text("Cancel",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

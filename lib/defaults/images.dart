@@ -18,4 +18,6 @@ class Images {
   static const String orderBanner = "assets/images/Group 22.png";
   static const String orderLogo = "assets/images/OrderLogo.png";
   static const String menuLogo = "assets/images/menuSample.png";
+  static const String thankYou = "assets/images/Group 4132.png";
+  static const String profileSample = "assets/images/ProfileSample.png";
 }
