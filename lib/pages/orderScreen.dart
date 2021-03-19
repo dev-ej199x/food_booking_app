@@ -121,7 +121,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 ),
 
                 Padding(
-                  padding: EdgeInsets.zero,
+                  padding: EdgeInsets.only(top: 180.0),
                   child: Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,116 +134,117 @@ class _OrderScreenState extends State<OrderScreen> {
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.bold),
                       ),
-                      Padding(padding: EdgeInsets.symmetric(horizontal: 3.0)),
-                      Expanded(
-                        child: Container(
-                          // width: MediaQuery.of(context).size.width,
-                          height: 4 * Config.heightMultiplier,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.all(1),
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Beef',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 1 * Config.textMultiplier,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(2),
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Pork',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 1 * Config.textMultiplier,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(2),
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Chicken',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 1 * Config.textMultiplier,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DropdownButton<String>(
-                                value: dropdownValue,
-                                icon: Icon(Icons.arrow_downward),
-                                iconSize: 24,
-                                elevation: 16,
-                                style: TextStyle(color: Colors.white),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.orange[800],
-                                ),
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    dropdownValue = newValue;
-                                  });
-                                },
-                                items: <String>[
-                                  'One',
-                                  'Two',
-                                  'Free',
-                                  'Four'
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
+                      //       Padding(padding: EdgeInsets.symmetric(horizontal: 3.0)),
+                      //       Expanded(
+                      //         child: Container(
+                      //           // width: MediaQuery.of(context).size.width,
+                      //           height: 4 * Config.heightMultiplier,
+                      //           decoration: BoxDecoration(
+                      //             color: Colors.grey[700],
+                      //             borderRadius: BorderRadius.circular(10.0),
+                      //           ),
+                      //           child: Row(
+                      //             children: <Widget>[
+                      //               Padding(
+                      //                 padding: EdgeInsets.all(1),
+                      //                 child: TextButton(
+                      //                   onPressed: () {},
+                      //                   child: Text(
+                      //                     'Beef',
+                      //                     style: TextStyle(
+                      //                       color: Colors.white,
+                      //                       fontSize: 1 * Config.textMultiplier,
+                      //                       fontWeight: FontWeight.bold,
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //               ),
+                      //               Padding(
+                      //                 padding: EdgeInsets.all(2),
+                      //                 child: TextButton(
+                      //                   onPressed: () {},
+                      //                   child: Text(
+                      //                     'Pork',
+                      //                     style: TextStyle(
+                      //                       color: Colors.white,
+                      //                       fontSize: 1 * Config.textMultiplier,
+                      //                       fontWeight: FontWeight.bold,
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //               ),
+                      //               Padding(
+                      //                 padding: EdgeInsets.all(2),
+                      //                 child: TextButton(
+                      //                   onPressed: () {},
+                      //                   child: Text(
+                      //                     'Chicken',
+                      //                     style: TextStyle(
+                      //                       color: Colors.white,
+                      //                       fontSize: 1 * Config.textMultiplier,
+                      //                       fontWeight: FontWeight.bold,
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //               ),
+                      //               DropdownButton<String>(
+                      //                 value: dropdownValue,
+                      //                 icon: Icon(Icons.arrow_downward),
+                      //                 iconSize: 24,
+                      //                 elevation: 16,
+                      //                 style: TextStyle(color: Colors.white),
+                      //                 underline: Container(
+                      //                   height: 2,
+                      //                   color: Colors.orange[800],
+                      //                 ),
+                      //                 onChanged: (String newValue) {
+                      //                   setState(() {
+                      //                     dropdownValue = newValue;
+                      //                   });
+                      //                 },
+                      //                 items: <String>[
+                      //                   'One',
+                      //                   'Two',
+                      //                   'Free',
+                      //                   'Four'
+                      //                 ].map<DropdownMenuItem<String>>((String value) {
+                      //                   return DropdownMenuItem<String>(
+                      //                     value: value,
+                      //                     child: Text(value),
+                      //                   );
+                      //                 }).toList(),
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      // )
                     ],
                   ),
                 ),
 
                 Padding(
                   padding: EdgeInsets.only(top: 10 * Config.heightMultiplier),
-                  child: GridView.builder(
-                      itemCount: _orderLogo.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2),
-                      itemBuilder: (BuildContext context, int index) {
-                        return Card(
-                          child: Hero(
-                            tag: _orderLogo[index]['name'],
-                            child: Material(
-                              child: InkWell(
-                                onTap: () {},
-                                child: GridTile(
-                                  child:
-                                      Image.asset(_orderLogo[index]['image']),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
+                  child: Center(child: Text('')),
+                  //  GridView.builder(
+                  //     itemCount: _orderLogo.length,
+                  //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  //         crossAxisCount: 2),
+                  //     itemBuilder: (BuildContext context, int index) {
+                  //       return Card(
+                  //         child: Hero(
+                  //           tag: _orderLogo[index]['name'],
+                  //           child: Material(
+                  //             child: InkWell(
+                  //               onTap: () {},
+                  //               child: GridTile(
+                  //                 child:
+                  //                     Image.asset(_orderLogo[index]['image']),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }),
                 ),
               ],
             ),
