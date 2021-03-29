@@ -24,14 +24,16 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  final List _restaurants = [];
+  List _restaurants = [];
   String dropdownValue = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getEstablishments();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _getEstablishments();
+    });
   }
 
   _onTheGo(int index, List<String> quantity) {
@@ -88,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                             iconSize: 42,
                             underline: SizedBox(),
                             onChanged: (String newValue) {
-                              print(newValue);
+                              // print(newValue);
                               setState(() {
                                 dropdownValue = newValue;
                               });
@@ -120,11 +122,14 @@ class _HomePageState extends State<HomePage> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4 * Config.widthMultiplier),
                             onPressed: () {
+                              // print(_restaurants[index]);
                               Navigator.push(
                                 context,
                                 PageTransition(
                                   type: PageTransitionType.rightToLeft,
-                                  child: OrderScreen(),
+                                  child: OrderScreen(
+                                    details: _restaurants[index],
+                                  ),
                                 ),
                               );
                             },
@@ -210,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                           iconSize: 42,
                           underline: SizedBox(),
                           onChanged: (String newValue) {
-                            print(newValue);
+                            // print(newValue);
                             setState(() {
                               dropdownValue = newValue;
                             });
@@ -293,7 +298,8 @@ class _HomePageState extends State<HomePage> {
                               context,
                               PageTransition(
                                 type: PageTransitionType.rightToLeft,
-                                child: OrderScreen(),
+                                child:
+                                    OrderScreen(details: _restaurants[index]),
                               ),
                             );
                           },
@@ -360,7 +366,7 @@ class _HomePageState extends State<HomePage> {
                             x++) {
                           quantity.add(x.toString());
                         }
-                        print(quantity);
+                        // print(quantity);
                         _onTheGo(index, quantity);
                       },
                       // color: Color(0xffD32F2F),
@@ -410,7 +416,7 @@ class _HomePageState extends State<HomePage> {
                             x++) {
                           quantity.add(x.toString());
                         }
-                        print(quantity);
+                        // print(quantity);
                         _booking(index, quantity);
                       },
                       // color: Color(0xffD32F2F),
@@ -439,9 +445,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getEstablishments() async {
-    // Http().showLoadingOverlay(context);
+    Http().showLoadingOverlay(context);
     var response = await Http(url: 'restaurants', body: {}).getWithHeader();
-    log(response.body);
+    // log(response.body);
     if (response is String) {
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(
@@ -477,28 +483,56 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       } else {
+        Navigator.pop(context);
         Map<String, dynamic> body = json.decode(response.body);
+        List<Map<String, dynamic>> restaurants = [];
         body['restaurant'].forEach((restaurant) {
-          // List<Map<String, dynamic>> tables = [];
-          // restaurant['restaurant_tables'].forEach((table) {
-          //   print(table);
-          //   tables.add({
-          //     "id": table['id'],
-          //     "name": table['name'],
-          //     "description": table['description'],
-          //     "status": table['status'],
-          //   });
-          // });
-          setState(() {
-            _restaurants.add({
-              "id": restaurant['id'],
-              "name": restaurant['name'],
-              "opentime": restaurant['opening_time'],
-              "closetime": restaurant['closing_time'],
-              "distance": restaurant['address'],
-              "max_persons_per_restaurant": 6
+          List<Map<String, dynamic>> categories = [];
+          restaurant['product_category'].forEach((category) {
+            List<Map<String, dynamic>> product = [];
+            category['products'].forEach((products) {
+              List<Map<String, dynamic>> variant = [];
+              products['variants'].forEach((variants) {
+                List<Map<String, dynamic>> productoption = [];
+                variants['product_option'].forEach((productOptions) {
+                  productoption.add({
+                    "productOptId": productOptions['id'],
+                  });
+                });
+                variant.add({
+                  "variantId": variants['id'],
+                  "variantName": variants['name'],
+                  "variantPrice": variants['price'],
+                  "variantDescription": variants['description'],
+                  "variantBanner": variants['image'],
+                });
+              });
+              product.add({
+                "productId": products['id'],
+                "productName": products['name'],
+                "productDescription": products['description'],
+                "banner": products['image'],
+                "productVariants": variant,
+              });
+            });
+            categories.add({
+              "categoriesID": category['id'],
+              "categoriesName": category['name'],
+              "products": product,
             });
           });
+          restaurants.add({
+            "id": restaurant['id'],
+            "name": restaurant['name'],
+            "opentime": restaurant['opening_time'],
+            "closetime": restaurant['closing_time'],
+            "distance": restaurant['address'],
+            "max_persons_per_restaurant": 6,
+            "productCategories": categories,
+          });
+        });
+        setState(() {
+          _restaurants = new List.from(restaurants);
         });
       }
     }
