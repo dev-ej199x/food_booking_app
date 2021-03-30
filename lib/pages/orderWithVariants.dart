@@ -14,19 +14,19 @@ class OrderWithVariants extends StatefulWidget {
   _OrderWithVariantsState createState() => _OrderWithVariantsState();
 }
 
-enum SingingCharacter { lafayette, jefferson }
-
 class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   List _variants = [];
   List _product = [];
-  List _addOns = [];
-  SingingCharacter _character = SingingCharacter.lafayette;
+  List _productOptions = [];
+  List _productOptItem = [];
   List<String> _productNames = [];
   void initState() {
     //TODO: implement initstate
     super.initState();
     _variants = new List.from(widget.details['productVariants']);
+    _productOptions = new List.from(widget.details['vairantOption']);
+    _productOptItem = new List.from(widget.details['productOptionItem']);
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
     //   _getVariants();
     // });
@@ -85,26 +85,30 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                       left: 3 * Config.widthMultiplier),
                   child: Column(
                     children: <Widget>[
-                      // ListView.builder(
-                      //   itemCount: _variants.length,
-                      //   itemBuilder: (context, index) {
-                      //     return Card(
-                      //       elevation: 40.0,
-                      //       child: RadioListTile<SingingCharacter>(
-                      //         title: const Text('Lafayette'),
-                      //         value: SingingCharacter.lafayette,
-                      //         groupValue: _character,
-                      //         onChanged: (SingingCharacter value) {
-                      //           setState(
-                      //             () {
-                      //               _character = value;
-                      //             },
-                      //           );
-                      //         },
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+                      ListView.builder(
+                        itemCount: _productOptions.length,
+                        itemBuilder: (context, index) {
+                          // if (_productOptions[index]['producOptType'] != 'notrequired') can return null
+                          // else
+                          return Column(
+                            children: [
+                              Container(
+                                child: Text(
+                                    _productOptions[index]['productOptName']),
+                              ),
+                              Card(
+                                child: ListTile(
+                                  leading: RadioListTile(
+                                      // onChanged: () {
+                                      //   setState(() {});
+                                      // },
+                                      ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

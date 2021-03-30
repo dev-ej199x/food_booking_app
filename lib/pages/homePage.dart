@@ -495,8 +495,21 @@ class _HomePageState extends State<HomePage> {
               products['variants'].forEach((variants) {
                 List<Map<String, dynamic>> productoption = [];
                 variants['product_option'].forEach((productOptions) {
+                  List<Map<String, dynamic>> productoptionitem = [];
+                  productOptions['product_option_items']
+                      .forEach((productOptionItem) {
+                    productoptionitem.add({
+                      "productOptItmId": productOptionItem['id'],
+                      "productOptItmName": productOptionItem['item_name'],
+                      "productOptItmPrice": productOptionItem['price'],
+                    });
+                  });
                   productoption.add({
                     "productOptId": productOptions['id'],
+                    "productOptName": productOptions['name'],
+                    "productOptType": productOptions['type'],
+                    "productOptSelection": productOptions['selection'],
+                    "productOptionItem": productoptionitem,
                   });
                 });
                 variant.add({
@@ -505,6 +518,7 @@ class _HomePageState extends State<HomePage> {
                   "variantPrice": variants['price'],
                   "variantDescription": variants['description'],
                   "variantBanner": variants['image'],
+                  "vairantOption": productoption,
                 });
               });
               product.add({

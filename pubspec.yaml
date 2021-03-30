@@ -42,6 +42,7 @@ dependencies:
   flutter_map:
   webview_flutter:
   smooth_star_rating:
+  cached_network_image:
   
 dev_dependencies:
   flutter_test:

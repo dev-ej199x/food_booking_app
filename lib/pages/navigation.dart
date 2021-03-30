@@ -67,7 +67,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
                         border: Border.all(color: Colors.grey)),
                     child: new FlutterMap(
                       options: new MapOptions(
-                          center: new LatLng(6.919956174032439, 122.08145288614394), minZoom: 15.0),
+                          center:
+                              new LatLng(6.919956174032439, 122.08145288614394),
+                          minZoom: 15.0),
                       layers: [
                         new TileLayerOptions(
                             urlTemplate:
@@ -81,14 +83,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
                           Marker(
                             width: 45.0,
                             height: 45.0,
-                            point: LatLng(6.9055497094699705, 122.07840707170523),
+                            point:
+                                LatLng(6.9055497094699705, 122.07840707170523),
                             builder: (context) => Container(
                               child: IconButton(
                                 icon: Icon(Icons.location_on),
                                 color: Colors.red,
                                 iconSize: 20.0,
                                 onPressed: () {
-                                  print('Marker Tapped');
+                                  // print('Marker Tapped');
                                 },
                               ),
                             ),

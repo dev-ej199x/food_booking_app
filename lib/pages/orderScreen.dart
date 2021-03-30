@@ -1,112 +1,121 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:food_booking_app/pages/orderWithVariants.dart';
 import 'package:http/http.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderScreen extends StatefulWidget {
+  Map<String, dynamic> details;
+  OrderScreen({Key key, @required this.details}) : super(key: key);
   @override
   _OrderScreenState createState() => _OrderScreenState();
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  final List _orderLogo = [
-    {
-      "image": "assets/images/OrderLogo.png",
-    },
-    {
-      "image": "assets/images/OrderLogo.png",
-    },
-    {
-      "image": "assets/images/OrderLogo.png",
-    },
-    {
-      "image": "assets/images/OrderLogo.png",
-    },
-    {
-      "image": "assets/images/OrderLogo.png",
-    },
-    {
-      "image": "assets/images/OrderLogo.png",
-    }
-  ];
-
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  final List _products = [];
-  String dropdownValue = 'Beef';
-  List<String> quantity;
+  List _products = [];
+  List _categories = [];
+  List<String> _categoriesNames = [];
+  String dropdownValue = '';
+  List<String> quantity = [];
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getproduct();
+    // print(widget.details);
+    // print(widget.details['productCategories']);
+    _categories = new List.from(widget.details['productCategories']);
+    if (_categories.isNotEmpty) {
+      _products = new List.from(_categories[0]['products']);
+      dropdownValue = _categories[0]['categoriesName'];
+      _categories.forEach((category) {
+        _categoriesNames.add(category['categoriesName']);
+      });
+      // print(_categoriesNames);
+    }
+
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   _getproduct();
+    // });
   }
 
-  _getproduct() async {
-    var response = await Http(url: 'products', body: {}).getWithHeader();
-    log(response.body);
-    if (response is String) {
-      Navigator.pop(context);
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: Text(
-            response,
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
-          ),
-        ),
-      );
-    } else if (response is Response) {
-      if (response.statusCode != 200) {
-        Navigator.pop(context);
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Color(0xFF323232),
-            content: Text(
-              response.body,
-              textScaleFactor: .8,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Colors.white,
-                fontSize: 2.2 * Config.textMultiplier,
-              ),
-            ),
-          ),
-        );
-      } else {
-        Map<String, dynamic> body = json.decode(response.body);
-        body['product'].forEach((product) {
-          // List<Map<String, dynamic>> tables = [];
-          // restaurant['restaurant_tables'].forEach((table) {
-          //   print(table);
-          //   tables.add({
-          //     "id": table['id'],
-          //     "name": table['name'],
-          //     "description": table['description'],
-          //     "status": table['status'],
-          //   });
-          // });
-          setState(() {
-            _products.add({
-              "id": product['id'],
-              "productname": product['product_name'],
-              "productdescription": product['product_description'],
-              "category": product['product_category'],
-            });
-          });
-        });
-      }
-    }
+  _category(int index) async {
+    setState(() {
+      _products = new List.from(_categories[index]['products']);
+    });
   }
+  // _getproduct() async {
+  //   Http().showLoadingOverlay(context);
+  //   var response = await Http(url: 'product', body: {}).getWithHeader();
+  //   log(response.body);
+  //   if (response is String) {
+  //     Navigator.pop(context);
+  //     _scaffoldKey.currentState.showSnackBar(
+  //       SnackBar(
+  //         behavior: SnackBarBehavior.floating,
+  //         backgroundColor: Color(0xFF323232),
+  //         content: Text(
+  //           response,
+  //           textScaleFactor: .8,
+  //           style: TextStyle(
+  //             color: Colors.white,
+  //             fontSize: 2.2 * Config.textMultiplier,
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   } else if (response is Response) {
+  //     if (response.statusCode != 200) {
+  //       Map<String, dynamic> body = json.decode(response.body);
+  //       Navigator.pop(context);
+  //       _scaffoldKey.currentState.showSnackBar(
+  //         SnackBar(
+  //           behavior: SnackBarBehavior.floating,
+  //           backgroundColor: Color(0xFF323232),
+  //           content: Text(
+  //             body['message'],
+  //             textScaleFactor: .8,
+  //             style: TextStyle(
+  //               fontFamily: 'Poppins',
+  //               color: Colors.white,
+  //               fontSize: 2.2 * Config.textMultiplier,
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     } else {
+  //       Navigator.pop(context);
+  //       Map<String, dynamic> body = json.decode(response.body);
+  //       body['product'].forEach((product) {
+  //         // List<Map<String, dynamic>> tables = [];
+  //         // restaurant['restaurant_tables'].forEach((table) {
+  //         //   print(table);
+  //         //   tables.add({
+  //         //     "id": table['id'],
+  //         //     "name": table['name'],
+  //         //     "description": table['description'],
+  //         //     "status": table['status'],
+  //         //   });
+  //         // });
+  //         setState(() {
+  //           _products.add({
+  //             "id": product['id'],
+  //             "productname": product['name'],
+  //             "productdescription": product['description'],
+  //             "banner": product['image'],
+  //             "category": product['product_categories'],
+  //           });
+  //         });
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -129,11 +138,8 @@ class _OrderScreenState extends State<OrderScreen> {
       ),
       body: Stack(
         children: <Widget>[
-          // Expanded(
-          // child:
           Column(
             children: <Widget>[
-              // child:
               Padding(
                 padding: EdgeInsets.zero,
                 child: Container(
@@ -180,168 +186,186 @@ class _OrderScreenState extends State<OrderScreen> {
                   ),
                 ),
               ),
-              Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding:
-                        EdgeInsets.only(top: 2.7 * Config.heightMultiplier),
-                    child: Text(
-                      'Category',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontStyle: FontStyle.normal,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(right: 5 * Config.widthMultiplier),
-                    child: Container(
-                      // width: MediaQuery.of(context).size.width,
-                      height: 1 * Config.heightMultiplier,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[700],
-                        borderRadius: BorderRadius.circular(10.0),
+              if (_categories.length > 0)
+                Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding:
+                          EdgeInsets.only(top: 2.7 * Config.heightMultiplier),
+                      child: Text(
+                        'Category',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontStyle: FontStyle.normal,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ),
-                  DropdownButton<String>(
-                      value: dropdownValue,
-                      icon: Icon(Icons.arrow_downward),
-                      iconSize: 24,
-                      elevation: 16,
-                      style: TextStyle(color: Colors.white),
-                      underline: Container(
-                        height: 2,
-                        color: Colors.orange[800],
-                      ),
-                      onChanged: (String newValue) {
-                        print(newValue);
-                        setState(() {
-                          dropdownValue = newValue;
-                        });
-                      },
-                      items: quantity
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 3 * Config.textMultiplier),
-                            child: Text(
-                              value,
-                              textDirection: TextDirection.rtl,
-                              // textAlign: TextAlign.center,
+                    if (_categories.length > 0)
+                      Padding(
+                        padding:
+                            EdgeInsets.only(right: 5 * Config.widthMultiplier),
+                        child: DropdownButton<String>(
+                            value: dropdownValue,
+                            icon: Icon(Icons.arrow_downward),
+                            iconSize: 24,
+                            elevation: 16,
+                            style: TextStyle(color: Colors.white),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.orange[800],
                             ),
-                          ),
-                        );
-                      }).toList()),
-                ],
-              ),
-              Expanded(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  itemCount: _orderLogo.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      elevation: 10.0,
-                      child: Column(
+                            onChanged: (String newValue) {
+                              // print(newValue);
+                              setState(() {
+                                dropdownValue = newValue;
+                              });
+                              _category(_categoriesNames.indexOf(newValue));
+                            },
+                            items: _categoriesNames
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 3 * Config.textMultiplier),
+                                  child: Text(
+                                    value,
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                    // textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            }).toList()),
+                      ),
+                  ],
+                ),
+              if (_products.length == 0)
+                Text('No products available')
+              else
+                Expanded(
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: _products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2),
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // // child:
-                          Hero(
-                            tag: '_orderLogo',
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  _orderLogo[index]['image'],
-                                  fit: BoxFit.cover,
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      top: 2.0 * Config.heightMultiplier),
-                                  child: Container(
-                                    width: 100,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(
-                                            5 * Config.imageSizeMultiplier),
-                                        bottomRight: Radius.circular(
-                                            5 * Config.imageSizeMultiplier),
-                                      ),
-                                      color: Color(0xffEB4D4D),
-                                    ),
-                                    //Product Name
-                                    child: Text(
-                                      _products[index]['productname'],
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 2 * Config.textMultiplier,
-                                        fontFamily: 'Segoe UI',
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.normal,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                          FlatButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: OrderWithVariants(
+                                    details: _products[index],
                                   ),
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      top: 16 * Config.heightMultiplier),
-                                  child: Container(
-                                    alignment: AlignmentGeometry.lerp(
-                                        Alignment.bottomCenter,
-                                        Alignment.bottomRight,
-                                        0),
-                                    height: 20,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xff484545),
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(
-                                            4 * Config.imageSizeMultiplier),
-                                        bottomRight: Radius.circular(
-                                            4 * Config.imageSizeMultiplier),
+                              );
+                            },
+                            child: Hero(
+                              //tag: '_orderLogo${_products[index]['productId']}',
+                              tag: 'orderLogo',
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: .6 * Config.widthMultiplier),
+                                color: Colors.red,
+                                child: Stack(
+                                  children: [
+                                    CachedNetworkImage(
+                                      imageUrl: _products[index]['banner'],
+                                      fit: BoxFit.fill,
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 1.0 * Config.heightMultiplier),
+                                      child: Container(
+                                        width: 100,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                5 * Config.imageSizeMultiplier),
+                                          ),
+                                        ),
+                                        //Product Name
+                                        child: Text(
+                                          _products[index]['productName'],
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 2 * Config.textMultiplier,
+                                            fontFamily: 'Segoe UI',
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.normal,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    //Product Description
-                                    child: Text(
-                                      _products[index]['productdescription'],
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 2 * Config.textMultiplier,
-                                        fontFamily: 'Segoe UI',
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.normal,
-                                        color: Colors.white,
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 16 * Config.heightMultiplier),
+                                      child: Container(
+                                        alignment: AlignmentGeometry.lerp(
+                                            Alignment.bottomCenter,
+                                            Alignment.bottomRight,
+                                            0),
+                                        height: 20,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff484545),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(
+                                                4 * Config.imageSizeMultiplier),
+                                            bottomRight: Radius.circular(
+                                                4 * Config.imageSizeMultiplier),
+                                          ),
+                                        ),
+                                        //Product Description
+                                        child: Text(
+                                          _products[index]
+                                              ['productDescription'],
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 2 * Config.textMultiplier,
+                                            fontFamily: 'Segoe UI',
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.normal,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 18.5 * Config.heightMultiplier,
+                                          left: 2 * Config.widthMultiplier),
+                                      child: SmoothStarRating(
+                                        borderColor: Colors.yellow,
+                                        color: Colors.yellow,
+                                        allowHalfRating: false,
+                                        starCount: 5,
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      top: 19.5 * Config.heightMultiplier,
-                                      left: 5 * Config.widthMultiplier),
-                                  child: SmoothStarRating(
-                                    borderColor: Colors.yellow,
-                                    color: Colors.yellow,
-                                    allowHalfRating: false,
-                                    starCount: 5,
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
-                          ),
+                          )
                         ],
-                      ),
-                    );
-                  },
-                ),
-              )
+                      );
+                    },
+                  ),
+                )
             ],
           ),
         ],

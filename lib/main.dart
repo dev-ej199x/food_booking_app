@@ -4,6 +4,8 @@ import 'package:food_booking_app/pages/address.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
 import 'package:food_booking_app/pages/navigation.dart';
 import 'package:food_booking_app/pages/orderScreen.dart';
+import 'package:food_booking_app/pages/orderWithVariants.dart';
+import 'package:food_booking_app/pages/paymentScreen.dart';
 import 'package:food_booking_app/pages/signUp.dart';
 import 'package:food_booking_app/defaults/appbar.dart';
 
@@ -23,7 +25,9 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Food Booking',
-          home: LoginScreen(from: null),
+          home: LoginScreen(
+            from: null,
+          ),
         );
       });
     });
