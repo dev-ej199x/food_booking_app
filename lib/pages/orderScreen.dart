@@ -272,17 +272,22 @@ class _OrderScreenState extends State<OrderScreen> {
                               );
                             },
                             child: Hero(
-                              //tag: '_orderLogo${_products[index]['productId']}',
-                              tag: 'orderLogo',
+                              tag: '_orderLogo${widget.details['variantID']}',
+                              // tag: 'orderLogo',
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: .6 * Config.widthMultiplier),
-                                color: Colors.red,
+                                color: Colors.orange[800],
                                 child: Stack(
                                   children: [
-                                    CachedNetworkImage(
-                                      imageUrl: _products[index]['banner'],
-                                      fit: BoxFit.fill,
+                                    Container(
+                                      height: 120,
+                                      child: CachedNetworkImage(
+                                        imageUrl: _products[index]['banner'],
+                                        fit: BoxFit.fill,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        height:
+                                            MediaQuery.of(context).size.height,
+                                      ),
                                     ),
                                     Padding(
                                       padding: EdgeInsets.only(
@@ -360,7 +365,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                 ),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       );
                     },

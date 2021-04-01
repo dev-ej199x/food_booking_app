@@ -494,7 +494,7 @@ class _HomePageState extends State<HomePage> {
               List<Map<String, dynamic>> variant = [];
               products['variants'].forEach((variants) {
                 List<Map<String, dynamic>> productoption = [];
-                variants['product_option'].forEach((productOptions) {
+                variants['product_options'].forEach((productOptions) {
                   List<Map<String, dynamic>> productoptionitem = [];
                   productOptions['product_option_items']
                       .forEach((productOptionItem) {

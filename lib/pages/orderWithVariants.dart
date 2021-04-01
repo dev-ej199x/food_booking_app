@@ -17,23 +17,34 @@ class OrderWithVariants extends StatefulWidget {
 class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   List _variants = [];
-  List _product = [];
   List _productOptions = [];
-  List _productOptItem = [];
-  List<String> _productNames = [];
+  // List _productOptItem = [];
   void initState() {
     //TODO: implement initstate
     super.initState();
     _variants = new List.from(widget.details['productVariants']);
-    _productOptions = new List.from(widget.details['vairantOption']);
-    _productOptItem = new List.from(widget.details['productOptionItem']);
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   _getVariants();
-    // });
+    if (_variants.isNotEmpty) {
+      _productOptions = new List.from(_variants[0]['vairantOption']);
+      // _variants.forEach((variant) {
+      //   _variantNames.add(variant['variantName']);
+      // });
+      print(_productOptions);
+    }
   }
+
+  // _variant(int index) async {
+  //   setState(() {
+  //     _productOptions = new List.from(_variants[index]['variantOption']);
+  //   });
+  // }
 
 // List<String> variation
   _variantDialog(int index) {
+    // void initState() {
+    //   super.initState();
+    //   _productOptions = new List.from(widget.details['variantOption']);
+    // }
+
     return showDialog(
         context: context,
         builder: (context) {
@@ -84,31 +95,36 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                       top: 8 * Config.heightMultiplier,
                       left: 3 * Config.widthMultiplier),
                   child: Column(
-                    children: <Widget>[
-                      ListView.builder(
-                        itemCount: _productOptions.length,
-                        itemBuilder: (context, index) {
-                          // if (_productOptions[index]['producOptType'] != 'notrequired') can return null
-                          // else
-                          return Column(
-                            children: [
-                              Container(
-                                child: Text(
-                                    _productOptions[index]['productOptName']),
-                              ),
-                              Card(
-                                child: ListTile(
-                                  leading: RadioListTile(
-                                      // onChanged: () {
-                                      //   setState(() {});
-                                      // },
-                                      ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                    children: [
+                      Expanded(
+                          child: SizedBox(
+                        height: 100.0,
+                        child: ListView.builder(
+                            itemCount: _productOptions.length,
+                            itemBuilder: (context, index) {
+                              return
+                                  // Column(
+                                  //         children: [
+                                  //           Expanded(
+                                  //             child: Container(
+                                  //               child:
+                                  Text(
+                                      _productOptions[index]['productOptName']);
+                              //             ),
+                              //           ),
+                              //           // Card(
+                              //           //   child: ListTile(
+                              //           //     leading: RadioListTile(
+                              //           //         // onChanged: () {
+                              //           //         //   setState(() {});
+                              //           //         // },
+                              //           //         ),
+                              //           //   ),
+                              //           // ),
+                              //         ],
+                              //       );
+                            }),
+                      )),
                     ],
                   ),
                 ),
@@ -162,22 +178,21 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         width: 270,
                         height: 130,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(4 * Config.imageSizeMultiplier)),
+                          borderRadius: BorderRadius.circular(10.0),
                           color: Color(0xffe8971d),
                         ),
-                        // Insert Hero() with tag '_orderLogo${_products[index]['productId']}
+                        // Insert Hero() with tag :'_orderLogo${_products[index]['productId']}
                         child: Hero(
-                          tag: 'orderLogo',
+                          tag: '_orderLogo${widget.details['variantID']}',
                           child: Stack(
                             children: <Widget>[
                               Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10 * Config.widthMultiplier),
-                                child:
-                                    // Image.asset('assets/images/menuSample.png')
-                                    CachedNetworkImage(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: CachedNetworkImage(
                                   imageUrl: widget.details['banner'],
+                                  width: MediaQuery.of(context).size.width,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -255,29 +270,35 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                 padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
               ),
               Expanded(
-                child: ListView.builder(
-                    itemCount: _variants.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        elevation: 40.0,
-                        child: ListTile(
-                          leading: widget.details['variantBanner'] != null
-                              ? CachedNetworkImage(
-                                  imageUrl: widget.details['variantBanner'],
-                                  fit: BoxFit.fill,
-                                )
-                              : Text('No Image Loaded'),
-                          title: Text(_variants[index]['variantName']),
-                          subtitle:
-                              Text(_variants[index]['variantDescription']),
-                          trailing:
-                              Text(_variants[index]['variantPrice'].toString()),
-                          onTap: () {
-                            _variantDialog(index);
-                          },
-                        ),
-                      );
-                    }),
+                child: SizedBox(
+                  height: 200.0,
+                  child: ListView.builder(
+                      itemCount: _variants.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 40.0,
+                          child: ListTile(
+                            leading: _variants[index]['variantBanner'] != null
+                                ? CachedNetworkImage(
+                                    imageUrl: _variants[index]['variantBanner'],
+                                    fit: BoxFit.fill,
+                                  )
+                                : Text('No Image Loaded'),
+                            title: Text(_variants[index]['variantName'],
+                                textAlign: TextAlign.center),
+                            subtitle: Text(
+                              _variants[index]['variantDescription'],
+                              textAlign: TextAlign.center,
+                            ),
+                            trailing: Text(
+                                '₱ ${_variants[index]['variantPrice'].toString()}'),
+                            onTap: () {
+                              _variantDialog(index);
+                            },
+                          ),
+                        );
+                      }),
+                ),
               ),
             ],
           ),
