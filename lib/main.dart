@@ -6,6 +6,7 @@ import 'package:food_booking_app/pages/navigation.dart';
 import 'package:food_booking_app/pages/orderScreen.dart';
 import 'package:food_booking_app/pages/orderWithVariants.dart';
 import 'package:food_booking_app/pages/paymentScreen.dart';
+import 'package:food_booking_app/pages/profile.dart';
 import 'package:food_booking_app/pages/signUp.dart';
 import 'package:food_booking_app/defaults/appbar.dart';
 

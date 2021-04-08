@@ -322,7 +322,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -393,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       'OR',
                       style: TextStyle(
-                          color: Colors.black,
+                          color: Color(0xffFF6347),
                           fontSize: 15.0,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Poppins'),
@@ -529,6 +529,7 @@ class _HomePageState extends State<HomePage> {
                 "productVariants": variant,
               });
             });
+            log(product.toString());
             categories.add({
               "categoriesID": category['id'],
               "categoriesName": category['name'],

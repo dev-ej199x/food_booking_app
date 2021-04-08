@@ -43,6 +43,7 @@ dependencies:
   webview_flutter:
   smooth_star_rating:
   cached_network_image:
+  scoped_model:
   
 dev_dependencies:
   flutter_test:
