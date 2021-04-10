@@ -200,13 +200,13 @@ class _OrderScreenState extends State<OrderScreen> {
                                 PageTransition(
                                   type: PageTransitionType.rightToLeft,
                                   child: OrderWithVariants(
-                                    details: _products[index],
-                                  ),
+                                      details: _products[index], index: index),
                                 ),
                               );
                             },
                             child: Hero(
-                              tag: '_orderLogo${widget.details['variantID']}',
+                              tag:
+                                  '_orderLogo$index${widget.details['variantID']}',
                               // tag: 'orderLogo',
                               child: Container(
                                 color: Colors.orange[800],

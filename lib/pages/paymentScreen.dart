@@ -45,7 +45,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 3 * Config.textMultiplier,
-                      color: Colors.blueAccent,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -53,7 +53,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Padding(
               padding: EdgeInsets.only(top: 8.5 * Config.heightMultiplier),
               child: Text(
-                'Delivery Address',
+                'Payment Address',
                 textScaleFactor: 1,
                 style: TextStyle(
                     fontFamily: 'Poppins',
@@ -66,58 +66,106 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                  top: 16 * Config.heightMultiplier,
+                  top: 20 * Config.heightMultiplier,
                   bottom: 10 * Config.heightMultiplier),
-              child: Text(
-                'Land Mark',
-                textAlign: TextAlign.center,
-                textScaleFactor: 1,
-                style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 2 * Config.textMultiplier,
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold),
-                //Here is the maping of address API
+              child: Container(
+                height: 180,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 3 * Config.widthMultiplier),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Payment Cards',
+                            textAlign: TextAlign.center,
+                            textScaleFactor: 1,
+                            style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 1 * Config.textMultiplier,
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          // Widgets of Different Bank Cards
+                          RaisedButton(
+                            color: Color(0xff3CE78C),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100.0),
+                            ),
+                            onPressed: () {},
+                            child: Text("Cash",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    VerticalDivider(
+                      width: 20,
+                      color: Colors.grey[700],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 1),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Item Fee: ',
+                            style: TextStyle(
+                                fontSize: 1.6 * Config.textMultiplier),
+                          ),
+                          Text(
+                            'Booking Fee: ',
+                            style: TextStyle(
+                                fontSize: 1.6 * Config.textMultiplier),
+                          ),
+                          Text(
+                            'Grand Fee: ',
+                            style: TextStyle(
+                                fontSize: 1.6 * Config.textMultiplier),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 24 * Config.heightMultiplier),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 3 * Config.widthMultiplier),
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        'Payment Cards',
-                        textAlign: TextAlign.center,
-                        textScaleFactor: 1,
-                        style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 1 * Config.textMultiplier,
-                            color: Colors.blueAccent,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      // Widgets of Different Bank Cards
-                      RaisedButton(
-                        color: Color(0xff3CE78C),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100.0),
-                        ),
-                        onPressed: () {},
-                        child: Text("Cash",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ],
+              padding: EdgeInsets.only(
+                  top: 48 * Config.heightMultiplier,
+                  left: 20 * Config.widthMultiplier),
+              child: RaisedButton(
+                elevation: 5,
+                color: Color(0xffFC4646),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+                onPressed: () {},
+                child: Text("SUBMIT",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
-            )
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  top: 55 * Config.heightMultiplier,
+                  left: 20 * Config.widthMultiplier),
+              child: RaisedButton(
+                elevation: 5,
+                color: Color(0xffFC4646),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+                onPressed: () {},
+                child: Text("CANCEL",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
           ],
         ),
       ),

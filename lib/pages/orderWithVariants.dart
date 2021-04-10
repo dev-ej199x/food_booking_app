@@ -10,7 +10,9 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderWithVariants extends StatefulWidget {
   Map<String, dynamic> details;
-  OrderWithVariants({Key key, @required this.details}) : super(key: key);
+  int index;
+  OrderWithVariants({Key key, @required this.details, @required this.index})
+      : super(key: key);
   @override
   _OrderWithVariantsState createState() => _OrderWithVariantsState();
 }
@@ -19,9 +21,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   List _variants = [];
   List _productOptions = [];
-  List _productOption = [];
-  List _productOptItemSelected = [];
-  int value = -1;
+  List _selected = [];
   TextEditingController _controller = TextEditingController();
   void initState() {
     //TODO: implement initstate
@@ -29,12 +29,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 
     _variants = new List.from(widget.details['productVariants']);
     if (_variants.isNotEmpty) {
-      _productOptions = new List.from(_variants[0]['vairantOption']);
-
-      // _variants.forEach((variant) {
-      //   _variantNames.add(variant['variantName']);
-      // },);
-      // print(_productOptions);
+      _variants.forEach((variant) {
+        variant['quantity'] = 0;
+        _selected.add([]);
+      });
     }
   }
 
@@ -51,12 +49,17 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   _variantDialog(int count) {
     print(count);
     setState(() {
-      value = -1;
-      _productOptItemSelected.clear();
+      // _selected[count].clear();
       _productOptions = new List.from(_variants[count]['vairantOption']);
-      // _productOption = new List.from(_productOptions[count]['productOptName']);
+      if (_selected[count].isEmpty) {
+        _productOptions.forEach((option) {
+          if (option['productOptSelection'] == 'single')
+            _selected[count].add(-1);
+          else
+            _selected[count].add([]);
+        });
+      }
     });
-    print(_productOption);
     return showDialog(
       context: context,
       builder: (context) {
@@ -120,113 +123,167 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           top: 2 * Config.heightMultiplier),
                                       child: Column(
                                         children: [
-                                          Text(
-                                            'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
-                                            style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontSize:
-                                                    3.2 * Config.textMultiplier,
-                                                fontWeight: FontWeight.bold),
-                                          ),
+                                          // Insert here Quantity of the Item
                                           Divider(
-                                            height: 20,
+                                            height: 0,
                                             color: Colors.red,
                                           ),
-
+                                          if (_productOptions[index]
+                                                  ['productOptionItem']
+                                              .isNotEmpty)
+                                            Text(
+                                              'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
+                                              style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 3.2 *
+                                                      Config.textMultiplier,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          else
+                                            SizedBox(
+                                              width: 0,
+                                              height: 0,
+                                            ),
                                           if (_productOptions[index]
                                                   ['productOptSelection'] ==
                                               'single')
-                                            ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: _productOptions[index]
-                                                      ['productOptionItem']
-                                                  .length,
-                                              itemBuilder:
-                                                  (context, itemindex) =>
-                                                      RadioListTile(
-                                                value: _productOptions[index][
-                                                                'productOptionItem']
-                                                            [itemindex]
-                                                        ['productOptItmId'] +
-                                                    itemindex,
-                                                groupValue: value,
-
-                                                // quantity
-                                                // secondary: Column(
-                                                //   crossAxisAlignment:
-                                                //       CrossAxisAlignment.center,
-                                                //   mainAxisAlignment:
-                                                //       MainAxisAlignment.center,
-                                                //   children: <Widget>[
-                                                //     MaterialButton(
-                                                //       minWidth: 2.0,
-                                                //       child: Icon(
-                                                //           Icons.arrow_drop_up),
-                                                //       onPressed: () {
-                                                //         int currentValue =
-                                                //             int.parse(
-                                                //                 _controller
-                                                //                     .text);
-                                                //         setState(() {
-                                                //           currentValue++;
-                                                //           _controller.text =
-                                                //               (currentValue)
-                                                //                   .toString(); // incrementing value
-                                                //         });
-                                                //       },
-                                                //     ),
-                                                //     TextFormField(
-                                                //       controller: _controller,
-                                                //       keyboardType: TextInputType
-                                                //           .numberWithOptions(
-                                                //               decimal: false,
-                                                //               signed: false),
-                                                //       inputFormatters: <
-                                                //           TextInputFormatter>[
-                                                //         WhitelistingTextInputFormatter
-                                                //             .digitsOnly
-                                                //       ],
-                                                //     ),
-                                                //     MaterialButton(
-                                                //       minWidth: 2.0,
-                                                //       child: Icon(Icons
-                                                //           .arrow_drop_down),
-                                                //       onPressed: () {
-                                                //         int currentValue =
-                                                //             int.parse(
-                                                //                 _controller
-                                                //                     .text);
-                                                //         setState(() {
-                                                //           print(
-                                                //               "Setting state");
-                                                //           currentValue--;
-                                                //           _controller.text =
-                                                //               (currentValue)
-                                                //                   .toString(); // decrementing value
-                                                //         });
-                                                //       },
-                                                //     ),
-                                                //   ],
-                                                // ),
-
-                                                title: Text(_productOptions[
-                                                                index][
-                                                            'productOptionItem']
-                                                        [itemindex]
-                                                    ['productOptItmName']),
-                                                onChanged: (valuechanged) {
-                                                  print(value);
-                                                  setstate(
-                                                    () {
-                                                      value = valuechanged;
-                                                    },
-                                                  );
-                                                  setState(
-                                                    () {
-                                                      value = valuechanged;
-                                                    },
-                                                  );
-                                                },
+                                            Container(
+                                              child: ListView.builder(
+                                                shrinkWrap: true,
+                                                itemCount: _productOptions[
+                                                            index]
+                                                        ['productOptionItem']
+                                                    .length,
+                                                itemBuilder:
+                                                    (context, itemindex) => Row(
+                                                  children: [
+                                                    Expanded(
+                                                        child: RadioListTile(
+                                                      value: _productOptions[
+                                                                          index]
+                                                                      [
+                                                                      'productOptionItem']
+                                                                  [itemindex][
+                                                              'productOptItmId'] +
+                                                          itemindex,
+                                                      groupValue:
+                                                          _selected[count]
+                                                              [index],
+                                                      title: Text(_productOptions[
+                                                                      index][
+                                                                  'productOptionItem']
+                                                              [itemindex][
+                                                          'productOptItmName']),
+                                                      onChanged:
+                                                          (valuechanged) {
+                                                        print(_selected[count]
+                                                            [index]);
+                                                        setstate(
+                                                          () {
+                                                            _selected[count]
+                                                                    [index] =
+                                                                valuechanged;
+                                                          },
+                                                        );
+                                                        setState(
+                                                          () {
+                                                            _selected[count]
+                                                                    [index] =
+                                                                valuechanged;
+                                                          },
+                                                        );
+                                                      },
+                                                    )),
+                                                    Expanded(
+                                                      child: Container(
+                                                        height: 10 *
+                                                            Config
+                                                                .heightMultiplier,
+                                                        child: Padding(
+                                                          padding: EdgeInsets.symmetric(
+                                                              vertical: 1 *
+                                                                  Config
+                                                                      .heightMultiplier,
+                                                              horizontal: 3 *
+                                                                  Config
+                                                                      .widthMultiplier),
+                                                          child: Column(
+                                                            children: <Widget>[
+                                                              Container(
+                                                                width: 50,
+                                                                height: 20,
+                                                                child:
+                                                                    MaterialButton(
+                                                                  minWidth: 2.0,
+                                                                  child: Icon(Icons
+                                                                      .arrow_drop_up),
+                                                                  onPressed:
+                                                                      () {
+                                                                    int currentValue =
+                                                                        int.parse(
+                                                                            _controller.text);
+                                                                    setState(
+                                                                        () {
+                                                                      currentValue++;
+                                                                      _controller
+                                                                              .text =
+                                                                          (currentValue)
+                                                                              .toString(); // incrementing value
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                width: 30,
+                                                                height: 15,
+                                                                child:
+                                                                    TextFormField(
+                                                                  controller:
+                                                                      _controller,
+                                                                  keyboardType: TextInputType.numberWithOptions(
+                                                                      decimal:
+                                                                          false,
+                                                                      signed:
+                                                                          false),
+                                                                  inputFormatters: <
+                                                                      TextInputFormatter>[
+                                                                    WhitelistingTextInputFormatter
+                                                                        .digitsOnly
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                height: 20,
+                                                                width: 50,
+                                                                child:
+                                                                    MaterialButton(
+                                                                  minWidth: 2.0,
+                                                                  child: Icon(Icons
+                                                                      .arrow_drop_down),
+                                                                  onPressed:
+                                                                      () {
+                                                                    int currentValue =
+                                                                        int.parse(
+                                                                            _controller.text);
+                                                                    setState(
+                                                                      () {
+                                                                        print(
+                                                                            "Setting state");
+                                                                        currentValue--;
+                                                                        _controller.text =
+                                                                            (currentValue).toString(); // decrementing value
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             )
                                           else
@@ -238,7 +295,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               itemBuilder:
                                                   (context, itemindex) =>
                                                       CheckboxListTile(
-                                                value: _productOptItemSelected
+                                                value: _selected[count][index]
                                                     .asMap()
                                                     .containsValue(itemindex),
                                                 title: Text(_productOptions[
@@ -250,33 +307,33 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                   if (valuechanged) {
                                                     setstate(
                                                       () {
-                                                        _productOptItemSelected
+                                                        _selected[count][index]
                                                             .add(itemindex);
                                                       },
                                                     );
                                                     setState(
                                                       () {
-                                                        _productOptItemSelected
+                                                        _selected[count][index]
                                                             .add(itemindex);
                                                       },
                                                     );
                                                   } else {
                                                     setstate(
                                                       () {
-                                                        _productOptItemSelected
+                                                        _selected[count][index]
                                                             .remove(itemindex);
                                                       },
                                                     );
                                                     setState(
                                                       () {
-                                                        _productOptItemSelected
+                                                        _selected[count][index]
                                                             .remove(itemindex);
                                                       },
                                                     );
                                                   }
                                                 },
                                               ),
-                                            ),
+                                            )
                                           // if (_productOptions[index]
                                           //         ['productOptType'] ==
                                           //     'required')
@@ -397,7 +454,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         ),
                         // Insert Hero() with tag :'_orderLogo${_products[index]['productId']}
                         child: Hero(
-                          tag: '_orderLogo${widget.details['variantID']}',
+                          tag:
+                              '_orderLogo${widget.index}${widget.details['variantID']}',
                           child: Stack(
                             children: <Widget>[
                               Container(
