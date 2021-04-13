@@ -8,154 +8,171 @@ class OrderCart extends StatefulWidget {
 }
 
 class _OrderCartState extends State<OrderCart> {
+  TextEditingController _noteController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Color(0xffFF6347)),
-      home: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(80.0),
-            child: AppBar(
-              bottom: TabBar(
-                indicatorColor: Colors.white,
-                tabs: [
-                  Text('Order Cart'),
-                  Text('Order History'),
-                ],
-              ),
-              title: Center(
-                child: Text(
-                  'CART',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 5 * Config.textMultiplier,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.normal,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80.0),
+        child: AppBar(
+          backgroundColor: Color(0xffeb4d4d),
+          title: Center(
+            child: Text(
+              'CART',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 5 * Config.textMultiplier,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.normal,
+                fontFamily: 'Poppins',
               ),
             ),
           ),
-          body: TabBarView(children: <Widget>[
-            columnList(),
-            columnList(),
-          ]),
+        ),
+      ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 1 * Config.widthMultiplier),
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Container(
+              height: 150,
+              width: MediaQuery.of(context).size.width,
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 20 * Config.heightMultiplier),
+              child: Divider(
+                height: 20,
+                color: Colors.red,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 22 * Config.heightMultiplier),
+              child: Container(
+                height: 200,
+                child: ListView(
+                  shrinkWrap: false,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 1 * Config.heightMultiplier),
+                      child: CardItem(),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 1 * Config.heightMultiplier),
+                      child: CardItem(),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 1 * Config.heightMultiplier),
+                      child: CardItem(),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 1 * Config.heightMultiplier),
+                      child: CardItem(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 350),
+              child: Divider(
+                height: 20,
+                color: Colors.red,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 370),
+              child: Container(
+                height: 100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            maxLines: 2,
+                            controller: _noteController,
+                            decoration: InputDecoration(
+                              labelText: 'NOTE',
+                              hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 2 * Config.textMultiplier),
+                              hintText: 'YOUR NOTE',
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey[700]),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xffFF6347),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4 * Config.widthMultiplier),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 1 * Config.widthMultiplier,
+                                  ),
+                                  child: Text('Grand Total: '),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 2 * Config.heightMultiplier),
+                                  child: Text('Sub Fee: '),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 2 * Config.heightMultiplier),
+                                  child: Text('Booking Fee: '),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.only(top: .2 * Config.heightMultiplier),
+                      child: Text('Preparation Time: '),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 510),
+              child: RaisedButton(
+                onPressed: () {
+                  print('Button Clicked');
+                },
+                child: Text(' PROCEED '),
+                color: Colors.deepOrange[400],
+                textColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
-
-Widget columnList() {
-  TextEditingController _noteController = TextEditingController();
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 1 * Config.widthMultiplier),
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Column(
-          children: <Widget>[
-            SizedBox(
-              height: 18.0,
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 1 * Config.heightMultiplier),
-              child: CardItem(),
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 1 * Config.heightMultiplier),
-              child: CardItem(),
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 1 * Config.heightMultiplier),
-              child: CardItem(),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 50),
-          child: Divider(
-            height: 20,
-            color: Colors.red,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 150),
-          child: TextField(
-            maxLines: 2,
-            controller: _noteController,
-            decoration: InputDecoration(
-              labelText: 'NOTE',
-              hintStyle: TextStyle(
-                  color: Colors.grey[400], fontSize: 2 * Config.textMultiplier),
-              hintText: 'YOUR NOTE',
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey[700]),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color(0xffFF6347),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 400),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding:
-                        EdgeInsets.only(top: 1.0 * Config.heightMultiplier),
-                    child: Text('Preparation Time: '),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 20.0 * Config.widthMultiplier,
-                        top: 1 * Config.heightMultiplier),
-                    child: Text('Grand Total: '),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
-                child: Text('Sub Fee: '),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
-                child: Text('Booking Fee: '),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 490),
-          child: RaisedButton(
-            onPressed: () {
-              print('Button Clicked');
-            },
-            child: Text(' PROCEED '),
-            color: Colors.deepOrange[400],
-            textColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(18.0),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class CardItem extends StatelessWidget {

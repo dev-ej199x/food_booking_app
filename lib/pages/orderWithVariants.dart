@@ -6,12 +6,18 @@ import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderWithVariants extends StatefulWidget {
   Map<String, dynamic> details;
+  Map<String, dynamic> restaurantDetails;
   int index;
-  OrderWithVariants({Key key, @required this.details, @required this.index})
+  OrderWithVariants(
+      {Key key,
+      @required this.details,
+      @required this.restaurantDetails,
+      @required this.index})
       : super(key: key);
   @override
   _OrderWithVariantsState createState() => _OrderWithVariantsState();
@@ -22,7 +28,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   List _variants = [];
   List _productOptions = [];
   List _selected = [];
-  TextEditingController _controller = TextEditingController();
+  List _controllers = [];
   void initState() {
     //TODO: implement initstate
     super.initState();
@@ -32,6 +38,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       _variants.forEach((variant) {
         variant['quantity'] = 0;
         _selected.add([]);
+        _controllers.add([]);
       });
     }
   }
@@ -47,6 +54,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 
 // List<String> variation
   _variantDialog(int count) {
+    TextEditingController _noteController = TextEditingController();
     print(count);
     setState(() {
       // _selected[count].clear();
@@ -57,6 +65,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             _selected[count].add(-1);
           else
             _selected[count].add([]);
+        });
+      }
+      if (_controllers[count].isEmpty) {
+        _productOptions.forEach((option) {
+          TextEditingController _controller = TextEditingController();
+          _controllers[count].add(_controller);
         });
       }
     });
@@ -107,6 +121,108 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                             ),
                           ),
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 3 * Config.widthMultiplier),
+                              child: Text(
+                                widget.details['productName'],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 3 * Config.textMultiplier,
+                                  fontFamily: 'Segoe UI',
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 2 * Config.heightMultiplier),
+                              child: Container(
+                                height: 6 * Config.heightMultiplier,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 20,
+                                      child: MaterialButton(
+                                        minWidth: 3.0,
+                                        child: Icon(Icons.arrow_drop_up),
+                                        onPressed: () {
+                                          int currentValue = int.parse(
+                                              _productOptions[count].text);
+                                          setState(() {
+                                            currentValue++;
+                                            _productOptions[count].text =
+                                                (currentValue).toString();
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                    // Container(
+                                    //   width: 30,
+                                    //   height: 15,
+                                    //   child: TextFormField(
+                                    //     controller: _controllers[count],
+                                    //     keyboardType:
+                                    //         TextInputType.numberWithOptions(
+                                    //             decimal: false, signed: false),
+                                    //     inputFormatters: <TextInputFormatter>[
+                                    //       WhitelistingTextInputFormatter
+                                    //           .digitsOnly
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    Container(
+                                      width: 50,
+                                      height: 20,
+                                      child: MaterialButton(
+                                        minWidth: 3.0,
+                                        child: Icon(Icons.arrow_drop_down),
+                                        onPressed: () {
+                                          int currentValue = int.parse(
+                                              _productOptions[count].text);
+                                          setState(() {
+                                            currentValue--;
+                                            _productOptions[count].text =
+                                                (currentValue).toString();
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          height: 10 * Config.heightMultiplier,
+                          color: Colors.grey[350],
+                          child: TextField(
+                            maxLines: 2,
+                            controller: _noteController,
+                            decoration: InputDecoration(
+                              labelText: 'NOTE',
+                              hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 2 * Config.textMultiplier),
+                              hintText: 'YOUR NOTE',
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey[700]),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xffFF6347),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                         Expanded(
                           child: SizedBox(
                             height: MediaQuery.of(context).size.height,
@@ -120,14 +236,16 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                     width: MediaQuery.of(context).size.width,
                                     child: Padding(
                                       padding: EdgeInsets.only(
-                                          top: 2 * Config.heightMultiplier),
+                                          top: 1 * Config.heightMultiplier),
                                       child: Column(
                                         children: [
-                                          // Insert here Quantity of the Item
-                                          Divider(
-                                            height: 0,
-                                            color: Colors.red,
-                                          ),
+                                          if (_productOptions[index]
+                                                  ['productOptionItem']
+                                              .isNotEmpty)
+                                            Divider(
+                                              height: 0,
+                                              color: Colors.red,
+                                            ),
                                           if (_productOptions[index]
                                                   ['productOptionItem']
                                               .isNotEmpty)
@@ -138,11 +256,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                   fontSize: 3.2 *
                                                       Config.textMultiplier,
                                                   fontWeight: FontWeight.bold),
-                                            )
-                                          else
-                                            SizedBox(
-                                              width: 0,
-                                              height: 0,
                                             ),
                                           if (_productOptions[index]
                                                   ['productOptSelection'] ==
@@ -196,7 +309,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                     )),
                                                     Expanded(
                                                       child: Container(
-                                                        height: 10 *
+                                                        height: 11 *
                                                             Config
                                                                 .heightMultiplier,
                                                         child: Padding(
@@ -207,77 +320,98 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                               horizontal: 3 *
                                                                   Config
                                                                       .widthMultiplier),
-                                                          child: Column(
-                                                            children: <Widget>[
-                                                              Container(
-                                                                width: 50,
-                                                                height: 20,
-                                                                child:
-                                                                    MaterialButton(
-                                                                  minWidth: 2.0,
-                                                                  child: Icon(Icons
-                                                                      .arrow_drop_up),
-                                                                  onPressed:
-                                                                      () {
-                                                                    int currentValue =
-                                                                        int.parse(
-                                                                            _controller.text);
-                                                                    setState(
-                                                                        () {
-                                                                      currentValue++;
-                                                                      _controller
-                                                                              .text =
-                                                                          (currentValue)
-                                                                              .toString(); // incrementing value
-                                                                    });
-                                                                  },
-                                                                ),
-                                                              ),
-                                                              Container(
-                                                                width: 30,
-                                                                height: 15,
-                                                                child:
-                                                                    TextFormField(
-                                                                  controller:
-                                                                      _controller,
-                                                                  keyboardType: TextInputType.numberWithOptions(
-                                                                      decimal:
-                                                                          false,
-                                                                      signed:
-                                                                          false),
-                                                                  inputFormatters: <
-                                                                      TextInputFormatter>[
-                                                                    WhitelistingTextInputFormatter
-                                                                        .digitsOnly
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              Container(
-                                                                height: 20,
-                                                                width: 50,
-                                                                child:
-                                                                    MaterialButton(
-                                                                  minWidth: 2.0,
-                                                                  child: Icon(Icons
-                                                                      .arrow_drop_down),
-                                                                  onPressed:
-                                                                      () {
-                                                                    int currentValue =
-                                                                        int.parse(
-                                                                            _controller.text);
-                                                                    setState(
-                                                                      () {
-                                                                        print(
-                                                                            "Setting state");
-                                                                        currentValue--;
-                                                                        _controller.text =
-                                                                            (currentValue).toString(); // decrementing value
+                                                          child: Center(
+                                                            child: Column(
+                                                              children: <
+                                                                  Widget>[
+                                                                Padding(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .only(
+                                                                    bottom: 1 *
+                                                                        Config
+                                                                            .heightMultiplier,
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    width: 55,
+                                                                    height: 20,
+                                                                    child:
+                                                                        MaterialButton(
+                                                                      minWidth:
+                                                                          2.0,
+                                                                      child: Icon(
+                                                                          Icons
+                                                                              .arrow_drop_up),
+                                                                      onPressed:
+                                                                          () {
+                                                                        int currentValue =
+                                                                            int.parse(_productOptions[count][index].text);
+                                                                        setState(
+                                                                            () {
+                                                                          currentValue++;
+                                                                          _productOptions[count][index].text =
+                                                                              (currentValue).toString(); // incrementing value
+                                                                        });
                                                                       },
-                                                                    );
-                                                                  },
+                                                                    ),
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ],
+                                                                Padding(
+                                                                  padding: EdgeInsets.only(
+                                                                      left: 1 *
+                                                                          Config
+                                                                              .widthMultiplier),
+                                                                  child:
+                                                                      Container(
+                                                                    width: 25,
+                                                                    height: 15,
+                                                                    child:
+                                                                        TextFormField(
+                                                                      controller:
+                                                                          _controllers[count]
+                                                                              [
+                                                                              index],
+                                                                      keyboardType: TextInputType.numberWithOptions(
+                                                                          decimal:
+                                                                              false,
+                                                                          signed:
+                                                                              false),
+                                                                      inputFormatters: <
+                                                                          TextInputFormatter>[
+                                                                        WhitelistingTextInputFormatter
+                                                                            .digitsOnly
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  height: 20,
+                                                                  width: 55,
+                                                                  child:
+                                                                      MaterialButton(
+                                                                    minWidth:
+                                                                        2.0,
+                                                                    child: Icon(
+                                                                        Icons
+                                                                            .arrow_drop_down),
+                                                                    onPressed:
+                                                                        () {
+                                                                      int currentValue =
+                                                                          int.parse(
+                                                                              _productOptions[count][index].text);
+                                                                      setState(
+                                                                        () {
+                                                                          currentValue--;
+                                                                          _productOptions[count][index].text =
+                                                                              (currentValue).toString(); // decrementing value
+                                                                        },
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -373,7 +507,13 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               child: RaisedButton(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 4 * Config.widthMultiplier),
-                                onPressed: () {},
+                                onPressed: () {
+                                  // print('asdasdas');
+                                  // _controllers[count].forEach((controller) {
+                                  //   print(controller.text);
+                                  // });
+                                  // _addToCart();
+                                },
                                 color: Color(0xffE44D36),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
@@ -403,6 +543,55 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                 ));
       },
     );
+  }
+
+  _addToCart(
+      int variantId, int quantity, String note, List productOptions) async {
+//     'restaurant_id' => 'required|exists:restaurants,id',
+//     'longitude' => 'required|string',            -> customer's
+//     'latitude' => 'required|string',             -> customer's
+//     'distance' => 'required|numeric',            -> later na sa cart
+//     'customers_note' => 'nullable|string',       -> later na sa cart
+//     'booking_time' => null,                      -> later na sa cart
+//     'sub_total' => null,                         -> later na sa cart
+//     'discounted_sub_total' => null,              -> later na sa cart
+//     'concierge_fee' => null,                     -> later na sa cart
+//     'grand_total' => null,                       -> later na sa cart
+//     'markup' => 0,                               -> later na sa cart
+//     'address' => null,                           -> customer's address
+
+// /** Order Request Product Model */
+// // Product
+// 'order_request_products' => 'required|array|min:1',
+// 'order_request_products.*.variant_id' => 'required|exists:products,id',
+// 'order_request_products.*.quantity' => 'required|numeric|min:1',
+// 'order_request_products.*.note' => 'nullable|string',
+// 'order_request_products.*.product_options' => 'sometimes|array',
+// 'order_request_products.*.product_options.*.id' => 'required|exists:product_options,id',
+// 'order_request_products.*.product_options.*.product_option_items' => 'required|array',
+// 'order_request_products.*.product_options.*.product_option_items.*' => 'required|exists:product_option_items,id',
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var cart = {};
+    if (sharedPreferences.getString('cart') != null) {
+      cart = json.decode(sharedPreferences.getString('cart'));
+      if (cart['restaurant_id'] != widget.restaurantDetails['id']) {
+        //snackbar
+        return;
+      }
+    } else {
+      cart = {
+        'restaurant_id': widget.restaurantDetails['id'],
+      };
+    }
+
+    List request_products = [];
+    request_products.add({
+      'variant_id': variantId,
+      'quantity': quantity,
+      'note': note,
+      'product_options': productOptions
+    });
   }
 
   @override

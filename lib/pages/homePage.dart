@@ -447,7 +447,7 @@ class _HomePageState extends State<HomePage> {
   _getEstablishments() async {
     Http().showLoadingOverlay(context);
     var response = await Http(url: 'restaurants', body: {}).getWithHeader();
-    // log(response.body);
+    log(response.body);
     if (response is String) {
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(
@@ -485,6 +485,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         Navigator.pop(context);
         Map<String, dynamic> body = json.decode(response.body);
+        print(response.body);
         List<Map<String, dynamic>> restaurants = [];
         body['restaurant'].forEach((restaurant) {
           List<Map<String, dynamic>> categories = [];
@@ -541,7 +542,9 @@ class _HomePageState extends State<HomePage> {
             "name": restaurant['name'],
             "opentime": restaurant['opening_time'],
             "closetime": restaurant['closing_time'],
-            "distance": restaurant['address'],
+            "latitude": restaurant['latitude'],
+            "longitude": restaurant['longitude'],
+            "address": restaurant['address'],
             "max_persons_per_restaurant": 6,
             "productCategories": categories,
           });
@@ -847,7 +850,7 @@ class _HomePageState extends State<HomePage> {
                                               starCount: 5,
                                             ),
                                             Text(
-                                              _restaurants[index]['distance'],
+                                              _restaurants[index]['address'],
                                               style: TextStyle(
                                                 fontSize:
                                                     2 * Config.textMultiplier,

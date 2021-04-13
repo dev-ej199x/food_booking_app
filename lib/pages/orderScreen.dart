@@ -200,7 +200,9 @@ class _OrderScreenState extends State<OrderScreen> {
                                 PageTransition(
                                   type: PageTransitionType.rightToLeft,
                                   child: OrderWithVariants(
-                                      details: _products[index], index: index),
+                                      details: _products[index],
+                                      restaurantDetails: widget.details,
+                                      index: index),
                                 ),
                               );
                             },

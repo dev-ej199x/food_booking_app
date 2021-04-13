@@ -18,7 +18,8 @@ class _ProfileState extends State<Profile> {
   TextEditingController _numberController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
   FocusNode _nameFocus = FocusNode();
-
+  FocusNode _numberFocus = FocusNode();
+  Color _editColor = Colors.green;
   bool _edit = false;
 
   @override
@@ -92,6 +93,22 @@ class _ProfileState extends State<Profile> {
         child: AppBar(
           backgroundColor: Color(0xffeb4d4d),
           elevation: 0,
+          title: Padding(
+            padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
+            child: Center(
+              child: Text(
+                'Profile',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 5 * Config.textMultiplier,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.normal,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
         ),
       ),
       body: Stack(
@@ -101,7 +118,7 @@ class _ProfileState extends State<Profile> {
             child: Stack(
               children: <Widget>[
                 Container(
-                  height: 190.0,
+                  height: 140.0,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
@@ -110,86 +127,181 @@ class _ProfileState extends State<Profile> {
                     color: Color(0xffeb4d4d),
                   ),
                 ),
-                Container(
-                  height: 37 * Config.heightMultiplier,
-                  width: MediaQuery.of(context).size.width,
-                  alignment: Alignment.topCenter,
-                  child: CircleAvatar(
-                    radius: 140,
-                    backgroundColor: Colors.red,
-                    child: CircleAvatar(
-                      backgroundImage: AssetImage(Images.profileSample),
-                      radius: 130.0,
-                    ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 30 * Config.widthMultiplier,
+                      top: 7 * Config.heightMultiplier),
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Container(
+                        height: 130,
+                        width: 130,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(width: 3, color: Colors.red),
+                          boxShadow: [
+                            BoxShadow(
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              color: Colors.white,
+                            ),
+                          ],
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: AssetImage(
+                                  'assets/images/ProfileSample.png')),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(width: 3, color: Colors.white),
+                              color: Colors.red),
+                          child: IconButton(
+                              padding: EdgeInsets.only(
+                                  bottom: 0 * Config.heightMultiplier,
+                                  right: 0 * Config.widthMultiplier),
+                              iconSize: 18,
+                              onPressed: () {
+                                setState(() {
+                                  _edit = true;
+                                });
+                              },
+                              icon: Icon(Icons.edit),
+                              color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Center(
-                    child: Padding(
-                  padding: EdgeInsets.only(top: 14 * Config.heightMultiplier),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: 2 * Config.heightMultiplier),
-                        child: Container(
-                          alignment: Alignment.topCenter,
-                          height: 40,
-                          width: 300,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10 * Config.imageSizeMultiplier),
-                            ),
-                            border: Border.all(
-                              width: 1.0,
-                              color: const Color(0x40707070),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 4 * Config.widthMultiplier),
-                                child: Image.asset(
-                                  Images.profileSample,
-                                  height: 5 * Config.heightMultiplier,
-                                  width: 5 * Config.imageSizeMultiplier,
-                                ),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 1 * Config.heightMultiplier),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: 2 * Config.heightMultiplier),
+                          child: Container(
+                            alignment: Alignment.topCenter,
+                            height: 40,
+                            width: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(
+                                    10 * Config.imageSizeMultiplier),
                               ),
-                              Expanded(
-                                child: TextFormField(
-                                  enabled: _edit ? true : false,
-                                  controller: _nameController,
-                                  focusNode: _nameFocus,
-                                  onFieldSubmitted: (text) {},
-                                  keyboardType: TextInputType.text,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                          hintText: 'Name',
-                                          border: InputBorder.none,
-                                          hintStyle: TextStyle(
-                                              fontFamily: 'Metropolis',
-                                              color: Color(0xFFB6B7B7),
-                                              fontSize:
-                                                  1.8 * Config.textMultiplier,
-                                              fontWeight: FontWeight.normal))
-                                      .copyWith(isDense: true),
-                                  style: TextStyle(
-                                      fontFamily: 'Metropolis',
-                                      color: Colors.black,
-                                      fontSize: 1.8 * Config.textMultiplier,
-                                      fontWeight: FontWeight.normal),
+                              border: Border.all(
+                                width: 1.0,
+                                color: const Color(0x40707070),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 4 * Config.widthMultiplier),
+                                  child: Image.asset(
+                                    Images.profileSample,
+                                    height: 5 * Config.heightMultiplier,
+                                    width: 5 * Config.imageSizeMultiplier,
+                                  ),
                                 ),
-                              )
-                            ],
+                                Expanded(
+                                  child: TextFormField(
+                                    enabled: _edit ? true : false,
+                                    controller: _nameController,
+                                    focusNode: _nameFocus,
+                                    onFieldSubmitted: (text) {},
+                                    keyboardType: TextInputType.text,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                            hintText: 'Name',
+                                            border: InputBorder.none,
+                                            hintStyle: TextStyle(
+                                                fontFamily: 'Metropolis',
+                                                color: Color(0xFFB6B7B7),
+                                                fontSize:
+                                                    1.8 * Config.textMultiplier,
+                                                fontWeight: FontWeight.normal))
+                                        .copyWith(isDense: true),
+                                    style: TextStyle(
+                                        fontFamily: 'Metropolis',
+                                        color: Colors.black,
+                                        fontSize: 1.8 * Config.textMultiplier,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: 2 * Config.heightMultiplier),
-                        child: Container(
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: 2 * Config.heightMultiplier),
+                          child: Container(
+                            alignment: Alignment.topCenter,
+                            height: 40,
+                            width: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(
+                                    10 * Config.imageSizeMultiplier),
+                              ),
+                              border: Border.all(
+                                width: 1.0,
+                                color: const Color(0x40707090),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 4 * Config.widthMultiplier),
+                                  child: Icon(
+                                    Icons.contact_phone_rounded,
+                                    size: 4 * Config.imageSizeMultiplier,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    enabled: _edit ? true : false,
+                                    controller: _numberController,
+                                    onFieldSubmitted: (text) {},
+                                    keyboardType: TextInputType.text,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                            hintText: 'Number',
+                                            border: InputBorder.none,
+                                            hintStyle: TextStyle(
+                                                fontFamily: 'Metropolis',
+                                                color: Color(0xFFB6B7B7),
+                                                fontSize:
+                                                    1.8 * Config.textMultiplier,
+                                                fontWeight: FontWeight.normal))
+                                        .copyWith(isDense: true),
+                                    style: TextStyle(
+                                        fontFamily: 'Metropolis',
+                                        color: Colors.black,
+                                        fontSize: 1.8 * Config.textMultiplier,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
                           alignment: Alignment.topCenter,
                           height: 40,
                           width: 300,
@@ -208,22 +320,21 @@ class _ProfileState extends State<Profile> {
                               Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 4 * Config.widthMultiplier),
-                                child: Image.asset(
-                                  Images.profileSample,
-                                  height: 5 * Config.heightMultiplier,
-                                  width: 5 * Config.imageSizeMultiplier,
+                                child: Icon(
+                                  Icons.location_city,
+                                  size: 4 * Config.imageSizeMultiplier,
+                                  color: Colors.red,
                                 ),
                               ),
                               Expanded(
                                 child: TextFormField(
                                   enabled: _edit ? true : false,
-                                  controller: _numberController,
-                                  focusNode: _nameFocus,
+                                  controller: _addressController,
                                   onFieldSubmitted: (text) {},
                                   keyboardType: TextInputType.text,
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
-                                          hintText: 'Number',
+                                          hintText: 'Adress',
                                           border: InputBorder.none,
                                           hintStyle: TextStyle(
                                               fontFamily: 'Metropolis',
@@ -242,63 +353,33 @@ class _ProfileState extends State<Profile> {
                             ],
                           ),
                         ),
-                      ),
-                      Container(
-                        alignment: Alignment.topCenter,
-                        height: 40,
-                        width: 300,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(10 * Config.imageSizeMultiplier),
-                          ),
-                          border: Border.all(
-                            width: 1.0,
-                            color: const Color(0x40707090),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4 * Config.widthMultiplier),
-                              child: Image.asset(
-                                Images.profileSample,
-                                height: 5 * Config.heightMultiplier,
-                                width: 5 * Config.imageSizeMultiplier,
-                              ),
-                            ),
-                            Expanded(
-                              child: TextFormField(
-                                enabled: _edit ? true : false,
-                                controller: _addressController,
-                                focusNode: _nameFocus,
-                                onFieldSubmitted: (text) {},
-                                keyboardType: TextInputType.text,
-                                textInputAction: TextInputAction.next,
-                                decoration: InputDecoration(
-                                        hintText: 'Adress',
-                                        border: InputBorder.none,
-                                        hintStyle: TextStyle(
-                                            fontFamily: 'Metropolis',
-                                            color: Color(0xFFB6B7B7),
-                                            fontSize:
-                                                1.8 * Config.textMultiplier,
-                                            fontWeight: FontWeight.normal))
-                                    .copyWith(isDense: true),
-                                style: TextStyle(
-                                    fontFamily: 'Metropolis',
-                                    color: Colors.black,
-                                    fontSize: 1.8 * Config.textMultiplier,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 55.0 * Config.heightMultiplier),
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 5 * Config.heightMultiplier,
+                    width: 50 * Config.widthMultiplier,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(40.0),
+                          bottomRight: Radius.circular(40.0)),
+                      color: Color(0xffeb4d4d),
+                    ),
+                    child: Text(
+                      'Purchase History',
+                      style: TextStyle(
+                        fontFamily: 'Metropolis',
+                        color: Colors.white,
+                        fontSize: 2 * Config.textMultiplier,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
