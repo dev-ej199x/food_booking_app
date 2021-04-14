@@ -29,6 +29,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   List _productOptions = [];
   List _selected = [];
   List _controllers = [];
+  // List _productControllers = [];
   void initState() {
     //TODO: implement initstate
     super.initState();
@@ -39,6 +40,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         variant['quantity'] = 0;
         _selected.add([]);
         _controllers.add([]);
+        // _productControllers.add([]);
       });
     }
   }
@@ -55,10 +57,18 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 // List<String> variation
   _variantDialog(int count) {
     TextEditingController _noteController = TextEditingController();
+    TextEditingController _productController = TextEditingController();
+    _productController.text = '1';
     print(count);
     setState(() {
-      // _selected[count].clear();
+      _selected[count].clear();
       _productOptions = new List.from(_variants[count]['vairantOption']);
+      // if (_productControllers.isEmpty) {
+      //   _productOptions.forEach((option) {
+      //     TextEditingController _productController = TextEditingController();
+      //     _productControllers.add(_productController);
+      //   });
+      // }
       if (_selected[count].isEmpty) {
         _productOptions.forEach((option) {
           if (option['productOptSelection'] == 'single')
@@ -67,9 +77,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             _selected[count].add([]);
         });
       }
+
+      _controllers[count].clear();
       if (_controllers[count].isEmpty) {
         _productOptions.forEach((option) {
           TextEditingController _controller = TextEditingController();
+          _controller.text = '0';
           _controllers[count].add(_controller);
         });
       }
@@ -128,7 +141,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 3 * Config.widthMultiplier),
                               child: Text(
-                                widget.details['productName'],
+                                _variants[count]['variantName'],
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 3 * Config.textMultiplier,
@@ -143,54 +156,68 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               padding: EdgeInsets.symmetric(
                                   vertical: 2 * Config.heightMultiplier),
                               child: Container(
-                                height: 6 * Config.heightMultiplier,
+                                height: 10 * Config.heightMultiplier,
                                 child: Column(
                                   children: [
-                                    Container(
-                                      width: 50,
-                                      height: 20,
-                                      child: MaterialButton(
-                                        minWidth: 3.0,
-                                        child: Icon(Icons.arrow_drop_up),
-                                        onPressed: () {
-                                          int currentValue = int.parse(
-                                              _productOptions[count].text);
-                                          setState(() {
-                                            currentValue++;
-                                            _productOptions[count].text =
-                                                (currentValue).toString();
-                                          });
-                                        },
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: 1 * Config.heightMultiplier,
+                                      ),
+                                      child: Container(
+                                        width: 55,
+                                        height: 20,
+                                        child: MaterialButton(
+                                          minWidth: 2.0,
+                                          child: Icon(Icons.arrow_drop_up),
+                                          onPressed: () {
+                                            int currentValue = int.parse(
+                                                _productController.text);
+                                            setState(() {
+                                              currentValue++;
+                                              _productController.text =
+                                                  (currentValue)
+                                                      .toString(); // incrementing value
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
-                                    // Container(
-                                    //   width: 30,
-                                    //   height: 15,
-                                    //   child: TextFormField(
-                                    //     controller: _controllers[count],
-                                    //     keyboardType:
-                                    //         TextInputType.numberWithOptions(
-                                    //             decimal: false, signed: false),
-                                    //     inputFormatters: <TextInputFormatter>[
-                                    //       WhitelistingTextInputFormatter
-                                    //           .digitsOnly
-                                    //     ],
-                                    //   ),
-                                    // ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 1 * Config.widthMultiplier),
+                                      child: Container(
+                                        width: 25,
+                                        height: 15,
+                                        child: TextFormField(
+                                          controller: _productController,
+                                          keyboardType:
+                                              TextInputType.numberWithOptions(
+                                                  decimal: false,
+                                                  signed: false),
+                                          inputFormatters: <TextInputFormatter>[
+                                            WhitelistingTextInputFormatter
+                                                .digitsOnly
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                     Container(
-                                      width: 50,
                                       height: 20,
+                                      width: 55,
                                       child: MaterialButton(
-                                        minWidth: 3.0,
+                                        minWidth: 2.0,
                                         child: Icon(Icons.arrow_drop_down),
                                         onPressed: () {
                                           int currentValue = int.parse(
-                                              _productOptions[count].text);
-                                          setState(() {
-                                            currentValue--;
-                                            _productOptions[count].text =
-                                                (currentValue).toString();
-                                          });
+                                              _productController.text);
+                                          setState(
+                                            () {
+                                              currentValue--;
+                                              _productController.text =
+                                                  (currentValue)
+                                                      .toString(); // decrementing value
+                                            },
+                                          );
                                         },
                                       ),
                                     ),
@@ -346,11 +373,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                       onPressed:
                                                                           () {
                                                                         int currentValue =
-                                                                            int.parse(_productOptions[count][index].text);
+                                                                            int.parse(_controllers[count][index].text);
                                                                         setState(
                                                                             () {
                                                                           currentValue++;
-                                                                          _productOptions[count][index].text =
+                                                                          _controllers[count][index].text =
                                                                               (currentValue).toString(); // incrementing value
                                                                         });
                                                                       },
@@ -399,11 +426,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                         () {
                                                                       int currentValue =
                                                                           int.parse(
-                                                                              _productOptions[count][index].text);
+                                                                              _controllers[count][index].text);
                                                                       setState(
                                                                         () {
                                                                           currentValue--;
-                                                                          _productOptions[count][index].text =
+                                                                          _controllers[count][index].text =
                                                                               (currentValue).toString(); // decrementing value
                                                                         },
                                                                       );
