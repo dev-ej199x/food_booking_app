@@ -6,9 +6,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/orderScreen.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 import '../defaults/config.dart';
@@ -447,7 +449,7 @@ class _HomePageState extends State<HomePage> {
   _getEstablishments() async {
     Http().showLoadingOverlay(context);
     var response = await Http(url: 'restaurants', body: {}).getWithHeader();
-    log(response.body);
+
     if (response is String) {
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(
@@ -545,7 +547,7 @@ class _HomePageState extends State<HomePage> {
             "latitude": restaurant['latitude'],
             "longitude": restaurant['longitude'],
             "address": restaurant['address'],
-            "max_persons_per_restaurant": 6,
+            "max_persons_per_restaurant": 10,
             "productCategories": categories,
           });
         });
@@ -554,6 +556,19 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
+  }
+
+  _logout() async {
+    SharedPreferences _sharedPreference = await SharedPreferences.getInstance();
+    _sharedPreference.clear();
+    Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(
+            type: PageTransitionType.rightToLeft,
+            child: LoginScreen(
+              from: null,
+            )),
+        (route) => false);
   }
 
   @override
@@ -567,6 +582,11 @@ class _HomePageState extends State<HomePage> {
         child: AppBar(
           backgroundColor: Color(0xffeb4d4d),
           elevation: 0,
+          leading: FlatButton(
+              onPressed: () {
+                _logout();
+              },
+              child: Icon(Icons.logout)),
         ),
       ),
       body: Container(
@@ -795,7 +815,7 @@ class _HomePageState extends State<HomePage> {
                                                 Images.sampleRestaurant),
                                             fit: BoxFit.fill,
                                             width:
-                                                40 * Config.imageSizeMultiplier,
+                                                35 * Config.imageSizeMultiplier,
                                             height:
                                                 10 * Config.imageSizeMultiplier,
                                           ),
@@ -812,7 +832,7 @@ class _HomePageState extends State<HomePage> {
                                               Text(
                                                 _restaurants[index]['name'],
                                                 style: TextStyle(
-                                                  fontSize: 2.5 *
+                                                  fontSize: 1.9 *
                                                       Config.textMultiplier,
                                                   fontFamily: 'Segoe UI',
                                                   fontWeight: FontWeight.bold,

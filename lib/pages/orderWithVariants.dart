@@ -29,11 +29,19 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   List _productOptions = [];
   List _selected = [];
   List _controllers = [];
+  List _productOptItems = [];
+  List _categories = [];
+  List _products = [];
+  List _product = [];
   // List _productControllers = [];
   void initState() {
     //TODO: implement initstate
     super.initState();
 
+    // _products = new List.from(widget.details['products']);
+    // if (_product.isNotEmpty) {
+
+    // }
     _variants = new List.from(widget.details['productVariants']);
     if (_variants.isNotEmpty) {
       _variants.forEach((variant) {
@@ -43,6 +51,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         // _productControllers.add([]);
       });
     }
+    // print(_products);
   }
 
   // _variant(int index) async {
@@ -59,16 +68,21 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     TextEditingController _noteController = TextEditingController();
     TextEditingController _productController = TextEditingController();
     _productController.text = '1';
+
     print(count);
     setState(() {
       _selected[count].clear();
+      // _products = new List.from(_categories[count]['products']);
       _productOptions = new List.from(_variants[count]['vairantOption']);
+      _productOptItems =
+          new List.from(_productOptions[count]['productOptionItem']);
       // if (_productControllers.isEmpty) {
       //   _productOptions.forEach((option) {
       //     TextEditingController _productController = TextEditingController();
       //     _productControllers.add(_productController);
       //   });
       // }
+
       if (_selected[count].isEmpty) {
         _productOptions.forEach((option) {
           if (option['productOptSelection'] == 'single')
@@ -81,9 +95,13 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       _controllers[count].clear();
       if (_controllers[count].isEmpty) {
         _productOptions.forEach((option) {
-          TextEditingController _controller = TextEditingController();
-          _controller.text = '0';
-          _controllers[count].add(_controller);
+          List<TextEditingController> controllers = [];
+          option['productOptionItem'].forEach((item) {
+            TextEditingController _controller = TextEditingController();
+            _controller.text = '0';
+            controllers.add(_controller);
+          });
+          _controllers[count].add(controllers);
         });
       }
     });
@@ -289,6 +307,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               'single')
                                             Container(
                                               child: ListView.builder(
+                                                // physics: ScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: _productOptions[
                                                             index]
@@ -373,11 +392,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                       onPressed:
                                                                           () {
                                                                         int currentValue =
-                                                                            int.parse(_controllers[count][index].text);
+                                                                            int.parse(_controllers[count][index][itemindex].text);
                                                                         setState(
                                                                             () {
                                                                           currentValue++;
-                                                                          _controllers[count][index].text =
+                                                                          _controllers[count][index][itemindex].text =
                                                                               (currentValue).toString(); // incrementing value
                                                                         });
                                                                       },
@@ -396,9 +415,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                     child:
                                                                         TextFormField(
                                                                       controller:
-                                                                          _controllers[count]
+                                                                          _controllers[count][index]
                                                                               [
-                                                                              index],
+                                                                              itemindex],
                                                                       keyboardType: TextInputType.numberWithOptions(
                                                                           decimal:
                                                                               false,
@@ -426,11 +445,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                         () {
                                                                       int currentValue =
                                                                           int.parse(
-                                                                              _controllers[count][index].text);
+                                                                              _controllers[count][index][itemindex].text);
                                                                       setState(
                                                                         () {
                                                                           currentValue--;
-                                                                          _controllers[count][index].text =
+                                                                          _controllers[count][index][itemindex].text =
                                                                               (currentValue).toString(); // decrementing value
                                                                         },
                                                                       );
@@ -449,6 +468,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             )
                                           else
                                             ListView.builder(
+                                              // physics: ScrollPhysics(),
                                               shrinkWrap: true,
                                               itemCount: _productOptions[index]
                                                       ['productOptionItem']
@@ -472,12 +492,13 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                             .add(itemindex);
                                                       },
                                                     );
-                                                    setState(
-                                                      () {
-                                                        _selected[count][index]
-                                                            .add(itemindex);
-                                                      },
-                                                    );
+
+                                                    // setState(
+                                                    //   () {
+                                                    //     _selected[count][index]
+                                                    //         .add(itemindex);
+                                                    //   },
+                                                    // );
                                                   } else {
                                                     setstate(
                                                       () {
@@ -485,13 +506,15 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                             .remove(itemindex);
                                                       },
                                                     );
-                                                    setState(
-                                                      () {
-                                                        _selected[count][index]
-                                                            .remove(itemindex);
-                                                      },
-                                                    );
+                                                    // setState(
+                                                    //   () {
+                                                    //     _selected[count][index]
+                                                    //         .remove(itemindex);
+                                                    //   },
+                                                    // );
                                                   }
+                                                  print(
+                                                      _selected[count][index]);
                                                 },
                                               ),
                                             )
@@ -535,11 +558,136 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 4 * Config.widthMultiplier),
                                 onPressed: () {
-                                  // print('asdasdas');
-                                  // _controllers[count].forEach((controller) {
-                                  //   print(controller.text);
-                                  // });
-                                  // _addToCart();
+                                  // id
+                                  List product_options = [];
+                                  bool proceed = true;
+                                  _selected[count].forEach((selected) {
+                                    //check if required or not
+                                    //required and singular dapat selected > -1, return; proceed = false, snackbar na required sya
+                                    //required and multiple dapat selected.length > 0, return; proceed = false, snackbar na required sya
+                                    if (_productOptions[count]
+                                            ['productOptSelection'] ==
+                                        'single') {
+                                      if (_productOptions[count]
+                                                  ['productOptType'] ==
+                                              'required' &&
+                                          selected == -1) {
+                                        proceed = false;
+                                        _scaffoldKey.currentState
+                                            .showSnackBar(SnackBar(
+                                          duration: Duration(
+                                              seconds: 2, milliseconds: 155),
+                                          behavior: SnackBarBehavior.floating,
+                                          backgroundColor: Color(0xFF323232),
+                                          content: Text(
+                                            'Please Select Atleast One',
+                                            textScaleFactor: .8,
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                              fontSize:
+                                                  2.2 * Config.textMultiplier,
+                                            ),
+                                          ),
+                                        ));
+                                      } else {
+                                        print(
+                                            'SINGLE TO. DITO YUNG ERROR HAKDOG');
+                                        print(_productOptItems[_selected[count]
+                                                .indexOf(selected)]
+                                            ['productOptItmName']);
+                                        print(proceed);
+                                        product_options.add({
+                                          'id': _productOptions[_selected[count]
+                                                  .indexOf(selected)]
+                                              ['productOptId'],
+                                          'name': _productOptions[
+                                                  _selected[count]
+                                                      .indexOf(selected)]
+                                              ['productOptName'],
+                                          'product_option_items': [
+                                            {
+                                              'id': selected,
+                                              'name': _productOptItems[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptItmName'],
+                                            }
+                                          ]
+                                        });
+                                        proceed = true;
+                                      }
+                                    } else {
+                                      if (_productOptions[count]
+                                                  ['productOptType'] ==
+                                              'required' &&
+                                          selected.length == 0) {
+                                        print('MULTIPLE TAPOS FALSE');
+                                        proceed = false;
+                                        _scaffoldKey.currentState
+                                            .showSnackBar(SnackBar(
+                                          duration: Duration(
+                                              seconds: 2, milliseconds: 155),
+                                          behavior: SnackBarBehavior.floating,
+                                          backgroundColor: Color(0xFF323232),
+                                          content: Text(
+                                            'Please Select Atleast One',
+                                            textScaleFactor: .8,
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                              fontSize:
+                                                  2.2 * Config.textMultiplier,
+                                            ),
+                                          ),
+                                        ));
+                                      } else {
+                                        print('DITO YUNG ERROR HAKDOG');
+                                        List product_option_items = [];
+                                        selected.forEach((id) {
+                                          product_option_items.add({
+                                            'id': selected,
+                                            'name': _productOptItems[
+                                                    _selected[count]
+                                                        .indexOf(selected)]
+                                                ['productOptItmName']
+                                          });
+                                        });
+                                        product_options.add({
+                                          'id': _productOptions[_selected[count]
+                                                  .indexOf(selected)]
+                                              ['productOptId'],
+                                          'name': _productOptions[
+                                                  _selected[count]
+                                                      .indexOf(selected)]
+                                              ['productOptName'],
+                                          'product_option_items':
+                                              product_option_items
+                                        });
+
+                                        proceed = false;
+                                      }
+
+                                      if (_productOptions[count]
+                                              ['productOptSelection'] ==
+                                          'multiple') {
+                                        proceed = true;
+                                        print('2nd If Done');
+                                      } else
+                                        proceed = false;
+                                    }
+                                  });
+
+                                  print(proceed);
+                                  if (proceed) {
+                                    print('PROCEED');
+                                    _addToCart(
+                                        _variants[count]['variantName'],
+                                        _variants[count]['variantId'],
+                                        int.parse(_productController.text),
+                                        _noteController.text,
+                                        product_options);
+                                  }
                                 },
                                 color: Color(0xffE44D36),
                                 shape: RoundedRectangleBorder(
@@ -572,8 +720,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     );
   }
 
-  _addToCart(
-      int variantId, int quantity, String note, List productOptions) async {
+  _addToCart(String variantName, int variantId, int quantity, String note,
+      List productOptions) async {
 //     'restaurant_id' => 'required|exists:restaurants,id',
 //     'longitude' => 'required|string',            -> customer's
 //     'latitude' => 'required|string',             -> customer's
@@ -603,22 +751,49 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     if (sharedPreferences.getString('cart') != null) {
       cart = json.decode(sharedPreferences.getString('cart'));
       if (cart['restaurant_id'] != widget.restaurantDetails['id']) {
-        //snackbar
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            'The Cart has already have an order. It will Ovewrite, Proceed?',
+            textScaleFactor: .8,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        );
         return;
+      } else {
+        cart['order_request_products'].add({
+          'product_name': widget.details['productName'],
+          'variant_id': variantId,
+          'name': variantName,
+          'quantity': quantity,
+          'note': note,
+          'product_options': productOptions
+        });
+        sharedPreferences.setString('cart', json.encode(cart));
       }
     } else {
       cart = {
         'restaurant_id': widget.restaurantDetails['id'],
+        'order_request_products': [
+          {
+            'product_name': widget.details['productName'],
+            'variant_id': variantId,
+            'name': variantName,
+            'quantity': quantity,
+            'note': note,
+            'product_options': productOptions
+          }
+        ]
       };
+      sharedPreferences.setString('cart', json.encode(cart));
     }
 
-    List request_products = [];
-    request_products.add({
-      'variant_id': variantId,
-      'quantity': quantity,
-      'note': note,
-      'product_options': productOptions
-    });
+    print(sharedPreferences.getString('cart'));
   }
 
   @override
