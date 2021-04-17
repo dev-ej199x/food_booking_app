@@ -335,8 +335,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                           'productOptItmName']),
                                                       onChanged:
                                                           (valuechanged) {
-                                                        print(_selected[count]
-                                                            [index]);
                                                         setstate(
                                                           () {
                                                             _selected[count]
@@ -558,45 +556,65 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 4 * Config.widthMultiplier),
                                 onPressed: () {
-                                  // id
                                   List product_options = [];
                                   bool proceed = true;
-                                  _selected[count].forEach((selected) {
-                                    //check if required or not
-                                    //required and singular dapat selected > -1, return; proceed = false, snackbar na required sya
-                                    //required and multiple dapat selected.length > 0, return; proceed = false, snackbar na required sya
-                                    if (_productOptions[count]
+                                  _selected[count]
+                                      .asMap()
+                                      .forEach((index, selected) {
+                                    if (_productOptions[index]
                                             ['productOptSelection'] ==
                                         'single') {
-                                      if (_productOptions[count]
-                                                  ['productOptType'] ==
-                                              'required' &&
-                                          selected == -1) {
-                                        proceed = false;
-                                        _scaffoldKey.currentState
-                                            .showSnackBar(SnackBar(
-                                          duration: Duration(
-                                              seconds: 2, milliseconds: 155),
-                                          behavior: SnackBarBehavior.floating,
-                                          backgroundColor: Color(0xFF323232),
-                                          content: Text(
-                                            'Please Select Atleast One',
-                                            textScaleFactor: .8,
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              color: Colors.white,
-                                              fontSize:
-                                                  2.2 * Config.textMultiplier,
-                                            ),
-                                          ),
-                                        ));
+                                      if (_productOptions[index]
+                                              ['productOptType'] ==
+                                          'required') {
+                                        proceed = !proceed;
+                                        if (selected.runtimeType.toString() ==
+                                            "int") {
+                                          if (selected == -1) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(new SnackBar(
+                                              content: Text(
+                                                  'Single Selection is Required!'),
+                                              duration: Duration(
+                                                  seconds: 2,
+                                                  milliseconds: 155),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ));
+                                            proceed = !proceed;
+                                          } else {
+                                            proceed = true;
+                                            print('AddtocartSingle');
+
+                                            product_options.add({
+                                              'id': _productOptions[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptId'],
+                                              'name': _productOptions[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptName'],
+                                              'product_option_items': [
+                                                {
+                                                  'id': _productOptItems[
+                                                          _selected[count]
+                                                              .indexOf(
+                                                                  selected)]
+                                                      ['productOptId'],
+                                                  'name': _productOptItems[
+                                                          _selected[count]
+                                                              .indexOf(
+                                                                  selected)]
+                                                      ['productOptItmName'],
+                                                }
+                                              ]
+                                            });
+                                          }
+                                        }
                                       } else {
-                                        print(
-                                            'SINGLE TO. DITO YUNG ERROR HAKDOG');
-                                        print(_productOptItems[_selected[count]
-                                                .indexOf(selected)]
-                                            ['productOptItmName']);
-                                        print(proceed);
+                                        proceed = true;
+                                        print('AddtocartSingle');
                                         product_options.add({
                                           'id': _productOptions[_selected[count]
                                                   .indexOf(selected)]
@@ -607,7 +625,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               ['productOptName'],
                                           'product_option_items': [
                                             {
-                                              'id': selected,
+                                              'id': _productOptItems[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptId'],
                                               'name': _productOptItems[
                                                       _selected[count]
                                                           .indexOf(selected)]
@@ -615,38 +636,69 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             }
                                           ]
                                         });
-                                        proceed = true;
                                       }
-                                    } else {
-                                      if (_productOptions[count]
-                                                  ['productOptType'] ==
-                                              'required' &&
-                                          selected.length == 0) {
-                                        print('MULTIPLE TAPOS FALSE');
-                                        proceed = false;
-                                        _scaffoldKey.currentState
-                                            .showSnackBar(SnackBar(
-                                          duration: Duration(
-                                              seconds: 2, milliseconds: 155),
-                                          behavior: SnackBarBehavior.floating,
-                                          backgroundColor: Color(0xFF323232),
-                                          content: Text(
-                                            'Please Select Atleast One',
-                                            textScaleFactor: .8,
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              color: Colors.white,
-                                              fontSize:
-                                                  2.2 * Config.textMultiplier,
-                                            ),
-                                          ),
-                                        ));
+                                    }
+                                    if (_productOptions[index]
+                                            ['productOptSelection'] ==
+                                        'multiple') {
+                                      if (_productOptions[index]
+                                              ['productOptType'] ==
+                                          'required') {
+                                        proceed = !proceed;
+                                        if (selected.runtimeType.toString() ==
+                                            "List<dynamic>") {
+                                          if (selected.length == 0) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(new SnackBar(
+                                              content: Text(
+                                                  'Multi Selection is Required!'),
+                                              duration: Duration(
+                                                  seconds: 2,
+                                                  milliseconds: 155),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ));
+                                            proceed = !proceed;
+                                          } else {
+                                            proceed = true;
+                                            print('AddtocartMultiple');
+                                            List product_option_items = [];
+                                            selected.forEach((id) {
+                                              product_option_items.add({
+                                                'id': _productOptItems[
+                                                        _selected[count]
+                                                            .indexOf(selected)]
+                                                    ['productOptId'],
+                                                'name': _productOptItems[
+                                                        _selected[count]
+                                                            .indexOf(selected)]
+                                                    ['productOptItmName']
+                                              });
+                                            });
+                                            product_options.add({
+                                              'id': _productOptions[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptId'],
+                                              'name': _productOptions[
+                                                      _selected[count]
+                                                          .indexOf(selected)]
+                                                  ['productOptName'],
+                                              'product_option_items':
+                                                  product_option_items
+                                            });
+                                          }
+                                        }
                                       } else {
-                                        print('DITO YUNG ERROR HAKDOG');
+                                        proceed = true;
+                                        print('AddtocartMultiple');
                                         List product_option_items = [];
                                         selected.forEach((id) {
                                           product_option_items.add({
-                                            'id': selected,
+                                            'id': _productOptItems[
+                                                    _selected[count]
+                                                        .indexOf(selected)]
+                                                ['productOptId'],
                                             'name': _productOptItems[
                                                     _selected[count]
                                                         .indexOf(selected)]
@@ -664,30 +716,20 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           'product_option_items':
                                               product_option_items
                                         });
-
-                                        proceed = false;
                                       }
-
-                                      if (_productOptions[count]
-                                              ['productOptSelection'] ==
-                                          'multiple') {
-                                        proceed = true;
-                                        print('2nd If Done');
-                                      } else
-                                        proceed = false;
                                     }
                                   });
 
-                                  print(proceed);
-                                  if (proceed) {
-                                    print('PROCEED');
-                                    _addToCart(
-                                        _variants[count]['variantName'],
-                                        _variants[count]['variantId'],
-                                        int.parse(_productController.text),
-                                        _noteController.text,
-                                        product_options);
-                                  }
+                                  // print(proceed);
+                                  // if (proceed) {
+                                  //   print('Success');
+                                  //   _addToCart(
+                                  //       _variants[count]['variantName'],
+                                  //       _variants[count]['variantId'],
+                                  //       int.parse(_productController.text),
+                                  //       _noteController.text,
+                                  //       product_options);
+                                  // }
                                 },
                                 color: Color(0xffE44D36),
                                 shape: RoundedRectangleBorder(
