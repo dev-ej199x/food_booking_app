@@ -44,6 +44,8 @@ dependencies:
   smooth_star_rating:
   cached_network_image:
   scoped_model:
+  geocoding:
+  geolocator:
   
 dev_dependencies:
   flutter_test:

@@ -720,7 +720,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       }
                                     }
                                   });
-                                  print(_noteController.text);
+                                  print(
+                                    _variants[count]['variantId'],
+                                  );
                                   print(proceed);
                                   // print(_variants[count]['variantName']);
                                   // print(_variants[count]['variantId']);
@@ -733,6 +735,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                         int.parse(_productController.text),
                                         _noteController.text,
                                         product_options);
+                                    print(_addToCart(
+                                        _variants[count]['variantName'],
+                                        _variants[count]['variantId'],
+                                        int.parse(_productController.text),
+                                        _noteController.text,
+                                        product_options));
                                   }
                                 },
                                 color: Color(0xffE44D36),
@@ -789,28 +797,28 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 // 'order_request_products.*.product_options.*.product_option_items' => 'required|array',
 // 'order_request_products.*.product_options.*.product_option_items.*' => 'required|exists:product_option_items,id',
 
-  _checkCartCount() async {
-    int count = 0;
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    if (sharedPreferences.getString('cart') != null) {
-      Map<String, dynamic> cart =
-          json.decode(sharedPreferences.getString('cart'));
-      if (cart['id'] == widget.restaurantDetails) {
-        List<dynamic> items = cart['items'];
-        items.forEach((element) {
-          count += element['quantity'];
-        });
-      }
-    }
-    setState(() {
-      _cartQuantity = count;
-    });
-  }
+  // _checkCartCount() async {
+  //   int count = 0;
+  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  //   if (sharedPreferences.getString('cart') != null) {
+  //     Map<String, dynamic> cart =
+  //         json.decode(sharedPreferences.getString('cart'));
+  //     if (cart['id'] == widget.restaurantDetails) {
+  //       List<dynamic> items = cart['items'];
+  //       items.forEach((element) {
+  //         count += element['quantity'];
+  //       });
+  //     }
+  //   }
+  //   setState(() {
+  //     _cartQuantity = count;
+  //   });
+  // }
 
   _addToCart(String variantName, int variantId, int quantity, String note,
       List productOptions) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    Map<String, dynamic> cart;
+    var cart = {};
     if (sharedPreferences.getString('cart') != null &&
         sharedPreferences.get('cart') != 'null') {
       cart = json.decode(sharedPreferences.getString('cart'));
@@ -838,7 +846,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           'note': note,
           'product_options': productOptions
         });
-        sharedPreferences.setString('cart', json.encode(cart));
+        await sharedPreferences.setString('cart', json.encode(cart));
       }
     } else {
       cart = {
@@ -855,10 +863,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         ]
       };
 
-      sharedPreferences.setString('cart', json.encode(cart));
+      await sharedPreferences.setString('cart', json.encode(cart));
     }
-
-    print(sharedPreferences.getString('cart'));
+    print(sharedPreferences.setString('cart', json.encode(cart)));
   }
 
   @override

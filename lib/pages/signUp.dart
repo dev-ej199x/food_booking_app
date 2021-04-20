@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +23,8 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-
+  Position _currentPosition;
+  String _currentAddress;
   SharedPreferences _sharedPreferences;
 
   bool _hidePassword = true;
@@ -31,8 +34,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   FocusNode _firstNameFocus = FocusNode();
   FocusNode _numberFocus = FocusNode();
   FocusNode _addressFocus = FocusNode();
-  FocusNode _longitudeFocus = FocusNode();
-  FocusNode _latitudeFocus = FocusNode();
   FocusNode _userNameFocus = FocusNode();
 
   TextEditingController _username = TextEditingController();
@@ -47,14 +48,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   TextEditingController _addressController = TextEditingController();
 
-  TextEditingController _longitudeController = TextEditingController();
-
-  TextEditingController _latitudeController = TextEditingController();
-
   void initState() {
     // TODO: implement initState
     super.initState();
     _configure();
+  }
+
+  _getCurrentLocation() {
+    Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.best,
+            forceAndroidLocationManager: true)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        _getAddressFromLatLng();
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = placemarks[0];
+
+      setState(() {
+        _currentAddress = "${place.street},${place.locality}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   _configure() async {
@@ -112,6 +138,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   _signUp() async {
+    _getCurrentLocation();
     Http().showLoadingOverlay(context);
     var response = await Http(url: 'signup', body: {
       'username': _username.text,
@@ -119,9 +146,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'password_confirmation': _passwordController.text,
       'name': _firstnameController.text,
       'number': _numberController.text,
-      'address': _addressController.text,
-      'longitude': _longitudeController.text,
-      'latitude': _latitudeController.text,
+      'address': _currentAddress.toString(),
+      'longitude': _currentPosition.longitude.toString(),
+      'latitude': _currentPosition.latitude.toString(),
     }).postNoHeader();
     if (response is String) {
       Navigator.pop(context);
@@ -476,49 +503,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 color: Color(0xff908787),
                                               ),
                                             ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller: _addressController,
-                                                focusNode: _addressFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _numberFocus);
-                                                },
+                                            if (_currentAddress != null)
+                                              Text(
+                                                _currentAddress,
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
                                                   color: Colors.black,
-                                                  fontSize: 2.2 *
+                                                  fontSize: 1.7 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Address",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
                                               ),
-                                            )
                                           ],
                                         ),
                                       ),
@@ -839,8 +833,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 obscureText: _hidePassword,
                                                 onFieldSubmitted: (value) {
                                                   FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _longitudeFocus);
+                                                      .unfocus();
                                                 },
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
@@ -896,174 +889,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.location_on_outlined,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller:
-                                                    _longitudeController,
-                                                focusNode: _longitudeFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _latitudeFocus);
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Longitude",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.location_on_outlined,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller: _latitudeController,
-                                                focusNode: _latitudeFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Latitude",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
                                           horizontal:
                                               8 * Config.widthMultiplier,
                                           vertical:
@@ -1087,6 +912,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Center(
                                                 child: Text(
                                                   "Save",
+                                                  textScaleFactor: 1,
+                                                  style: TextStyle(
+                                                      fontSize: 2.2 *
+                                                          Config.textMultiplier,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          )),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              8 * Config.widthMultiplier,
+                                          vertical:
+                                              1 * Config.heightMultiplier),
+                                      child: ButtonTheme(
+                                          height: 7 * Config.heightMultiplier,
+                                          child: RaisedButton(
+                                            onPressed: () {
+                                              _getCurrentLocation();
+                                            },
+                                            color: Color(0xffeb4d4d),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10 *
+                                                      Config
+                                                          .imageSizeMultiplier),
+                                            ),
+                                            splashColor:
+                                                Colors.white.withOpacity(.4),
+                                            child: Container(
+                                              child: Center(
+                                                child: Text(
+                                                  "Get Address",
                                                   textScaleFactor: 1,
                                                   style: TextStyle(
                                                       fontSize: 2.2 *
