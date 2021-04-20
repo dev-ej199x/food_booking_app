@@ -30,9 +30,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   List _selected = [];
   List _controllers = [];
   List _productOptItems = [];
-  List _categories = [];
-  List _products = [];
-  List _product = [];
+  int _cartQuantity = 0;
   // List _productControllers = [];
   void initState() {
     //TODO: implement initstate
@@ -69,7 +67,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     TextEditingController _productController = TextEditingController();
     _productController.text = '1';
 
-    print(count);
+    // print(count);
     setState(() {
       _selected[count].clear();
       // _products = new List.from(_categories[count]['products']);
@@ -349,6 +347,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                 valuechanged;
                                                           },
                                                         );
+                                                        print(_selected[count]
+                                                            [index]);
                                                       },
                                                     )),
                                                     Expanded(
@@ -557,7 +557,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                     horizontal: 4 * Config.widthMultiplier),
                                 onPressed: () {
                                   List product_options = [];
-                                  bool proceed = true;
+                                  bool proceed = false;
                                   _selected[count]
                                       .asMap()
                                       .forEach((index, selected) {
@@ -567,10 +567,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       if (_productOptions[index]
                                               ['productOptType'] ==
                                           'required') {
-                                        proceed = !proceed;
                                         if (selected.runtimeType.toString() ==
                                             "int") {
-                                          if (selected == -1) {
+                                          if (selected <= -1) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(new SnackBar(
                                               content: Text(
@@ -585,31 +584,31 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           } else {
                                             proceed = true;
                                             print('AddtocartSingle');
-
                                             product_options.add({
                                               'id': _productOptions[
-                                                      _selected[count]
+                                                      _selected[index]
                                                           .indexOf(selected)]
                                                   ['productOptId'],
                                               'name': _productOptions[
-                                                      _selected[count]
+                                                      _selected[index]
                                                           .indexOf(selected)]
                                                   ['productOptName'],
                                               'product_option_items': [
                                                 {
                                                   'id': _productOptItems[
-                                                          _selected[count]
+                                                          _selected[index]
                                                               .indexOf(
                                                                   selected)]
-                                                      ['productOptId'],
+                                                      ['productOptItmId'],
                                                   'name': _productOptItems[
-                                                          _selected[count]
+                                                          _selected[index]
                                                               .indexOf(
                                                                   selected)]
                                                       ['productOptItmName'],
                                                 }
                                               ]
                                             });
+                                            print(product_options);
                                           }
                                         }
                                       } else {
@@ -628,7 +627,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               'id': _productOptItems[
                                                       _selected[count]
                                                           .indexOf(selected)]
-                                                  ['productOptId'],
+                                                  ['productOptItmId'],
                                               'name': _productOptItems[
                                                       _selected[count]
                                                           .indexOf(selected)]
@@ -636,6 +635,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             }
                                           ]
                                         });
+                                        print(product_options);
                                       }
                                     }
                                     if (_productOptions[index]
@@ -644,7 +644,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       if (_productOptions[index]
                                               ['productOptType'] ==
                                           'required') {
-                                        proceed = !proceed;
                                         if (selected.runtimeType.toString() ==
                                             "List<dynamic>") {
                                           if (selected.length == 0) {
@@ -668,7 +667,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                 'id': _productOptItems[
                                                         _selected[count]
                                                             .indexOf(selected)]
-                                                    ['productOptId'],
+                                                    ['productOptItmId'],
                                                 'name': _productOptItems[
                                                         _selected[count]
                                                             .indexOf(selected)]
@@ -687,6 +686,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               'product_option_items':
                                                   product_option_items
                                             });
+                                            print(product_options);
                                           }
                                         }
                                       } else {
@@ -698,7 +698,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             'id': _productOptItems[
                                                     _selected[count]
                                                         .indexOf(selected)]
-                                                ['productOptId'],
+                                                ['productOptItmId'],
                                             'name': _productOptItems[
                                                     _selected[count]
                                                         .indexOf(selected)]
@@ -716,20 +716,24 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           'product_option_items':
                                               product_option_items
                                         });
+                                        print(product_options);
                                       }
                                     }
                                   });
-
-                                  // print(proceed);
-                                  // if (proceed) {
-                                  //   print('Success');
-                                  //   _addToCart(
-                                  //       _variants[count]['variantName'],
-                                  //       _variants[count]['variantId'],
-                                  //       int.parse(_productController.text),
-                                  //       _noteController.text,
-                                  //       product_options);
-                                  // }
+                                  print(_noteController.text);
+                                  print(proceed);
+                                  // print(_variants[count]['variantName']);
+                                  // print(_variants[count]['variantId']);
+                                  // print(product_options);
+                                  if (proceed) {
+                                    print('Success');
+                                    _addToCart(
+                                        _variants[count]['variantName'],
+                                        _variants[count]['variantId'],
+                                        int.parse(_productController.text),
+                                        _noteController.text,
+                                        product_options);
+                                  }
                                 },
                                 color: Color(0xffE44D36),
                                 shape: RoundedRectangleBorder(
@@ -761,10 +765,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       },
     );
   }
-
-  _addToCart(String variantName, int variantId, int quantity, String note,
-      List productOptions) async {
-//     'restaurant_id' => 'required|exists:restaurants,id',
+  //     'restaurant_id' => 'required|exists:restaurants,id',
 //     'longitude' => 'required|string',            -> customer's
 //     'latitude' => 'required|string',             -> customer's
 //     'distance' => 'required|numeric',            -> later na sa cart
@@ -788,9 +789,30 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 // 'order_request_products.*.product_options.*.product_option_items' => 'required|array',
 // 'order_request_products.*.product_options.*.product_option_items.*' => 'required|exists:product_option_items,id',
 
+  _checkCartCount() async {
+    int count = 0;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var cart = {};
     if (sharedPreferences.getString('cart') != null) {
+      Map<String, dynamic> cart =
+          json.decode(sharedPreferences.getString('cart'));
+      if (cart['id'] == widget.restaurantDetails) {
+        List<dynamic> items = cart['items'];
+        items.forEach((element) {
+          count += element['quantity'];
+        });
+      }
+    }
+    setState(() {
+      _cartQuantity = count;
+    });
+  }
+
+  _addToCart(String variantName, int variantId, int quantity, String note,
+      List productOptions) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    Map<String, dynamic> cart;
+    if (sharedPreferences.getString('cart') != null &&
+        sharedPreferences.get('cart') != 'null') {
       cart = json.decode(sharedPreferences.getString('cart'));
       if (cart['restaurant_id'] != widget.restaurantDetails['id']) {
         SnackBar(
@@ -832,6 +854,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           }
         ]
       };
+
       sharedPreferences.setString('cart', json.encode(cart));
     }
 

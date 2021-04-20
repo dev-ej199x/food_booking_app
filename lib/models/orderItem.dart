@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_booking_app/models/addOn.dart';
+import 'package:food_booking_app/models/productOption.dart';
 
 class OrderItemModel {
   final id;
@@ -8,7 +8,6 @@ class OrderItemModel {
   final price;
   final quantity;
   final total;
-  List<AddOnModel> addons;
 
   OrderItemModel({
     @required this.id,
@@ -17,6 +16,5 @@ class OrderItemModel {
     @required this.price,
     @required this.quantity,
     @required this.total,
-    @required this.addons,
   });
 }
