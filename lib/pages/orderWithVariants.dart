@@ -74,6 +74,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       _productOptions = new List.from(_variants[count]['vairantOption']);
       _productOptItems =
           new List.from(_productOptions[count]['productOptionItem']);
+      // _productOptItems[count]['productOptItmPrice'] =
       // if (_productControllers.isEmpty) {
       //   _productOptions.forEach((option) {
       //     TextEditingController _productController = TextEditingController();
@@ -161,6 +162,21 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 3 * Config.textMultiplier,
+                                  fontFamily: 'Segoe UI',
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 2 * Config.widthMultiplier),
+                              child: Text(
+                                '₱ ${_variants[count]['variantPrice'].toString()}.00',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 2 * Config.textMultiplier,
                                   fontFamily: 'Segoe UI',
                                   fontWeight: FontWeight.bold,
                                   fontStyle: FontStyle.normal,
@@ -331,6 +347,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                   'productOptionItem']
                                                               [itemindex][
                                                           'productOptItmName']),
+                                                      secondary: Text(
+                                                          '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00'),
                                                       onChanged:
                                                           (valuechanged) {
                                                         setstate(
@@ -351,111 +369,137 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                             [index]);
                                                       },
                                                     )),
-                                                    Expanded(
-                                                      child: Container(
-                                                        height: 11 *
-                                                            Config
-                                                                .heightMultiplier,
-                                                        child: Padding(
-                                                          padding: EdgeInsets.symmetric(
-                                                              vertical: 1 *
-                                                                  Config
-                                                                      .heightMultiplier,
-                                                              horizontal: 3 *
-                                                                  Config
-                                                                      .widthMultiplier),
-                                                          child: Center(
-                                                            child: Column(
-                                                              children: <
-                                                                  Widget>[
-                                                                Padding(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .only(
-                                                                    bottom: 1 *
-                                                                        Config
-                                                                            .heightMultiplier,
-                                                                  ),
-                                                                  child:
-                                                                      Container(
-                                                                    width: 55,
-                                                                    height: 20,
-                                                                    child:
-                                                                        MaterialButton(
-                                                                      minWidth:
-                                                                          2.0,
-                                                                      child: Icon(
-                                                                          Icons
-                                                                              .arrow_drop_up),
-                                                                      onPressed:
-                                                                          () {
-                                                                        int currentValue =
-                                                                            int.parse(_controllers[count][index][itemindex].text);
-                                                                        setState(
-                                                                            () {
-                                                                          currentValue++;
-                                                                          _controllers[count][index][itemindex].text =
-                                                                              (currentValue).toString(); // incrementing value
-                                                                        });
-                                                                      },
-                                                                    ),
-                                                                  ),
+                                                    Container(
+                                                      height: 11 *
+                                                          Config
+                                                              .heightMultiplier,
+                                                      child: Padding(
+                                                        padding: EdgeInsets.symmetric(
+                                                            vertical: 1 *
+                                                                Config
+                                                                    .heightMultiplier,
+                                                            horizontal: 1 *
+                                                                Config
+                                                                    .widthMultiplier),
+                                                        child: Center(
+                                                          child: Column(
+                                                            children: <Widget>[
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .only(
+                                                                  bottom: 1 *
+                                                                      Config
+                                                                          .heightMultiplier,
                                                                 ),
-                                                                Padding(
-                                                                  padding: EdgeInsets.only(
-                                                                      left: 1 *
-                                                                          Config
-                                                                              .widthMultiplier),
-                                                                  child:
-                                                                      Container(
-                                                                    width: 25,
-                                                                    height: 15,
-                                                                    child:
-                                                                        TextFormField(
-                                                                      controller:
-                                                                          _controllers[count][index]
-                                                                              [
-                                                                              itemindex],
-                                                                      keyboardType: TextInputType.numberWithOptions(
-                                                                          decimal:
-                                                                              false,
-                                                                          signed:
-                                                                              false),
-                                                                      inputFormatters: <
-                                                                          TextInputFormatter>[
-                                                                        WhitelistingTextInputFormatter
-                                                                            .digitsOnly
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  height: 20,
+                                                                child:
+                                                                    Container(
                                                                   width: 55,
+                                                                  height: 20,
                                                                   child:
                                                                       MaterialButton(
                                                                     minWidth:
                                                                         2.0,
                                                                     child: Icon(
                                                                         Icons
-                                                                            .arrow_drop_down),
+                                                                            .arrow_drop_up),
                                                                     onPressed:
                                                                         () {
+                                                                      int _priceValue =
+                                                                          int.parse(_productOptions[index]['productOptionItem'][itemindex]
+                                                                              [
+                                                                              'productOptItmPrice']);
                                                                       int currentValue =
                                                                           int.parse(
                                                                               _controllers[count][index][itemindex].text);
+                                                                      // if (currentValue ==
+                                                                      //     0) {
+                                                                      //   _productOptions[index]['productOptionItem']
+                                                                      //       [
+                                                                      //       itemindex] = _productOptions[index]
+                                                                      //           ['productOptionItem']
+                                                                      //       [
+                                                                      //       itemindex];
+                                                                      // }
                                                                       setState(
-                                                                        () {
-                                                                          currentValue--;
-                                                                          _controllers[count][index][itemindex].text =
-                                                                              (currentValue).toString(); // decrementing value
-                                                                        },
-                                                                      );
+                                                                          () {
+                                                                        _priceValue =
+                                                                            _priceValue +
+                                                                                _priceValue;
+                                                                        currentValue++;
+                                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
+                                                                            (_priceValue).toString();
+                                                                        _controllers[count][index][itemindex].text =
+                                                                            (currentValue).toString(); // incrementing value
+                                                                      });
+                                                                      print(_priceValue
+                                                                          .toString());
                                                                     },
                                                                   ),
                                                                 ),
-                                                              ],
-                                                            ),
+                                                              ),
+                                                              Padding(
+                                                                padding: EdgeInsets.only(
+                                                                    left: 1 *
+                                                                        Config
+                                                                            .widthMultiplier),
+                                                                child:
+                                                                    Container(
+                                                                  width: 25,
+                                                                  height: 15,
+                                                                  child:
+                                                                      TextFormField(
+                                                                    controller: _controllers[count]
+                                                                            [
+                                                                            index]
+                                                                        [
+                                                                        itemindex],
+                                                                    keyboardType: TextInputType.numberWithOptions(
+                                                                        decimal:
+                                                                            false,
+                                                                        signed:
+                                                                            false),
+                                                                    inputFormatters: <
+                                                                        TextInputFormatter>[
+                                                                      WhitelistingTextInputFormatter
+                                                                          .digitsOnly
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                height: 20,
+                                                                width: 55,
+                                                                child:
+                                                                    MaterialButton(
+                                                                  minWidth: 2.0,
+                                                                  child: Icon(Icons
+                                                                      .arrow_drop_down),
+                                                                  onPressed:
+                                                                      () {
+                                                                    int _priceValue =
+                                                                        int.parse(_productOptions[index]['productOptionItem'][itemindex]
+                                                                            [
+                                                                            'productOptItmPrice']);
+                                                                    int currentValue =
+                                                                        int.parse(
+                                                                            _controllers[count][index][itemindex].text);
+                                                                    setState(
+                                                                      () {
+                                                                        _priceValue =
+                                                                            _priceValue -
+                                                                                _priceValue;
+                                                                        currentValue--;
+                                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
+                                                                            (_priceValue).toString();
+                                                                        _controllers[count][index][itemindex].text =
+                                                                            (currentValue).toString(); // decrementing value
+                                                                      },
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
                                                       ),
@@ -912,7 +956,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         width: 270,
                         height: 130,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
+                          borderRadius: BorderRadius.circular(15.0),
                           color: Color(0xffe8971d),
                         ),
                         // Insert Hero() with tag :'_orderLogo${_products[index]['productId']}
@@ -923,12 +967,17 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15.0)),
+                                  color: Colors.green,
                                 ),
-                                child: CachedNetworkImage(
-                                  imageUrl: widget.details['banner'],
-                                  width: MediaQuery.of(context).size.width,
-                                  fit: BoxFit.cover,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.network(
+                                    widget.details['banner'],
+                                    width: MediaQuery.of(context).size.width,
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
                               Padding(
@@ -1014,7 +1063,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                       leading: _variants[index]['variantBanner'] != null
                           ? CachedNetworkImage(
                               imageUrl: _variants[index]['variantBanner'],
-                              width: 10 * Config.imageSizeMultiplier,
+                              width: 20 * Config.imageSizeMultiplier,
                               fit: BoxFit.fill,
                             )
                           : Text('No Image Loaded'),
@@ -1025,7 +1074,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         textAlign: TextAlign.center,
                       ),
                       trailing: Text(
-                          '₱ ${_variants[index]['variantPrice'].toString()}'),
+                          '₱ ${_variants[index]['variantPrice'].toString()}.00'),
                       onTap: () {
                         _variantDialog(index);
                       },

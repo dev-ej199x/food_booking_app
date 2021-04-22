@@ -211,18 +211,29 @@ class _OrderScreenState extends State<OrderScreen> {
                                   '_orderLogo$index${widget.details['variantID']}',
                               // tag: 'orderLogo',
                               child: Container(
-                                color: Colors.orange[800],
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15.0)),
+                                  color: Colors.orange,
+                                ),
+                                height: 160.0,
                                 child: Stack(
                                   children: [
                                     Container(
-                                      height: 120,
-                                      child: CachedNetworkImage(
-                                        imageUrl: _products[index]['banner'],
-                                        fit: BoxFit.fill,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            MediaQuery.of(context).size.height,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15.0)),
+                                        color: Colors.green,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: Image.network(
+                                          _products[index]['banner'],
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: 120.0,
+                                          fit: BoxFit.fill,
+                                        ),
                                       ),
                                     ),
                                     Padding(
@@ -233,8 +244,10 @@ class _OrderScreenState extends State<OrderScreen> {
                                         height: 20,
                                         decoration: BoxDecoration(
                                           color: Colors.red,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(
+                                                5 * Config.imageSizeMultiplier),
+                                            bottomRight: Radius.circular(
                                                 5 * Config.imageSizeMultiplier),
                                           ),
                                         ),
