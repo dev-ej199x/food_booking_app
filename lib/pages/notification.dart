@@ -31,6 +31,7 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       ),
       body: Container(
+        height: double.infinity,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(

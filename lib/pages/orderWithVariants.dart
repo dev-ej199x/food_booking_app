@@ -41,8 +41,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   //
   _getVariants() async {
     print('products/${widget.details['productId']}');
-    var response = await Http(url: 'products/${widget.details['productId']}', body: {})
-        .getWithHeader();
+    var response =
+        await Http(url: 'products/${widget.details['productId']}', body: {})
+            .getWithHeader();
 
     if (response is String) {
       setState(() {
@@ -124,7 +125,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 
   void initState() {
     log(widget.details.toString());
-    
+
     //TODO: implement initstate
     super.initState();
 
@@ -291,9 +292,14 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           minWidth: 2.0,
                                           child: Icon(Icons.arrow_drop_up),
                                           onPressed: () {
+                                            int _priceValue = int.parse(
+                                                _variants[count]['variantPrice']
+                                                    .toString());
                                             int currentValue = int.parse(
                                                 _productController.text);
                                             setState(() {
+                                              _priceValue =
+                                                  _priceValue + _priceValue;
                                               currentValue++;
                                               _productController.text =
                                                   (currentValue)
@@ -329,10 +335,15 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                         minWidth: 2.0,
                                         child: Icon(Icons.arrow_drop_down),
                                         onPressed: () {
+                                          int _priceValue = int.parse(
+                                              _variants[count]['variantPrice']
+                                                  .toString());
                                           int currentValue = int.parse(
                                               _productController.text);
                                           setState(
                                             () {
+                                              _priceValue =
+                                                  _priceValue - _priceValue;
                                               currentValue--;
                                               _productController.text =
                                                   (currentValue)
@@ -493,9 +504,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                     onPressed:
                                                                         () {
                                                                       int _priceValue =
-                                                                          int.parse(_productOptions[index]['productOptionItem'][itemindex]
-                                                                              [
-                                                                              'productOptItmPrice']);
+                                                                          int.parse(
+                                                                              _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
                                                                       int currentValue =
                                                                           int.parse(
                                                                               _controllers[count][index][itemindex].text);
@@ -563,9 +573,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                   onPressed:
                                                                       () {
                                                                     int _priceValue =
-                                                                        int.parse(_productOptions[index]['productOptionItem'][itemindex]
-                                                                            [
-                                                                            'productOptItmPrice']);
+                                                                        int.parse(
+                                                                            _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
                                                                     int currentValue =
                                                                         int.parse(
                                                                             _controllers[count][index][itemindex].text);

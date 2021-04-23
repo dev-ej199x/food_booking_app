@@ -1,9 +1,11 @@
 // import 'package:carousel_pro/carousel_pro.dart';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:intl/intl.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/pages/login.dart';
@@ -13,8 +15,11 @@ import 'package:page_transition/page_transition.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:date_format/date_format.dart';
+
 import 'dart:math' as math;
 
+import '../defaults/config.dart';
 import '../defaults/config.dart';
 import '../defaults/http.dart';
 
@@ -25,21 +30,38 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  RefreshController _refreshController = RefreshController(initialLoadStatus: LoadStatus.loading);
+  RefreshController _refreshController =
+      RefreshController(initialLoadStatus: LoadStatus.loading);
+  TextEditingController _quantity = TextEditingController();
+  TextEditingController _datedPick = TextEditingController();
+  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+  TextEditingController _timeController = TextEditingController();
+  String _hour, _minute, _time;
+  String _setTime, _setDate;
+  String dateTime;
   List _restaurants = [];
   String dropdownValue = '';
+  DateTime pickDate;
   bool _loading = false;
 
   @override
   void initState() {
+    _datedPick.text = DateFormat.yMd().format(DateTime.now());
+
+    _timeController.text = formatDate(
+        DateTime(2019, 08, 1, DateTime.now().hour, DateTime.now().minute),
+        [hh, ':', nn, " ", am]).toString();
     // TODO: implement initState
     super.initState();
+
+    pickDate = DateTime.now();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _getEstablishments();
     });
   }
 
-  _onTheGo(int index, List<String> quantity) {
+  _onTheGo(int index) {
+    _quantity.clear();
     return showDialog(
         context: context,
         builder: (context) {
@@ -65,53 +87,101 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black,
                             fontWeight: FontWeight.bold),
                       ),
-                      Container(
-                        height: 5 * Config.heightMultiplier,
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 20 * Config.widthMultiplier,
-                            vertical: 1 * Config.heightMultiplier),
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(
-                                10 * Config.imageSizeMultiplier)),
-                        child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: dropdownValue,
-                            icon: Container(
-                              decoration: BoxDecoration(
-                                  color: Color(0xffF85A5A),
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(
-                                          10 * Config.imageSizeMultiplier),
-                                      bottomRight: Radius.circular(
-                                          10 * Config.imageSizeMultiplier))),
-                              child: Icon(
-                                Icons.arrow_drop_down_rounded,
-                                color: Colors.white,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10 * Config.widthMultiplier),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 10 * Config.widthMultiplier),
+                                      child: TextFormField(
+                                        textAlign: TextAlign.center,
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.all(8.0),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                          ),
+                                        ),
+                                        controller: _quantity,
+                                        keyboardType:
+                                            TextInputType.numberWithOptions(
+                                          decimal: false,
+                                          signed: true,
+                                        ),
+                                        inputFormatters: <TextInputFormatter>[
+                                          WhitelistingTextInputFormatter
+                                              .digitsOnly
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 8 * Config.heightMultiplier,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                width:
+                                                    .2 * Config.widthMultiplier,
+                                              ),
+                                            ),
+                                          ),
+                                          child: InkWell(
+                                            child: Icon(
+                                              Icons.arrow_drop_up,
+                                              size: 7.5 *
+                                                  Config.imageSizeMultiplier,
+                                            ),
+                                            onTap: () {
+                                              int currentValue =
+                                                  int.parse(_quantity.text);
+                                              setState(() {
+                                                currentValue++;
+                                                _quantity.text = (currentValue)
+                                                    .toString(); // incrementing value
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        InkWell(
+                                          child: Icon(
+                                            Icons.arrow_drop_down,
+                                            size: 7.5 *
+                                                Config.imageSizeMultiplier,
+                                          ),
+                                          onTap: () {
+                                            int currentValue =
+                                                int.parse(_quantity.text);
+                                            setState(() {
+                                              currentValue--;
+                                              _quantity.text = (currentValue > 0
+                                                      ? currentValue
+                                                      : 0)
+                                                  .toString(); // decrementing value
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            iconSize: 42,
-                            underline: SizedBox(),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                dropdownValue = newValue;
-                              });
-                            },
-                            items: quantity
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 3 * Config.textMultiplier),
-                                  child: Text(
-                                    value,
-                                    textDirection: TextDirection.rtl,
-                                    // textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              );
-                            }).toList()),
+                          ),
+                        ],
                       ),
                       Padding(
                         padding: EdgeInsets.only(
@@ -124,6 +194,7 @@ class _HomePageState extends State<HomePage> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4 * Config.widthMultiplier),
                             onPressed: () {
+                              // print(_restaurants[index]);
                               Navigator.push(
                                 context,
                                 PageTransition(
@@ -163,7 +234,42 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  _booking(int index, List<String> quantity) {
+  _pickDate() async {
+    DateTime date = await showDatePicker(
+      context: context,
+      initialDate: pickDate,
+      firstDate: DateTime(DateTime.now().year - 5),
+      lastDate: DateTime(DateTime.now().year + 5),
+    );
+    if (date != null)
+      setState(() {
+        pickDate = date;
+        _datedPick.text = DateFormat.yMd().format(pickDate);
+      });
+  }
+
+  _pickTime() async {
+    TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _hour = selectedTime.hour.toString();
+        _minute = selectedTime.minute.toString();
+        _time = _hour + ' : ' + _minute;
+        _timeController.text = _time;
+        _timeController.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+  }
+
+  _booking(int index) {
+    _quantity.clear();
+    _timeController.clear();
+    _datedPick.clear();
     return showDialog(
         context: context,
         builder: (context) {
@@ -176,7 +282,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             content: Container(
-              height: 53 * Config.widthMultiplier,
+              height: 60 * Config.widthMultiplier,
               child: Center(
                 child: Column(
                   children: <Widget>[
@@ -188,53 +294,100 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.black,
                           fontWeight: FontWeight.bold),
                     ),
-                    Container(
-                      height: 5 * Config.heightMultiplier,
-                      margin: EdgeInsets.symmetric(
-                          horizontal: 20 * Config.widthMultiplier,
-                          vertical: 1 * Config.heightMultiplier),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(
-                              10 * Config.imageSizeMultiplier)),
-                      child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: dropdownValue,
-                          icon: Container(
-                            decoration: BoxDecoration(
-                                color: Color(0xffF85A5A),
-                                borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(
-                                        10 * Config.imageSizeMultiplier),
-                                    bottomRight: Radius.circular(
-                                        10 * Config.imageSizeMultiplier))),
-                            child: Icon(
-                              Icons.arrow_drop_down_rounded,
-                              color: Colors.white,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10 * Config.widthMultiplier),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        left: 10 * Config.widthMultiplier),
+                                    child: TextFormField(
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.all(8.0),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                        ),
+                                      ),
+                                      controller: _quantity,
+                                      keyboardType:
+                                          TextInputType.numberWithOptions(
+                                        decimal: false,
+                                        signed: true,
+                                      ),
+                                      inputFormatters: <TextInputFormatter>[
+                                        WhitelistingTextInputFormatter
+                                            .digitsOnly
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  height: 8 * Config.heightMultiplier,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              width:
+                                                  .2 * Config.widthMultiplier,
+                                            ),
+                                          ),
+                                        ),
+                                        child: InkWell(
+                                          child: Icon(
+                                            Icons.arrow_drop_up,
+                                            size: 7.5 *
+                                                Config.imageSizeMultiplier,
+                                          ),
+                                          onTap: () {
+                                            int currentValue =
+                                                int.parse(_quantity.text);
+                                            setState(() {
+                                              currentValue++;
+                                              _quantity.text = (currentValue)
+                                                  .toString(); // incrementing value
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      InkWell(
+                                        child: Icon(
+                                          Icons.arrow_drop_down,
+                                          size:
+                                              7.5 * Config.imageSizeMultiplier,
+                                        ),
+                                        onTap: () {
+                                          int currentValue =
+                                              int.parse(_quantity.text);
+                                          setState(() {
+                                            currentValue--;
+                                            _quantity.text = (currentValue > 0
+                                                    ? currentValue
+                                                    : 0)
+                                                .toString(); // decrementing value
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          iconSize: 42,
-                          underline: SizedBox(),
-                          onChanged: (String newValue) {
-                            setState(() {
-                              dropdownValue = newValue;
-                            });
-                          },
-                          items: quantity
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: 3 * Config.textMultiplier),
-                                child: Text(
-                                  value,
-                                  textDirection: TextDirection.rtl,
-                                  // textAlign: TextAlign.center,
-                                ),
-                              ),
-                            );
-                          }).toList()),
+                        ),
+                      ],
                     ),
                     Text(
                       'Book Time',
@@ -245,40 +398,96 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold),
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: 18 * Config.widthMultiplier,
-                          vertical: 1 * Config.heightMultiplier),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(
-                              10 * Config.imageSizeMultiplier)),
+                      color: Colors.red,
+                      height: 68,
+                      width: MediaQuery.of(context).size.width,
                       child: Row(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: 3 * Config.widthMultiplier),
-                            child: Text(
-                              'asdsa',
-                              textScaleFactor: 1,
-                              style: TextStyle(
-                                  fontSize: 2.2 * Config.textMultiplier,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Expanded(
+                          Column(
+                            children: <Widget>[
+                              Text(
+                                'Choose Date',
+                                style: TextStyle(
+                                    fontSize: 2.5 * Config.textMultiplier,
+                                    fontFamily: 'Poppins',
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  _pickDate();
+                                },
+                                child: Container(
+                                  width: 25 * Config.widthMultiplier,
+                                  height: 3 * Config.heightMultiplier,
+                                  margin: EdgeInsets.only(top: 1),
+                                  alignment: Alignment.bottomCenter,
+                                  decoration:
+                                      BoxDecoration(color: Colors.grey[200]),
+                                  child: TextFormField(
+                                    style: TextStyle(
+                                        fontSize: 2 * Config.textMultiplier),
+                                    textAlign: TextAlign.center,
+                                    enabled: false,
+                                    keyboardType: TextInputType.text,
+                                    controller: _datedPick,
+                                    onSaved: (String val) {
+                                      _setDate = val;
+                                    },
+                                    decoration: InputDecoration(
+                                      disabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide.none),
+                                      // labelText: 'Date',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Spacer(),
-                          Container(
-                            decoration: BoxDecoration(
-                                color: Color(0xffF85A5A),
-                                borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(
-                                        10 * Config.imageSizeMultiplier),
-                                    bottomRight: Radius.circular(
-                                        10 * Config.imageSizeMultiplier))),
-                            child: Icon(
-                              Icons.arrow_drop_down_rounded,
-                              color: Colors.white,
-                            ),
+                          Column(
+                            children: <Widget>[
+                              Text(
+                                'Choose Time',
+                                style: TextStyle(
+                                    fontSize: 2.5 * Config.textMultiplier,
+                                    fontFamily: 'Poppins',
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  _pickTime();
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 1),
+                                  width: 25 * Config.widthMultiplier,
+                                  height: 3 * Config.heightMultiplier,
+                                  alignment: Alignment.center,
+                                  decoration:
+                                      BoxDecoration(color: Colors.grey[200]),
+                                  child: TextFormField(
+                                    style: TextStyle(
+                                        fontSize: 2 * Config.textMultiplier),
+                                    textAlign: TextAlign.center,
+                                    onSaved: (String val) {
+                                      _setTime = val;
+                                    },
+                                    enabled: false,
+                                    keyboardType: TextInputType.text,
+                                    controller: _timeController,
+                                    decoration: InputDecoration(
+                                      disabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide.none),
+                                      // labelText: 'Time',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -354,19 +563,7 @@ class _HomePageState extends State<HomePage> {
                         EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        List<String> quantity = [];
-                        setState(() {
-                          dropdownValue = '1';
-                        });
-                        for (int x = 1;
-                            x <=
-                                _restaurants[index]
-                                    ['max_persons_per_restaurant'];
-                            x++) {
-                          quantity.add(x.toString());
-                        }
-                        _onTheGo(index, quantity);
+                        _onTheGo(index);
                       },
                       // color: Color(0xffD32F2F),
                       style: ButtonStyle(
@@ -379,10 +576,11 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         'On the Go',
                         style: TextStyle(
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Poppins'),
+                          fontSize: 2.5 * Config.textMultiplier,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                   ),
@@ -403,21 +601,8 @@ class _HomePageState extends State<HomePage> {
                         EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
-                        List<String> quantity = [];
-                        setState(() {
-                          dropdownValue = '1';
-                        });
-                        for (int x = 1;
-                            x <=
-                                _restaurants[index]
-                                    ['max_persons_per_restaurant'];
-                            x++) {
-                          quantity.add(x.toString());
-                        }
-                        _booking(index, quantity);
+                        _booking(index);
                       },
-                      // color: Color(0xffD32F2F),
                       style: ButtonStyle(
                         shadowColor: MaterialStateProperty.all(Colors.red),
                         elevation: MaterialStateProperty.all(10),
@@ -428,7 +613,7 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         'Book',
                         style: TextStyle(
-                            fontSize: 15.0,
+                            fontSize: 2.5 * Config.textMultiplier,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Poppins'),
@@ -443,11 +628,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getEstablishments() async {
-    if (!_loading)Http().showLoadingOverlay(context);
+    if (!_loading) Http().showLoadingOverlay(context);
     var response = await Http(url: 'restaurants', body: {}).getWithHeader();
 
     if (response is String) {
-      if (!_loading)Navigator.pop(context);
+      if (!_loading) Navigator.pop(context);
       setState(() {
         _loading = false;
       });
@@ -467,7 +652,7 @@ class _HomePageState extends State<HomePage> {
       );
     } else if (response is Response) {
       if (response.statusCode != 200) {
-        if (!_loading)Navigator.pop(context);
+        if (!_loading) Navigator.pop(context);
         setState(() {
           _loading = false;
         });
@@ -488,6 +673,7 @@ class _HomePageState extends State<HomePage> {
         );
       } else {
         Map<String, dynamic> body = json.decode(response.body);
+        print(response.body);
         List<Map<String, dynamic>> restaurants = [];
         body['restaurant'].forEach((restaurant) {
           List<Map<String, dynamic>> categories = [];
@@ -532,6 +718,7 @@ class _HomePageState extends State<HomePage> {
                 "productVariants": variant,
               });
             });
+            log(product.toString());
             categories.add({
               "categoriesID": category['id'],
               "categoriesName": category['name'],
@@ -546,11 +733,12 @@ class _HomePageState extends State<HomePage> {
             "latitude": restaurant['latitude'],
             "longitude": restaurant['longitude'],
             "address": restaurant['address'],
+            "images": restaurant['image'],
             "max_persons_per_restaurant": 10,
             "productCategories": categories,
           });
         });
-        if (!_loading)Navigator.pop(context);
+        if (!_loading) Navigator.pop(context);
         setState(() {
           _restaurants = new List.from(restaurants);
           _loading = false;
@@ -600,31 +788,17 @@ class _HomePageState extends State<HomePage> {
               Container(
                 height: 100.0,
                 width: double.infinity,
-                child: CarouselSlider(
+                child: CarouselSlider.builder(
+                  itemCount: _restaurants.length,
                   options: CarouselOptions(
                     height: 150.0,
                     enlargeCenterPage: false,
                     viewportFraction: 1,
                     autoPlay: true,
                   ),
-                  items: [
-                    Image.asset(
-                      'assets/images/Mask Group 2.png',
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                    ),
-                    Image.asset(
-                      'assets/images/Restaurant.jpg',
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                    ),
-                  ].map((i) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return i;
-                      },
-                    );
-                  }).toList(),
+                  itemBuilder:
+                      (BuildContext context, int itemIndex, int index) =>
+                          Image.network(_restaurants[itemIndex]['images']),
                 ),
               ),
               Align(
@@ -639,8 +813,8 @@ class _HomePageState extends State<HomePage> {
                     padding: EdgeInsets.symmetric(horizontal: 20.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                          2 * Config.imageSizeMultiplier),
+                      borderRadius:
+                          BorderRadius.circular(2 * Config.imageSizeMultiplier),
                       // border: Border.all(color: Colors.grey[800]),
                       boxShadow: [
                         BoxShadow(
@@ -651,17 +825,16 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     child: TextField(
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        icon: Icon(Icons.search, color: Colors.grey[800]),
-                        hintText: ('Search Restaurant'),
-                        hintStyle: TextStyle(
-                          color: Colors.grey[800],
-                          fontFamily: 'Segoe UI',
-                        ),
-                      ).copyWith(isDense: true)
-                    ),
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          icon: Icon(Icons.search, color: Colors.grey[800]),
+                          hintText: ('Search Restaurant'),
+                          hintStyle: TextStyle(
+                            color: Colors.grey[800],
+                            fontFamily: 'Poppins',
+                          ),
+                        ).copyWith(isDense: true)),
                   ),
                 ),
               )
@@ -680,7 +853,7 @@ class _HomePageState extends State<HomePage> {
                     'Featured Restaurant',
                     style: TextStyle(
                         fontSize: 2 * Config.textMultiplier,
-                        fontFamily: 'Segoe UI',
+                        fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.normal,
                         color: Color(0xff707070)),
@@ -692,7 +865,7 @@ class _HomePageState extends State<HomePage> {
                       textScaleFactor: 1,
                       style: TextStyle(
                           fontSize: 1.2 * Config.textMultiplier,
-                          fontFamily: 'Segoe UI',
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.normal,
                           color: Color(0xff707070)),
@@ -708,35 +881,16 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               height: 150.0,
               width: double.infinity,
-              child: CarouselSlider(
+              child: CarouselSlider.builder(
+                itemCount: _restaurants.length,
                 options: CarouselOptions(
                     enlargeCenterPage: true, viewportFraction: .7),
-                items: [
-                  Image.asset(
-                    'assets/images/CoffeeShop.png',
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                  ),
-                  Image.asset(
-                    'assets/images/Restaurant.jpg',
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                  ),
-                  Image.asset(
-                    'assets/images/Pastry.jpg',
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                  )
-                ].map((i) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return i;
-                    },
-                  );
-                }).toList(),
+                itemBuilder: (BuildContext context, int itemIndex, int index) =>
+                    Image.network(_restaurants[itemIndex]['images']),
               ),
             ),
           ),
+
           Padding(
             padding: EdgeInsets.only(
                 top: 5.0,
@@ -749,7 +903,7 @@ class _HomePageState extends State<HomePage> {
                   'Nearby Restaurants',
                   style: TextStyle(
                       fontSize: 2 * Config.textMultiplier,
-                      fontFamily: 'Segoe UI',
+                      fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.normal,
                       color: Color(0xff707070)),
@@ -760,7 +914,7 @@ class _HomePageState extends State<HomePage> {
                     'See All',
                     style: TextStyle(
                         fontSize: 1.2 * Config.textMultiplier,
-                        fontFamily: 'Segoe UI',
+                        fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.normal,
                         color: Color(0xff707070)),
@@ -770,158 +924,162 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Container(
-            child: Expanded(
-            child: SmartRefresher(
-              enablePullDown: !_loading,
-              onRefresh: () {
-                setState(() {
-                  _restaurants.clear();
-                  _loading = true;
-                });
-                _getEstablishments();
-              },
-              physics: BouncingScrollPhysics(),
-              header: WaterDropMaterialHeader(
-                backgroundColor: Config.appColor,
-                color: Colors.white,
-                distance: 4 * Config.heightMultiplier,
-              ),
-              controller: _refreshController,
-                child: 
-                _restaurants.length > 0?
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _restaurants.length,
-                  itemBuilder: (BuildContext context, int index) =>
-                      Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 1 * Config.heightMultiplier, horizontal: 4 * Config.widthMultiplier),
-                    child: FlatButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        _createAlertDialog(index);
+              child: Expanded(
+                  child: SmartRefresher(
+                      enablePullDown: !_loading,
+                      onRefresh: () {
+                        setState(() {
+                          _restaurants.clear();
+                          _loading = true;
+                        });
+                        _getEstablishments();
                       },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                                2 * Config.imageSizeMultiplier)
+                      physics: BouncingScrollPhysics(),
+                      header: WaterDropMaterialHeader(
+                        backgroundColor: Config.appColor,
+                        color: Colors.white,
+                        distance: 4 * Config.heightMultiplier,
                       ),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: EdgeInsets.symmetric(
-                            vertical: 1 * Config.heightMultiplier,
-                            horizontal: 0.4 * Config.widthMultiplier),
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topRight,
-                              end: Alignment.topLeft,
-                              colors: [
-                                Colors.orange.shade900,
-                                Colors.white60
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                2 * Config.imageSizeMultiplier)),
-                        child: Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 2 * Config.widthMultiplier),
-                                  child: Image(
-                                    image: AssetImage(
-                                        Images.sampleRestaurant),
-                                    fit: BoxFit.fill,
-                                    width:
-                                        35 * Config.imageSizeMultiplier,
-                                    height:
-                                        10 * Config.imageSizeMultiplier,
-                                  ),
-                                ),
-                                // SizedBox(width: 27.0),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      right:
-                                          1.8 * Config.widthMultiplier),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.end,
-                                    children: <Widget>[
-                                      Text(
-                                        _restaurants[index]['name'],
-                                        style: TextStyle(
-                                          fontSize: 1.9 *
-                                              Config.textMultiplier,
-                                          fontFamily: 'Segoe UI',
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.normal,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
-                                        style: TextStyle(
-                                          fontSize: 1.4 *
-                                              Config.textMultiplier,
-                                          fontFamily: 'Segoe UI',
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.normal,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Padding(
+                      controller: _refreshController,
+                      child: _restaurants.length > 0
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: _restaurants.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                                  Padding(
                                 padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        2.5 * Config.widthMultiplier),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    SmoothStarRating(
-                                      starCount: 5,
-                                      color: Colors.yellow,
-                                      borderColor: Colors.black,
-                                      defaultIconData: Icons.star_border_rounded,
-                                      filledIconData: Icons.star_rounded,
-                                      halfFilledIconData: Icons.star_half_rounded,
+                                    vertical: 1 * Config.heightMultiplier,
+                                    horizontal: 4 * Config.widthMultiplier),
+                                child: FlatButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () {
+                                    _createAlertDialog(index);
+                                  },
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          2 * Config.imageSizeMultiplier)),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 1 * Config.heightMultiplier,
+                                        horizontal:
+                                            0.4 * Config.widthMultiplier),
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topRight,
+                                          end: Alignment.topLeft,
+                                          colors: [
+                                            Colors.orange.shade900,
+                                            Colors.white60
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                            2 * Config.imageSizeMultiplier)),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  left: 2 *
+                                                      Config.widthMultiplier),
+                                              child: Image.network(
+                                                _restaurants[index]['images'],
+                                                fit: BoxFit.fill,
+                                                width: 35 *
+                                                    Config.imageSizeMultiplier,
+                                                height: 10 *
+                                                    Config.imageSizeMultiplier,
+                                              ),
+                                            ),
+                                            // SizedBox(width: 27.0),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  right: 1.8 *
+                                                      Config.widthMultiplier),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: <Widget>[
+                                                  Text(
+                                                    _restaurants[index]['name'],
+                                                    style: TextStyle(
+                                                      fontSize: 1.9 *
+                                                          Config.textMultiplier,
+                                                      fontFamily: 'Poppins',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontStyle:
+                                                          FontStyle.normal,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
+                                                    style: TextStyle(
+                                                      fontSize: 1.4 *
+                                                          Config.textMultiplier,
+                                                      fontFamily: 'Poppins',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontStyle:
+                                                          FontStyle.normal,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Align(
+                                          alignment: Alignment.bottomLeft,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 2.5 *
+                                                    Config.widthMultiplier),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                SmoothStarRating(
+                                                  starCount: 5,
+                                                  color: Colors.yellow,
+                                                  borderColor: Colors.black,
+                                                  defaultIconData:
+                                                      Icons.star_border_rounded,
+                                                  filledIconData:
+                                                      Icons.star_rounded,
+                                                  halfFilledIconData:
+                                                      Icons.star_half_rounded,
+                                                ),
+                                                Text(
+                                                  _restaurants[index]
+                                                      ['address'],
+                                                  style: TextStyle(
+                                                    fontSize: 2 *
+                                                        Config.textMultiplier,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle: FontStyle.normal,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    Text(
-                                      _restaurants[index]['address'],
-                                      style: TextStyle(
-                                        fontSize:
-                                            2 * Config.textMultiplier,
-                                        fontFamily: 'Segoe UI',
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.normal,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                :
-                Center(child:Text('No restaurants to show'))
-              )
-            )
-          )
+                          : Center(child: Text('No restaurants to show')))))
         ],
-      
       ),
     );
   }
