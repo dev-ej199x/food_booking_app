@@ -796,13 +796,13 @@ class _HomePageState extends State<HomePage> {
               controller: _refreshController,
                 child: 
                 _restaurants.length > 0?
-                ListView.builder(
+                GridView.count(
+                  crossAxisCount: 2,
                   shrinkWrap: true,
-                  itemCount: _restaurants.length,
-                  itemBuilder: (BuildContext context, int index) =>
-                      Padding(
+                  children: List.generate(_restaurants.length, (index) {  
+                      return Padding(
                     padding: EdgeInsets.symmetric(
-                        vertical: 1 * Config.heightMultiplier, horizontal: 4 * Config.widthMultiplier),
+                        vertical: 1 * Config.heightMultiplier, horizontal: 2 * Config.widthMultiplier),
                     child: FlatButton(
                       padding: EdgeInsets.zero,
                       onPressed: () {
@@ -830,11 +830,13 @@ class _HomePageState extends State<HomePage> {
                                 2 * Config.imageSizeMultiplier)),
                         child: Column(
                           children: <Widget>[
-                            Row(
+                            Expanded(
+                              child: Row(
                               mainAxisAlignment:
                                   MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Padding(
+                                Expanded(
+                                  child: Padding(
                                   padding: EdgeInsets.only(
                                       left: 2 * Config.widthMultiplier),
                                   child: Image(
@@ -846,6 +848,7 @@ class _HomePageState extends State<HomePage> {
                                     height:
                                         10 * Config.imageSizeMultiplier,
                                   ),
+                                )
                                 ),
                                 // SizedBox(width: 27.0),
                                 Padding(
@@ -882,6 +885,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                               ],
+                            )
                             ),
                             Align(
                               alignment: Alignment.bottomLeft,
@@ -895,13 +899,9 @@ class _HomePageState extends State<HomePage> {
                                   children: <Widget>[
                                     SmoothStarRating(
                                       starCount: 5,
-                                      color: Colors.yellow,
-                                      borderColor: Colors.black,
-                                      defaultIconData: Icons.star_border_rounded,
-                                      filledIconData: Icons.star_rounded,
-                                      halfFilledIconData: Icons.star_half_rounded,
                                     ),
-                                    Text(
+                                    Expanded(
+                                      child: Text(
                                       _restaurants[index]['address'],
                                       style: TextStyle(
                                         fontSize:
@@ -911,7 +911,7 @@ class _HomePageState extends State<HomePage> {
                                         fontStyle: FontStyle.normal,
                                         color: Colors.white,
                                       ),
-                                    ),
+                                    )),
                                   ],
                                 ),
                               ),
@@ -920,7 +920,8 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                  ),
+                  );
+                  })
                 )
                 :
                 Center(child:Text('No restaurants to show'))
