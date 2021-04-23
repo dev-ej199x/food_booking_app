@@ -228,7 +228,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'username': _username.text,
       'password': _passwordController.text
     }).postNoHeader();
-    log(response.body);
 
     if (response is String) {
       Navigator.pop(context);

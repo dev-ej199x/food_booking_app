@@ -70,7 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
       'username': _usernameController.text,
       'password': _passwordController.text
     }).postNoHeader();
-    log(response.body);
 
     if (response is String) {
       Navigator.pop(context);

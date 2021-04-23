@@ -93,7 +93,6 @@ class _HomePageState extends State<HomePage> {
                             iconSize: 42,
                             underline: SizedBox(),
                             onChanged: (String newValue) {
-                              // print(newValue);
                               setState(() {
                                 dropdownValue = newValue;
                               });
@@ -125,7 +124,6 @@ class _HomePageState extends State<HomePage> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4 * Config.widthMultiplier),
                             onPressed: () {
-                              // print(_restaurants[index]);
                               Navigator.push(
                                 context,
                                 PageTransition(
@@ -218,7 +216,6 @@ class _HomePageState extends State<HomePage> {
                           iconSize: 42,
                           underline: SizedBox(),
                           onChanged: (String newValue) {
-                            // print(newValue);
                             setState(() {
                               dropdownValue = newValue;
                             });
@@ -369,7 +366,6 @@ class _HomePageState extends State<HomePage> {
                             x++) {
                           quantity.add(x.toString());
                         }
-                        // print(quantity);
                         _onTheGo(index, quantity);
                       },
                       // color: Color(0xffD32F2F),
@@ -419,7 +415,6 @@ class _HomePageState extends State<HomePage> {
                             x++) {
                           quantity.add(x.toString());
                         }
-                        // print(quantity);
                         _booking(index, quantity);
                       },
                       // color: Color(0xffD32F2F),
@@ -493,7 +488,6 @@ class _HomePageState extends State<HomePage> {
         );
       } else {
         Map<String, dynamic> body = json.decode(response.body);
-        print(response.body);
         List<Map<String, dynamic>> restaurants = [];
         body['restaurant'].forEach((restaurant) {
           List<Map<String, dynamic>> categories = [];
@@ -538,7 +532,6 @@ class _HomePageState extends State<HomePage> {
                 "productVariants": variant,
               });
             });
-            log(product.toString());
             categories.add({
               "categoriesID": category['id'],
               "categoriesName": category['name'],

@@ -91,7 +91,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
                                 color: Colors.red,
                                 iconSize: 20.0,
                                 onPressed: () {
-                                  // print('Marker Tapped');
                                 },
                               ),
                             ),

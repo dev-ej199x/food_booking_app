@@ -69,7 +69,6 @@ class _ProfileState extends State<Profile> {
           ),
         );
       } else {
-        print(response.body);
         Navigator.pop(context);
         Map<String, dynamic> body = json.decode(response.body);
         setState(() {
@@ -77,7 +76,6 @@ class _ProfileState extends State<Profile> {
           _numberController.text = body['user']['number'];
           _addressController.text = body['user']['address'];
         });
-        print(_nameController.text);
       }
     }
   }

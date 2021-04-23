@@ -158,7 +158,6 @@ class _OrderCartState extends State<OrderCart> {
               padding: EdgeInsets.only(top: 510),
               child: RaisedButton(
                 onPressed: () {
-                  print('Button Clicked');
                 },
                 child: Text(' PROCEED '),
                 color: Colors.deepOrange[400],

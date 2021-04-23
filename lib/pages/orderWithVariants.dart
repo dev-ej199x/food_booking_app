@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:http/http.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
@@ -25,6 +27,9 @@ class OrderWithVariants extends StatefulWidget {
 
 class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  bool _loading = false;
   List _variants = [];
   List _productOptions = [];
   List _selected = [];
@@ -32,7 +37,94 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   List _productOptItems = [];
   int _cartQuantity = 0;
   // List _productControllers = [];
+  //
+  //
+  _getVariants() async {
+    print('products/${widget.details['productId']}');
+    var response = await Http(url: 'products/${widget.details['productId']}', body: {})
+        .getWithHeader();
+
+    if (response is String) {
+      setState(() {
+        _loading = false;
+      });
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            response,
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        setState(() {
+          _loading = false;
+        });
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: Text(
+              response.body,
+              textScaleFactor: .8,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.white,
+                fontSize: 2.2 * Config.textMultiplier,
+              ),
+            ),
+          ),
+        );
+      } else {
+        Map<String, dynamic> product = json.decode(response.body)['product'];
+        List<Map<String, dynamic>> variant = [];
+        product['variants'].forEach((variants) {
+          List<Map<String, dynamic>> productoption = [];
+          variants['product_options']?.forEach((productOptions) {
+            List<Map<String, dynamic>> productoptionitem = [];
+            productOptions['product_option_items'].forEach((productOptionItem) {
+              productoptionitem.add({
+                "productOptItmId": productOptionItem['id'],
+                "productOptItmName": productOptionItem['item_name'],
+                "productOptItmPrice": productOptionItem['price'],
+              });
+            });
+            productoption.add({
+              "productOptId": productOptions['id'],
+              "productOptName": productOptions['name'],
+              "productOptType": productOptions['type'],
+              "productOptSelection": productOptions['selection'],
+              "productOptionItem": productoptionitem,
+            });
+          });
+          variant.add({
+            "variantId": variants['id'],
+            "variantName": variants['name'],
+            "variantPrice": variants['price'],
+            "variantDescription": variants['description'],
+            "variantBanner": variants['image'],
+            "vairantOption": productoption,
+          });
+        });
+
+        setState(() {
+          _variants = new List.from(variant);
+          _loading = false;
+        });
+      }
+    }
+  }
+
   void initState() {
+    log(widget.details.toString());
+    
     //TODO: implement initstate
     super.initState();
 
@@ -49,7 +141,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         // _productControllers.add([]);
       });
     }
-    // print(_products);
   }
 
   // _variant(int index) async {
@@ -58,7 +149,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   //       _productOption = new List.from(_variants[index]['variantOption']);
   //     },
   //   );
-  //   print(_productOption);
   // }
 
 // List<String> variation
@@ -67,7 +157,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     TextEditingController _productController = TextEditingController();
     _productController.text = '1';
 
-    // print(count);
     setState(() {
       _selected[count].clear();
       // _products = new List.from(_categories[count]['products']);
@@ -365,8 +454,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                 valuechanged;
                                                           },
                                                         );
-                                                        print(_selected[count]
-                                                            [index]);
                                                       },
                                                     )),
                                                     Container(
@@ -432,8 +519,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                         _controllers[count][index][itemindex].text =
                                                                             (currentValue).toString(); // incrementing value
                                                                       });
-                                                                      print(_priceValue
-                                                                          .toString());
                                                                     },
                                                                   ),
                                                                 ),
@@ -555,8 +640,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                     //   },
                                                     // );
                                                   }
-                                                  print(
-                                                      _selected[count][index]);
                                                 },
                                               ),
                                             )
@@ -627,7 +710,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             proceed = !proceed;
                                           } else {
                                             proceed = true;
-                                            print('AddtocartSingle');
                                             product_options.add({
                                               'id': _productOptions[
                                                       _selected[index]
@@ -652,12 +734,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                 }
                                               ]
                                             });
-                                            print(product_options);
                                           }
                                         }
                                       } else {
                                         proceed = true;
-                                        print('AddtocartSingle');
                                         product_options.add({
                                           'id': _productOptions[_selected[count]
                                                   .indexOf(selected)]
@@ -679,7 +759,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             }
                                           ]
                                         });
-                                        print(product_options);
                                       }
                                     }
                                     if (_productOptions[index]
@@ -704,7 +783,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             proceed = !proceed;
                                           } else {
                                             proceed = true;
-                                            print('AddtocartMultiple');
                                             List product_option_items = [];
                                             selected.forEach((id) {
                                               product_option_items.add({
@@ -730,12 +808,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               'product_option_items':
                                                   product_option_items
                                             });
-                                            print(product_options);
                                           }
                                         }
                                       } else {
                                         proceed = true;
-                                        print('AddtocartMultiple');
                                         List product_option_items = [];
                                         selected.forEach((id) {
                                           product_option_items.add({
@@ -760,31 +836,16 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                           'product_option_items':
                                               product_option_items
                                         });
-                                        print(product_options);
                                       }
                                     }
                                   });
-                                  print(
-                                    _variants[count]['variantId'],
-                                  );
-                                  print(proceed);
-                                  // print(_variants[count]['variantName']);
-                                  // print(_variants[count]['variantId']);
-                                  // print(product_options);
                                   if (proceed) {
-                                    print('Success');
                                     _addToCart(
                                         _variants[count]['variantName'],
                                         _variants[count]['variantId'],
                                         int.parse(_productController.text),
                                         _noteController.text,
                                         product_options);
-                                    print(_addToCart(
-                                        _variants[count]['variantName'],
-                                        _variants[count]['variantId'],
-                                        int.parse(_productController.text),
-                                        _noteController.text,
-                                        product_options));
                                   }
                                 },
                                 color: Color(0xffE44D36),
@@ -909,7 +970,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 
       await sharedPreferences.setString('cart', json.encode(cart));
     }
-    print(sharedPreferences.setString('cart', json.encode(cart)));
   }
 
   @override
@@ -1053,35 +1113,59 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
               Padding(
                 padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _variants.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 40.0,
-                    child: ListTile(
-                      leading: _variants[index]['variantBanner'] != null
-                          ? CachedNetworkImage(
-                              imageUrl: _variants[index]['variantBanner'],
-                              width: 20 * Config.imageSizeMultiplier,
-                              fit: BoxFit.fill,
-                            )
-                          : Text('No Image Loaded'),
-                      title: Text(_variants[index]['variantName'],
-                          textAlign: TextAlign.center),
-                      subtitle: Text(
-                        _variants[index]['variantDescription'],
-                        textAlign: TextAlign.center,
-                      ),
-                      trailing: Text(
-                          '₱ ${_variants[index]['variantPrice'].toString()}.00'),
-                      onTap: () {
-                        _variantDialog(index);
-                      },
+              Container(
+                  child: Expanded(
+                child: SmartRefresher(
+                    enablePullDown: !_loading,
+                    onRefresh: () {
+                      setState(() {
+                        _variants.clear();
+                        _loading = true;
+                      });
+                      _getVariants();
+                    },
+                    physics: BouncingScrollPhysics(),
+                    header: WaterDropMaterialHeader(
+                      backgroundColor: Config.appColor,
+                      color: Colors.white,
+                      distance: 4 * Config.heightMultiplier,
                     ),
-                  );
-                },
-              ),
+                    controller: _refreshController,
+                    child: _variants.length == 0
+                        ? Center(child: Text('No products available'))
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _variants.length,
+                            itemBuilder: (context, index) {
+                              return Card(
+                                elevation: 40.0,
+                                child: ListTile(
+                                  leading: _variants[index]['variantBanner'] !=
+                                          null
+                                      ? CachedNetworkImage(
+                                          imageUrl: _variants[index]
+                                              ['variantBanner'],
+                                          width:
+                                              20 * Config.imageSizeMultiplier,
+                                          fit: BoxFit.fill,
+                                        )
+                                      : Text('No Image Loaded'),
+                                  title: Text(_variants[index]['variantName'],
+                                      textAlign: TextAlign.center),
+                                  subtitle: Text(
+                                    _variants[index]['variantDescription'],
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  trailing: Text(
+                                      '₱ ${_variants[index]['variantPrice'].toString()}.00'),
+                                  onTap: () {
+                                    _variantDialog(index);
+                                  },
+                                ),
+                              );
+                            },
+                          )),
+              ))
             ],
           ),
         ],
