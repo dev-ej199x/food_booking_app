@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:http/http.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
@@ -25,6 +26,9 @@ class OrderWithVariants extends StatefulWidget {
 
 class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  bool _loading = true;
   List _variants = [];
   List _productOptions = [];
   List _selected = [];
@@ -36,51 +40,32 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     //TODO: implement initstate
     super.initState();
 
-    // _products = new List.from(widget.details['products']);
-    // if (_product.isNotEmpty) {
-
-    // }
     _variants = new List.from(widget.details['productVariants']);
     if (_variants.isNotEmpty) {
       _variants.forEach((variant) {
         variant['quantity'] = 0;
         _selected.add([]);
         _controllers.add([]);
-        // _productControllers.add([]);
       });
     }
-    // print(_products);
   }
-
-  // _variant(int index) async {
-  //   setState(
-  //     () {
-  //       _productOption = new List.from(_variants[index]['variantOption']);
-  //     },
-  //   );
-  //   print(_productOption);
-  // }
 
 // List<String> variation
   _variantDialog(int count) {
     TextEditingController _noteController = TextEditingController();
     TextEditingController _productController = TextEditingController();
+    RefreshController _refreshController =
+        RefreshController(initialRefresh: false);
+    bool _loading = true;
     _productController.text = '1';
 
     // print(count);
     setState(() {
       _selected[count].clear();
-      // _products = new List.from(_categories[count]['products']);
+
       _productOptions = new List.from(_variants[count]['vairantOption']);
       _productOptItems =
           new List.from(_productOptions[count]['productOptionItem']);
-      // _productOptItems[count]['productOptItmPrice'] =
-      // if (_productControllers.isEmpty) {
-      //   _productOptions.forEach((option) {
-      //     TextEditingController _productController = TextEditingController();
-      //     _productControllers.add(_productController);
-      //   });
-      // }
 
       if (_selected[count].isEmpty) {
         _productOptions.forEach((option) {
@@ -285,42 +270,250 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         Expanded(
                           child: SizedBox(
                             height: MediaQuery.of(context).size.height,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: _productOptions.length,
-                              itemBuilder: (context, index) => Column(
-                                children: [
-                                  Container(
-                                    //  color: Color(0xffFF6347),
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 1 * Config.heightMultiplier),
-                                      child: Column(
-                                        children: [
-                                          if (_productOptions[index]
-                                                  ['productOptionItem']
-                                              .isNotEmpty)
-                                            Divider(
-                                              height: 0,
-                                              color: Colors.red,
-                                            ),
-                                          if (_productOptions[index]
-                                                  ['productOptionItem']
-                                              .isNotEmpty)
-                                            Text(
-                                              'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
-                                              style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 3.2 *
-                                                      Config.textMultiplier,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          if (_productOptions[index]
-                                                  ['productOptSelection'] ==
-                                              'single')
-                                            Container(
-                                              child: ListView.builder(
+                            child: SmartRefresher(
+                              controller: _refreshController,
+                              enablePullDown: _loading,
+                              onRefresh: () {
+                                setState(() {
+                                  _loading = true;
+                                  _productOptions = new List.from(
+                                      _variants[count]['vairantOption']);
+                                  _productOptItems = new List.from(
+                                      _productOptions[count]
+                                          ['productOptionItem']);
+                                });
+
+                                print('LOVE');
+                              },
+                              physics: BouncingScrollPhysics(),
+                              header: WaterDropMaterialHeader(
+                                backgroundColor: Color(0xff707070),
+                                color: Colors.white,
+                                distance: .2 * Config.heightMultiplier,
+                              ),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: _productOptions.length,
+                                itemBuilder: (context, index) => Column(
+                                  children: [
+                                    Container(
+                                      //  color: Color(0xffFF6347),
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 1 * Config.heightMultiplier),
+                                        child: Column(
+                                          children: [
+                                            if (_productOptions[index]
+                                                    ['productOptionItem']
+                                                .isNotEmpty)
+                                              Divider(
+                                                height: 0,
+                                                color: Colors.red,
+                                              ),
+                                            if (_productOptions[index]
+                                                    ['productOptionItem']
+                                                .isNotEmpty)
+                                              Text(
+                                                'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
+                                                style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 3.2 *
+                                                        Config.textMultiplier,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            if (_productOptions[index]
+                                                    ['productOptSelection'] ==
+                                                'single')
+                                              Container(
+                                                child: ListView.builder(
+                                                  // physics: ScrollPhysics(),
+                                                  shrinkWrap: true,
+                                                  itemCount: _productOptions[
+                                                              index]
+                                                          ['productOptionItem']
+                                                      .length,
+                                                  itemBuilder:
+                                                      (context, itemindex) =>
+                                                          Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: RadioListTile(
+                                                        value: _productOptions[
+                                                                            index]
+                                                                        [
+                                                                        'productOptionItem']
+                                                                    [itemindex][
+                                                                'productOptItmId'] +
+                                                            itemindex,
+                                                        groupValue:
+                                                            _selected[count]
+                                                                [index],
+                                                        title: Text(_productOptions[
+                                                                        index][
+                                                                    'productOptionItem']
+                                                                [itemindex][
+                                                            'productOptItmName']),
+                                                        secondary: Text(
+                                                            '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00'),
+                                                        onChanged:
+                                                            (valuechanged) {
+                                                          setstate(
+                                                            () {
+                                                              _selected[count]
+                                                                      [index] =
+                                                                  valuechanged;
+                                                            },
+                                                          );
+                                                          setState(
+                                                            () {
+                                                              _selected[count]
+                                                                      [index] =
+                                                                  valuechanged;
+                                                            },
+                                                          );
+                                                          print(_selected[count]
+                                                              [index]);
+                                                        },
+                                                      )),
+                                                      Container(
+                                                        height: 11 *
+                                                            Config
+                                                                .heightMultiplier,
+                                                        child: Padding(
+                                                          padding: EdgeInsets.symmetric(
+                                                              vertical: 1 *
+                                                                  Config
+                                                                      .heightMultiplier,
+                                                              horizontal: 1 *
+                                                                  Config
+                                                                      .widthMultiplier),
+                                                          child: Center(
+                                                            child: Column(
+                                                              children: <
+                                                                  Widget>[
+                                                                Padding(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .only(
+                                                                    bottom: 1 *
+                                                                        Config
+                                                                            .heightMultiplier,
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    width: 55,
+                                                                    height: 20,
+                                                                    child:
+                                                                        MaterialButton(
+                                                                      minWidth:
+                                                                          2.0,
+                                                                      child: Icon(
+                                                                          Icons
+                                                                              .arrow_drop_up),
+                                                                      onPressed:
+                                                                          () {
+                                                                        int _priceValue =
+                                                                            int.parse(_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
+                                                                        int currentValue =
+                                                                            int.parse(_controllers[count][index][itemindex].text);
+                                                                        // if (currentValue ==
+                                                                        //     0) {
+                                                                        //   _productOptions[index]['productOptionItem']
+                                                                        //       [
+                                                                        //       itemindex] = _productOptions[index]
+                                                                        //           ['productOptionItem']
+                                                                        //       [
+                                                                        //       itemindex];
+                                                                        // }
+                                                                        setState(
+                                                                            () {
+                                                                          _priceValue =
+                                                                              _priceValue + _priceValue;
+                                                                          currentValue++;
+                                                                          _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
+                                                                              (_priceValue).toString();
+                                                                          _controllers[count][index][itemindex].text =
+                                                                              (currentValue).toString(); // incrementing value
+                                                                        });
+                                                                        print(_priceValue
+                                                                            .toString());
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Padding(
+                                                                  padding: EdgeInsets.only(
+                                                                      left: 1 *
+                                                                          Config
+                                                                              .widthMultiplier),
+                                                                  child:
+                                                                      Container(
+                                                                    width: 25,
+                                                                    height: 15,
+                                                                    child:
+                                                                        TextFormField(
+                                                                      controller:
+                                                                          _controllers[count][index]
+                                                                              [
+                                                                              itemindex],
+                                                                      keyboardType: TextInputType.numberWithOptions(
+                                                                          decimal:
+                                                                              false,
+                                                                          signed:
+                                                                              false),
+                                                                      inputFormatters: <
+                                                                          TextInputFormatter>[
+                                                                        WhitelistingTextInputFormatter
+                                                                            .digitsOnly
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  height: 20,
+                                                                  width: 55,
+                                                                  child:
+                                                                      MaterialButton(
+                                                                    minWidth:
+                                                                        2.0,
+                                                                    child: Icon(
+                                                                        Icons
+                                                                            .arrow_drop_down),
+                                                                    onPressed:
+                                                                        () {
+                                                                      int _priceValue =
+                                                                          int.parse(
+                                                                              _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
+                                                                      int currentValue =
+                                                                          int.parse(
+                                                                              _controllers[count][index][itemindex].text);
+                                                                      setState(
+                                                                        () {
+                                                                          _priceValue =
+                                                                              _priceValue - _priceValue;
+                                                                          currentValue--;
+                                                                          _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
+                                                                              (_priceValue).toString();
+                                                                          _controllers[count][index][itemindex].text =
+                                                                              (currentValue).toString(); // decrementing value
+                                                                        },
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            else
+                                              ListView.builder(
                                                 // physics: ScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: _productOptions[
@@ -328,253 +521,71 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                         ['productOptionItem']
                                                     .length,
                                                 itemBuilder:
-                                                    (context, itemindex) => Row(
-                                                  children: [
-                                                    Expanded(
-                                                        child: RadioListTile(
-                                                      value: _productOptions[
-                                                                          index]
-                                                                      [
-                                                                      'productOptionItem']
-                                                                  [itemindex][
-                                                              'productOptItmId'] +
-                                                          itemindex,
-                                                      groupValue:
+                                                    (context, itemindex) =>
+                                                        CheckboxListTile(
+                                                  value: _selected[count][index]
+                                                      .asMap()
+                                                      .containsValue(itemindex),
+                                                  title: Text(_productOptions[
+                                                                  index][
+                                                              'productOptionItem']
+                                                          [itemindex]
+                                                      ['productOptItmName']),
+                                                  secondary: Text(
+                                                      '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00'),
+                                                  onChanged: (valuechanged) {
+                                                    if (valuechanged) {
+                                                      setstate(
+                                                        () {
                                                           _selected[count]
-                                                              [index],
-                                                      title: Text(_productOptions[
-                                                                      index][
-                                                                  'productOptionItem']
-                                                              [itemindex][
-                                                          'productOptItmName']),
-                                                      secondary: Text(
-                                                          '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00'),
-                                                      onChanged:
-                                                          (valuechanged) {
-                                                        setstate(
-                                                          () {
-                                                            _selected[count]
-                                                                    [index] =
-                                                                valuechanged;
-                                                          },
-                                                        );
-                                                        setState(
-                                                          () {
-                                                            _selected[count]
-                                                                    [index] =
-                                                                valuechanged;
-                                                          },
-                                                        );
-                                                        print(_selected[count]
-                                                            [index]);
-                                                      },
-                                                    )),
-                                                    Container(
-                                                      height: 11 *
-                                                          Config
-                                                              .heightMultiplier,
-                                                      child: Padding(
-                                                        padding: EdgeInsets.symmetric(
-                                                            vertical: 1 *
-                                                                Config
-                                                                    .heightMultiplier,
-                                                            horizontal: 1 *
-                                                                Config
-                                                                    .widthMultiplier),
-                                                        child: Center(
-                                                          child: Column(
-                                                            children: <Widget>[
-                                                              Padding(
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .only(
-                                                                  bottom: 1 *
-                                                                      Config
-                                                                          .heightMultiplier,
-                                                                ),
-                                                                child:
-                                                                    Container(
-                                                                  width: 55,
-                                                                  height: 20,
-                                                                  child:
-                                                                      MaterialButton(
-                                                                    minWidth:
-                                                                        2.0,
-                                                                    child: Icon(
-                                                                        Icons
-                                                                            .arrow_drop_up),
-                                                                    onPressed:
-                                                                        () {
-                                                                      int _priceValue =
-                                                                          int.parse(_productOptions[index]['productOptionItem'][itemindex]
-                                                                              [
-                                                                              'productOptItmPrice']);
-                                                                      int currentValue =
-                                                                          int.parse(
-                                                                              _controllers[count][index][itemindex].text);
-                                                                      // if (currentValue ==
-                                                                      //     0) {
-                                                                      //   _productOptions[index]['productOptionItem']
-                                                                      //       [
-                                                                      //       itemindex] = _productOptions[index]
-                                                                      //           ['productOptionItem']
-                                                                      //       [
-                                                                      //       itemindex];
-                                                                      // }
-                                                                      setState(
-                                                                          () {
-                                                                        _priceValue =
-                                                                            _priceValue +
-                                                                                _priceValue;
-                                                                        currentValue++;
-                                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
-                                                                            (_priceValue).toString();
-                                                                        _controllers[count][index][itemindex].text =
-                                                                            (currentValue).toString(); // incrementing value
-                                                                      });
-                                                                      print(_priceValue
-                                                                          .toString());
-                                                                    },
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Padding(
-                                                                padding: EdgeInsets.only(
-                                                                    left: 1 *
-                                                                        Config
-                                                                            .widthMultiplier),
-                                                                child:
-                                                                    Container(
-                                                                  width: 25,
-                                                                  height: 15,
-                                                                  child:
-                                                                      TextFormField(
-                                                                    controller: _controllers[count]
-                                                                            [
-                                                                            index]
-                                                                        [
-                                                                        itemindex],
-                                                                    keyboardType: TextInputType.numberWithOptions(
-                                                                        decimal:
-                                                                            false,
-                                                                        signed:
-                                                                            false),
-                                                                    inputFormatters: <
-                                                                        TextInputFormatter>[
-                                                                      WhitelistingTextInputFormatter
-                                                                          .digitsOnly
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Container(
-                                                                height: 20,
-                                                                width: 55,
-                                                                child:
-                                                                    MaterialButton(
-                                                                  minWidth: 2.0,
-                                                                  child: Icon(Icons
-                                                                      .arrow_drop_down),
-                                                                  onPressed:
-                                                                      () {
-                                                                    int _priceValue =
-                                                                        int.parse(_productOptions[index]['productOptionItem'][itemindex]
-                                                                            [
-                                                                            'productOptItmPrice']);
-                                                                    int currentValue =
-                                                                        int.parse(
-                                                                            _controllers[count][index][itemindex].text);
-                                                                    setState(
-                                                                      () {
-                                                                        _priceValue =
-                                                                            _priceValue -
-                                                                                _priceValue;
-                                                                        currentValue--;
-                                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
-                                                                            (_priceValue).toString();
-                                                                        _controllers[count][index][itemindex].text =
-                                                                            (currentValue).toString(); // decrementing value
-                                                                      },
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                          else
-                                            ListView.builder(
-                                              // physics: ScrollPhysics(),
-                                              shrinkWrap: true,
-                                              itemCount: _productOptions[index]
-                                                      ['productOptionItem']
-                                                  .length,
-                                              itemBuilder:
-                                                  (context, itemindex) =>
-                                                      CheckboxListTile(
-                                                value: _selected[count][index]
-                                                    .asMap()
-                                                    .containsValue(itemindex),
-                                                title: Text(_productOptions[
-                                                                index][
-                                                            'productOptionItem']
-                                                        [itemindex]
-                                                    ['productOptItmName']),
-                                                onChanged: (valuechanged) {
-                                                  if (valuechanged) {
-                                                    setstate(
-                                                      () {
-                                                        _selected[count][index]
-                                                            .add(itemindex);
-                                                      },
-                                                    );
+                                                                  [index]
+                                                              .add(itemindex);
+                                                        },
+                                                      );
 
-                                                    // setState(
-                                                    //   () {
-                                                    //     _selected[count][index]
-                                                    //         .add(itemindex);
-                                                    //   },
-                                                    // );
-                                                  } else {
-                                                    setstate(
-                                                      () {
-                                                        _selected[count][index]
-                                                            .remove(itemindex);
-                                                      },
-                                                    );
-                                                    // setState(
-                                                    //   () {
-                                                    //     _selected[count][index]
-                                                    //         .remove(itemindex);
-                                                    //   },
-                                                    // );
-                                                  }
-                                                  print(
-                                                      _selected[count][index]);
-                                                },
-                                              ),
-                                            )
-                                          // if (_productOptions[index]
-                                          //         ['productOptType'] ==
-                                          //     'required')
-                                          //   if (_productOptions[index]
-                                          //           ['productOptName'] ==
-                                          //       'Add-ons')
-                                          //     ListView.builder()
-                                          //   else
-                                          //     Text(
-                                          //         'This Product Has no Add-ons'),
-                                        ],
+                                                      // setState(
+                                                      //   () {
+                                                      //     _selected[count][index]
+                                                      //         .add(itemindex);
+                                                      //   },
+                                                      // );
+                                                    } else {
+                                                      setstate(
+                                                        () {
+                                                          _selected[count]
+                                                                  [index]
+                                                              .remove(
+                                                                  itemindex);
+                                                        },
+                                                      );
+                                                      // setState(
+                                                      //   () {
+                                                      //     _selected[count][index]
+                                                      //         .remove(itemindex);
+                                                      //   },
+                                                      // );
+                                                    }
+                                                    print(_selected[count]
+                                                        [index]);
+                                                  },
+                                                ),
+                                              )
+                                            // if (_productOptions[index]
+                                            //         ['productOptType'] ==
+                                            //     'required')
+                                            //   if (_productOptions[index]
+                                            //           ['productOptName'] ==
+                                            //       'Add-ons')
+                                            //     ListView.builder()
+                                            //   else
+                                            //     Text(
+                                            //         'This Product Has no Add-ons'),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -1053,34 +1064,57 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
               Padding(
                 padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _variants.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 40.0,
-                    child: ListTile(
-                      leading: _variants[index]['variantBanner'] != null
-                          ? CachedNetworkImage(
-                              imageUrl: _variants[index]['variantBanner'],
-                              width: 20 * Config.imageSizeMultiplier,
-                              fit: BoxFit.fill,
-                            )
-                          : Text('No Image Loaded'),
-                      title: Text(_variants[index]['variantName'],
-                          textAlign: TextAlign.center),
-                      subtitle: Text(
-                        _variants[index]['variantDescription'],
-                        textAlign: TextAlign.center,
-                      ),
-                      trailing: Text(
-                          '₱ ${_variants[index]['variantPrice'].toString()}.00'),
-                      onTap: () {
-                        _variantDialog(index);
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
+                  width: MediaQuery.of(context).size.width,
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    enablePullDown: _loading,
+                    onRefresh: () {
+                      setState(() {
+                        _loading = true;
+                        _variants =
+                            new List.from(widget.details['productVariants']);
+                      });
+                    },
+                    physics: BouncingScrollPhysics(),
+                    header: WaterDropMaterialHeader(
+                      backgroundColor: Color(0xff707070),
+                      color: Colors.orange,
+                      distance: .2 * Config.heightMultiplier,
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _variants.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 40.0,
+                          child: ListTile(
+                            leading: _variants[index]['variantBanner'] != null
+                                ? CachedNetworkImage(
+                                    imageUrl: _variants[index]['variantBanner'],
+                                    width: 20 * Config.imageSizeMultiplier,
+                                    fit: BoxFit.fill,
+                                  )
+                                : Text('No Image Loaded'),
+                            title: Text(_variants[index]['variantName'],
+                                textAlign: TextAlign.center),
+                            subtitle: Text(
+                              _variants[index]['variantDescription'],
+                              textAlign: TextAlign.center,
+                            ),
+                            trailing: Text(
+                                '₱ ${_variants[index]['variantPrice'].toString()}.00'),
+                            onTap: () {
+                              _variantDialog(index);
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ],
           ),

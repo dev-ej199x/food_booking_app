@@ -9,6 +9,8 @@ import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/pages/orderWithVariants.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -20,6 +22,10 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  SharedPreferences _sharedPreferences;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  bool _loading = true;
   List _products = [];
   List _categories = [];
   List<String> _categoriesNames = [];
@@ -37,12 +43,47 @@ class _OrderScreenState extends State<OrderScreen> {
       _categories.forEach((category) {
         _categoriesNames.add(category['categoriesName']);
       });
-      // print(_categoriesNames);
     }
+  }
 
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   _getproduct();
-    // });
+  _loadProducts() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    var response =
+        await Http(url: 'v1/productcategories${widget.details['id']}')
+            .getNoHeader();
+    if (response is String) {
+      Navigator.pop(context);
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(response,
+              textScaleFactor: .8,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                  fontFamily: 'Poppins'))));
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        Navigator.pop(context);
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: Text(body['message'],
+                textScaleFactor: .8,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 2.2 * Config.textMultiplier,
+                    fontFamily: 'Poppins'))));
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        setState(() {
+          _products = new List.from(body['products']);
+          _products.forEach((element) {});
+          _loading = false;
+        });
+      }
+    }
   }
 
   _category(int index) async {
@@ -183,143 +224,172 @@ class _OrderScreenState extends State<OrderScreen> {
                 Text('No products available')
               else
                 Expanded(
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    itemCount: _products.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2),
-                    itemBuilder: (BuildContext context, int index) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // // child:
-                          FlatButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: OrderWithVariants(
-                                      details: _products[index],
-                                      restaurantDetails: widget.details,
-                                      index: index),
-                                ),
-                              );
-                            },
-                            child: Hero(
-                              tag:
-                                  '_orderLogo$index${widget.details['variantID']}',
-                              // tag: 'orderLogo',
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(15.0)),
-                                  color: Colors.orange,
-                                ),
-                                height: 160.0,
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15.0)),
-                                        color: Colors.green,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.network(
-                                          _products[index]['banner'],
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          height: 120.0,
-                                          fit: BoxFit.fill,
-                                        ),
-                                      ),
+                  child: Container(
+                    padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
+                    width: double.infinity,
+                    child: SmartRefresher(
+                      controller: _refreshController,
+                      enablePullDown: _loading,
+                      onRefresh: () {
+                        setState(() {
+                          _loading = true;
+                        });
+                        _loadProducts();
+
+                        print('LOVE');
+                      },
+                      physics: BouncingScrollPhysics(),
+                      header: WaterDropMaterialHeader(
+                        backgroundColor: Color(0xff707070),
+                        color: Colors.white,
+                        distance: .2 * Config.heightMultiplier,
+                      ),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        itemCount: _products.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2),
+                        itemBuilder: (BuildContext context, int index) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // // child:
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    PageTransition(
+                                      type: PageTransitionType.rightToLeft,
+                                      child: OrderWithVariants(
+                                          details: _products[index],
+                                          restaurantDetails: widget.details,
+                                          index: index),
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 1.0 * Config.heightMultiplier),
-                                      child: Container(
-                                        width: 100,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(
-                                                5 * Config.imageSizeMultiplier),
-                                            bottomRight: Radius.circular(
-                                                5 * Config.imageSizeMultiplier),
-                                          ),
-                                        ),
-                                        //Product Name
-                                        child: Text(
-                                          _products[index]['productName'],
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 2 * Config.textMultiplier,
-                                            fontFamily: 'Segoe UI',
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle: FontStyle.normal,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
+                                  );
+                                },
+                                child: Hero(
+                                  tag:
+                                      '_orderLogo$index${widget.details['variantID']}',
+                                  // tag: 'orderLogo',
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(15.0)),
+                                      color: Colors.orange,
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 16 * Config.heightMultiplier),
-                                      child: Container(
-                                        alignment: AlignmentGeometry.lerp(
-                                            Alignment.bottomCenter,
-                                            Alignment.bottomRight,
-                                            0),
-                                        height: 20,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xff484545),
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(
-                                                4 * Config.imageSizeMultiplier),
-                                            bottomRight: Radius.circular(
-                                                4 * Config.imageSizeMultiplier),
+                                    height: 160.0,
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(15.0)),
+                                            color: Colors.green,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            child: Image.network(
+                                              _products[index]['banner'],
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              height: 120.0,
+                                              fit: BoxFit.fill,
+                                            ),
                                           ),
                                         ),
-                                        //Product Description
-                                        child: Text(
-                                          _products[index]
-                                              ['productDescription'],
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 2 * Config.textMultiplier,
-                                            fontFamily: 'Segoe UI',
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle: FontStyle.normal,
-                                            color: Colors.white,
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 1.0 *
+                                                  Config.heightMultiplier),
+                                          child: Container(
+                                            width: 100,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(5 *
+                                                    Config.imageSizeMultiplier),
+                                                bottomRight: Radius.circular(5 *
+                                                    Config.imageSizeMultiplier),
+                                              ),
+                                            ),
+                                            //Product Name
+                                            child: Text(
+                                              _products[index]['productName'],
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize:
+                                                    2 * Config.textMultiplier,
+                                                fontFamily: 'Segoe UI',
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle: FontStyle.normal,
+                                                color: Colors.white,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top:
+                                                  16 * Config.heightMultiplier),
+                                          child: Container(
+                                            alignment: AlignmentGeometry.lerp(
+                                                Alignment.bottomCenter,
+                                                Alignment.bottomRight,
+                                                0),
+                                            height: 20,
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xff484545),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(4 *
+                                                    Config.imageSizeMultiplier),
+                                                bottomRight: Radius.circular(4 *
+                                                    Config.imageSizeMultiplier),
+                                              ),
+                                            ),
+                                            //Product Description
+                                            child: Text(
+                                              _products[index]
+                                                  ['productDescription'],
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize:
+                                                    2 * Config.textMultiplier,
+                                                fontFamily: 'Segoe UI',
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle: FontStyle.normal,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 18.5 *
+                                                  Config.heightMultiplier,
+                                              left: 2 * Config.widthMultiplier),
+                                          child: SmoothStarRating(
+                                            borderColor: Colors.yellow,
+                                            color: Colors.yellow,
+                                            allowHalfRating: false,
+                                            starCount: 5,
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 18.5 * Config.heightMultiplier,
-                                          left: 2 * Config.widthMultiplier),
-                                      child: SmoothStarRating(
-                                        borderColor: Colors.yellow,
-                                        color: Colors.yellow,
-                                        allowHalfRating: false,
-                                        starCount: 5,
-                                      ),
-                                    )
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                )
+                ),
             ],
           ),
         ],
