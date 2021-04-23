@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_booking_app/pages/landing.dart';
 import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/address.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
@@ -26,9 +27,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Food Booking',
-          home: LoginScreen(
-            from: null,
-          ),
+          home: LandingScreen()
         );
       });
     });

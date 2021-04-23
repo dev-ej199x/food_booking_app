@@ -15,7 +15,7 @@ class Config {
   static bool isPortrait = true;
   static bool isMobilePortrait = false;
 
-  static Color appColor = Color(0xFFF1A50C);
+  static Color appColor = Color(0xFFFEB4D4D);
 
   void init(BoxConstraints constraints, Orientation orientation) {
     if (orientation == Orientation.portrait) {

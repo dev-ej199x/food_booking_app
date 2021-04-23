@@ -373,6 +373,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 Expanded(
                                   child: TextFormField(
+                                    textAlignVertical: TextAlignVertical.center,
                                     textInputAction: TextInputAction.done,
                                     controller: _passwordController,
                                     focusNode: _passwordFocus,
@@ -386,6 +387,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                       fontSize: 2.2 * Config.textMultiplier,
                                     ),
                                     decoration: new InputDecoration(
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _hidePassword?Icons.visibility:Icons.visibility_off,
+                                        ),
+                                        color: Colors.black,
+                                        focusColor: Colors.black,
+                                        hoverColor: Colors.black,
+                                        highlightColor: Colors.black,
+                                        onPressed: () {
+                                          setState(() {
+                                            _hidePassword = !_hidePassword;
+                                          });
+                                        },
+                                      ),
                                       hintStyle: TextStyle(
                                         fontFamily: 'Poppins',
                                         color: Colors.black.withOpacity(.4),

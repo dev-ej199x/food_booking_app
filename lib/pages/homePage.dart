@@ -10,12 +10,11 @@ import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/orderScreen.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'dart:math' as math;
 
-import '../defaults/config.dart';
-import '../defaults/config.dart';
-import '../defaults/config.dart';
 import '../defaults/config.dart';
 import '../defaults/http.dart';
 
@@ -26,8 +25,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  RefreshController _refreshController = RefreshController(initialLoadStatus: LoadStatus.loading);
   List _restaurants = [];
   String dropdownValue = '';
+  bool _loading = false;
 
   @override
   void initState() {
@@ -447,11 +448,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getEstablishments() async {
-    Http().showLoadingOverlay(context);
+    if (!_loading)Http().showLoadingOverlay(context);
     var response = await Http(url: 'restaurants', body: {}).getWithHeader();
 
     if (response is String) {
-      Navigator.pop(context);
+      if (!_loading)Navigator.pop(context);
+      setState(() {
+        _loading = false;
+      });
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -468,7 +472,10 @@ class _HomePageState extends State<HomePage> {
       );
     } else if (response is Response) {
       if (response.statusCode != 200) {
-        Navigator.pop(context);
+        if (!_loading)Navigator.pop(context);
+        setState(() {
+          _loading = false;
+        });
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
@@ -485,7 +492,6 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       } else {
-        Navigator.pop(context);
         Map<String, dynamic> body = json.decode(response.body);
         print(response.body);
         List<Map<String, dynamic>> restaurants = [];
@@ -551,8 +557,10 @@ class _HomePageState extends State<HomePage> {
             "productCategories": categories,
           });
         });
+        if (!_loading)Navigator.pop(context);
         setState(() {
           _restaurants = new List.from(restaurants);
+          _loading = false;
         });
       }
     }
@@ -586,318 +594,336 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _logout();
               },
-              child: Icon(Icons.logout)),
+              child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: Icon(Icons.logout))),
         ),
       ),
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        child: Padding(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: <Widget>[
-              Stack(
-                children: [
-                  Container(
-                    height: 100.0,
-                    width: double.infinity,
-                    child: CarouselSlider(
-                      options: CarouselOptions(
-                        height: 150.0,
-                        enlargeCenterPage: false,
-                        viewportFraction: 1,
-                        autoPlay: true,
-                      ),
-                      items: [
-                        Image.asset(
-                          'assets/images/Mask Group 2.png',
-                          fit: BoxFit.fill,
-                          width: double.infinity,
-                        ),
-                        Image.asset(
-                          'assets/images/Restaurant.jpg',
-                          fit: BoxFit.fill,
-                          width: double.infinity,
-                        ),
-                      ].map((i) {
-                        return Builder(
-                          builder: (BuildContext context) {
-                            return i;
-                          },
-                        );
-                      }).toList(),
-                    ),
+      body: Column(
+        children: <Widget>[
+          Stack(
+            children: [
+              Container(
+                height: 100.0,
+                width: double.infinity,
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                    height: 150.0,
+                    enlargeCenterPage: false,
+                    viewportFraction: 1,
+                    autoPlay: true,
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: EdgeInsets.zero,
-                      child: Container(
-                        height: 40.0,
-                        width: 80 * Config.widthMultiplier,
-                        margin: EdgeInsets.only(top: 80.0),
-                        padding: EdgeInsets.symmetric(horizontal: 20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                              2 * Config.imageSizeMultiplier),
-                          // border: Border.all(color: Colors.grey[800]),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(.4),
-                              offset: Offset(0, 1),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(Icons.search, color: Colors.grey[800]),
-                            hintText: ('Search Restaurant'),
-                            hintStyle: TextStyle(
-                              color: Colors.grey[800],
-                              fontFamily: 'Segoe UI',
-                            ),
-                          ),
-                        ),
-                      ),
+                  items: [
+                    Image.asset(
+                      'assets/images/Mask Group 2.png',
+                      fit: BoxFit.fill,
+                      width: double.infinity,
                     ),
-                  )
-                ],
+                    Image.asset(
+                      'assets/images/Restaurant.jpg',
+                      fit: BoxFit.fill,
+                      width: double.infinity,
+                    ),
+                  ].map((i) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return i;
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
-              // Establishment Banner
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: 10.0,
-                            left: 8 * Config.widthMultiplier,
-                            right: 8 * Config.widthMultiplier),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Featured Restaurant',
-                                style: TextStyle(
-                                    fontSize: 2 * Config.textMultiplier,
-                                    fontFamily: 'Segoe UI',
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FontStyle.normal,
-                                    color: Color(0xff707070)),
-                              ),
-                              TextButton(
-                                child: Text(
-                                  'See All Featured',
-                                  textScaleFactor: 1,
-                                  style: TextStyle(
-                                      fontSize: 1.2 * Config.textMultiplier,
-                                      fontFamily: 'Segoe UI',
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.normal,
-                                      color: Color(0xff707070)),
-                                ),
-                              ),
-                            ]),
-                      ),
-                      // featured restaurant information
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: 10.0,
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    height: 40.0,
+                    width: 80 * Config.widthMultiplier,
+                    alignment: Alignment.center,
+                    margin: EdgeInsets.only(top: 80.0),
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(
+                          2 * Config.imageSizeMultiplier),
+                      // border: Border.all(color: Colors.grey[800]),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(.4),
+                          offset: Offset(0, 1),
+                          blurRadius: 6,
                         ),
-                        child: Container(
-                          height: 150.0,
-                          width: double.infinity,
-                          child: CarouselSlider(
-                            options: CarouselOptions(
-                                enlargeCenterPage: true, viewportFraction: .7),
-                            items: [
-                              Image.asset(
-                                'assets/images/CoffeeShop.png',
-                                fit: BoxFit.fill,
-                                width: double.infinity,
-                              ),
-                              Image.asset(
-                                'assets/images/Restaurant.jpg',
-                                fit: BoxFit.fill,
-                                width: double.infinity,
-                              ),
-                              Image.asset(
-                                'assets/images/Pastry.jpg',
-                                fit: BoxFit.fill,
-                                width: double.infinity,
-                              )
-                            ].map((i) {
-                              return Builder(
-                                builder: (BuildContext context) {
-                                  return i;
-                                },
-                              );
-                            }).toList(),
-                          ),
+                      ],
+                    ),
+                    child: TextField(
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        icon: Icon(Icons.search, color: Colors.grey[800]),
+                        hintText: ('Search Restaurant'),
+                        hintStyle: TextStyle(
+                          color: Colors.grey[800],
+                          fontFamily: 'Segoe UI',
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: 5.0,
-                            left: 8 * Config.widthMultiplier,
-                            right: 8 * Config.widthMultiplier),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              'Nearby Restaurants',
-                              style: TextStyle(
-                                  fontSize: 2 * Config.textMultiplier,
-                                  fontFamily: 'Segoe UI',
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FontStyle.normal,
-                                  color: Color(0xff707070)),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'See All Nearby',
-                                style: TextStyle(
-                                    fontSize: 1.2 * Config.textMultiplier,
-                                    fontFamily: 'Segoe UI',
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FontStyle.normal,
-                                    color: Color(0xff707070)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 200.0,
-                        width: double.infinity,
-                        padding: EdgeInsets.all(5.0),
-                        child: ListView.builder(
-                          itemCount: _restaurants.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 1.1 * Config.heightMultiplier),
-                            child: FlatButton(
-                              onPressed: () {
-                                _createAlertDialog(index);
-                              },
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 1 * Config.heightMultiplier,
-                                    horizontal: 0.4 * Config.widthMultiplier),
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topRight,
-                                      end: Alignment.topLeft,
-                                      colors: [
-                                        Colors.orange.shade900,
-                                        Colors.white60
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                        2 * Config.imageSizeMultiplier)),
-                                child: Column(
-                                  children: <Widget>[
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 2 * Config.widthMultiplier),
-                                          child: Image(
-                                            image: AssetImage(
-                                                Images.sampleRestaurant),
-                                            fit: BoxFit.fill,
-                                            width:
-                                                35 * Config.imageSizeMultiplier,
-                                            height:
-                                                10 * Config.imageSizeMultiplier,
-                                          ),
-                                        ),
-                                        // SizedBox(width: 27.0),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              right:
-                                                  1.8 * Config.widthMultiplier),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: <Widget>[
-                                              Text(
-                                                _restaurants[index]['name'],
-                                                style: TextStyle(
-                                                  fontSize: 1.9 *
-                                                      Config.textMultiplier,
-                                                  fontFamily: 'Segoe UI',
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle: FontStyle.normal,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              Text(
-                                                '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
-                                                style: TextStyle(
-                                                  fontSize: 1.4 *
-                                                      Config.textMultiplier,
-                                                  fontFamily: 'Segoe UI',
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle: FontStyle.normal,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Align(
-                                      alignment: Alignment.bottomLeft,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                2.5 * Config.widthMultiplier),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            SmoothStarRating(
-                                              starCount: 5,
-                                            ),
-                                            Text(
-                                              _restaurants[index]['address'],
-                                              style: TextStyle(
-                                                fontSize:
-                                                    2 * Config.textMultiplier,
-                                                fontFamily: 'Segoe UI',
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle: FontStyle.normal,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ).copyWith(isDense: true)
+                    ),
                   ),
                 ),
               )
             ],
           ),
-        ),
+          // Establishment Banner
+          Padding(
+            padding: EdgeInsets.only(
+                top: 10.0,
+                left: 8 * Config.widthMultiplier,
+                right: 8 * Config.widthMultiplier),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'Featured Restaurant',
+                    style: TextStyle(
+                        fontSize: 2 * Config.textMultiplier,
+                        fontFamily: 'Segoe UI',
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                        color: Color(0xff707070)),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'See All Featured',
+                      textScaleFactor: 1,
+                      style: TextStyle(
+                          fontSize: 1.2 * Config.textMultiplier,
+                          fontFamily: 'Segoe UI',
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.normal,
+                          color: Color(0xff707070)),
+                    ),
+                  ),
+                ]),
+          ),
+          // featured restaurant information
+          Padding(
+            padding: EdgeInsets.only(
+              top: 10.0,
+            ),
+            child: Container(
+              height: 150.0,
+              width: double.infinity,
+              child: CarouselSlider(
+                options: CarouselOptions(
+                    enlargeCenterPage: true, viewportFraction: .7),
+                items: [
+                  Image.asset(
+                    'assets/images/CoffeeShop.png',
+                    fit: BoxFit.fill,
+                    width: double.infinity,
+                  ),
+                  Image.asset(
+                    'assets/images/Restaurant.jpg',
+                    fit: BoxFit.fill,
+                    width: double.infinity,
+                  ),
+                  Image.asset(
+                    'assets/images/Pastry.jpg',
+                    fit: BoxFit.fill,
+                    width: double.infinity,
+                  )
+                ].map((i) {
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return i;
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+                top: 5.0,
+                left: 8 * Config.widthMultiplier,
+                right: 8 * Config.widthMultiplier),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Nearby Restaurants',
+                  style: TextStyle(
+                      fontSize: 2 * Config.textMultiplier,
+                      fontFamily: 'Segoe UI',
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.normal,
+                      color: Color(0xff707070)),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'See All',
+                    style: TextStyle(
+                        fontSize: 1.2 * Config.textMultiplier,
+                        fontFamily: 'Segoe UI',
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                        color: Color(0xff707070)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Expanded(
+            child: SmartRefresher(
+              enablePullDown: !_loading,
+              onRefresh: () {
+                setState(() {
+                  _restaurants.clear();
+                  _loading = true;
+                });
+                _getEstablishments();
+              },
+              physics: BouncingScrollPhysics(),
+              header: WaterDropMaterialHeader(
+                backgroundColor: Config.appColor,
+                color: Colors.white,
+                distance: 4 * Config.heightMultiplier,
+              ),
+              controller: _refreshController,
+                child: 
+                _restaurants.length > 0?
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _restaurants.length,
+                  itemBuilder: (BuildContext context, int index) =>
+                      Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: 1 * Config.heightMultiplier, horizontal: 4 * Config.widthMultiplier),
+                    child: FlatButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        _createAlertDialog(index);
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                                2 * Config.imageSizeMultiplier)
+                      ),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.symmetric(
+                            vertical: 1 * Config.heightMultiplier,
+                            horizontal: 0.4 * Config.widthMultiplier),
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.topLeft,
+                              colors: [
+                                Colors.orange.shade900,
+                                Colors.white60
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                2 * Config.imageSizeMultiplier)),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 2 * Config.widthMultiplier),
+                                  child: Image(
+                                    image: AssetImage(
+                                        Images.sampleRestaurant),
+                                    fit: BoxFit.fill,
+                                    width:
+                                        35 * Config.imageSizeMultiplier,
+                                    height:
+                                        10 * Config.imageSizeMultiplier,
+                                  ),
+                                ),
+                                // SizedBox(width: 27.0),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      right:
+                                          1.8 * Config.widthMultiplier),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.end,
+                                    children: <Widget>[
+                                      Text(
+                                        _restaurants[index]['name'],
+                                        style: TextStyle(
+                                          fontSize: 1.9 *
+                                              Config.textMultiplier,
+                                          fontFamily: 'Segoe UI',
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle: FontStyle.normal,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
+                                        style: TextStyle(
+                                          fontSize: 1.4 *
+                                              Config.textMultiplier,
+                                          fontFamily: 'Segoe UI',
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle: FontStyle.normal,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        2.5 * Config.widthMultiplier),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    SmoothStarRating(
+                                      starCount: 5,
+                                    ),
+                                    Text(
+                                      _restaurants[index]['address'],
+                                      style: TextStyle(
+                                        fontSize:
+                                            2 * Config.textMultiplier,
+                                        fontFamily: 'Segoe UI',
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.normal,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                :
+                Center(child:Text('No restaurants to show'))
+              )
+            )
+          )
+        ],
+      
       ),
     );
   }
