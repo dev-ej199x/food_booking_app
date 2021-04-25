@@ -19,6 +19,7 @@ class _ProfileState extends State<Profile> {
   TextEditingController _addressController = TextEditingController();
   FocusNode _nameFocus = FocusNode();
   FocusNode _numberFocus = FocusNode();
+  FocusNode _addressFocus = FocusNode();
   Color _editColor = Colors.green;
   bool _edit = false;
 
@@ -77,6 +78,58 @@ class _ProfileState extends State<Profile> {
           _addressController.text = body['user']['address'];
         });
       }
+    }
+  }
+
+  _check() async {
+    if (_numberController.text.isEmpty ||
+        _nameController.text.isEmpty ||
+        _addressController.text.isEmpty) {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text('Fill all fields properly',
+              textScaleFactor: .8,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                  fontFamily: 'Poppins'))));
+      return;
+    }
+    _update();
+  }
+
+  _update() async {
+    var response = await Http(url: 'user/profile', body: {
+      'name': _nameController.text,
+      'number': _numberController.text,
+      'address': _addressController.text
+    }).putWithHeader();
+    if (response is String) {
+      Navigator.pop(context);
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(response,
+              textScaleFactor: .8,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                  fontFamily: 'Poppins'))));
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        Navigator.pop(context);
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: Text(body['message'],
+                textScaleFactor: .8,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 2.2 * Config.textMultiplier,
+                    fontFamily: 'Poppins'))));
+      } else {}
     }
   }
 
@@ -161,15 +214,17 @@ class _ProfileState extends State<Profile> {
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(width: 3, color: Colors.white),
-                              color: Colors.red),
+                              color: !_edit ? Colors.red : Colors.green),
                           child: IconButton(
                               padding: EdgeInsets.only(
                                   bottom: 0 * Config.heightMultiplier,
                                   right: 0 * Config.widthMultiplier),
                               iconSize: 18,
                               onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                _check();
                                 setState(() {
-                                  _edit = true;
+                                  _edit = !_edit;
                                 });
                               },
                               icon: Icon(Icons.edit),
@@ -219,7 +274,10 @@ class _ProfileState extends State<Profile> {
                                     enabled: _edit ? true : false,
                                     controller: _nameController,
                                     focusNode: _nameFocus,
-                                    onFieldSubmitted: (text) {},
+                                    onFieldSubmitted: (text) {
+                                      FocusScope.of(context)
+                                          .requestFocus(_numberFocus);
+                                    },
                                     keyboardType: TextInputType.text,
                                     textInputAction: TextInputAction.next,
                                     decoration: InputDecoration(
@@ -276,7 +334,10 @@ class _ProfileState extends State<Profile> {
                                   child: TextFormField(
                                     enabled: _edit ? true : false,
                                     controller: _numberController,
-                                    onFieldSubmitted: (text) {},
+                                    onFieldSubmitted: (text) {
+                                      FocusScope.of(context)
+                                          .requestFocus(_addressFocus);
+                                    },
                                     keyboardType: TextInputType.text,
                                     textInputAction: TextInputAction.next,
                                     decoration: InputDecoration(
@@ -329,7 +390,9 @@ class _ProfileState extends State<Profile> {
                                 child: TextFormField(
                                   enabled: _edit ? true : false,
                                   controller: _addressController,
-                                  onFieldSubmitted: (text) {},
+                                  onFieldSubmitted: (text) {
+                                    FocusScope.of(context).unfocus();
+                                  },
                                   keyboardType: TextInputType.text,
                                   textInputAction: TextInputAction.next,
                                   decoration: InputDecoration(
