@@ -27,6 +27,7 @@ class _OrderCartState extends State<OrderCart> {
                 fontStyle: FontStyle.normal,
                 fontFamily: 'Poppins',
               ),
+              textScaleFactor: 1,
             ),
           ),
         ),
@@ -37,20 +38,20 @@ class _OrderCartState extends State<OrderCart> {
           alignment: Alignment.topCenter,
           children: [
             Container(
-              height: 150,
+              height: 30 * Config.heightMultiplier,
               width: MediaQuery.of(context).size.width,
             ),
             Padding(
               padding: EdgeInsets.only(top: 20 * Config.heightMultiplier),
               child: Divider(
-                height: 20,
+                height: 4 * Config.heightMultiplier,
                 color: Colors.red,
               ),
             ),
             Padding(
               padding: EdgeInsets.only(top: 22 * Config.heightMultiplier),
               child: Container(
-                height: 200,
+                height: 28 * Config.heightMultiplier,
                 child: ListView(
                   shrinkWrap: false,
                   children: <Widget>[
@@ -79,16 +80,16 @@ class _OrderCartState extends State<OrderCart> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 350),
+              padding: EdgeInsets.only(top: 48 * Config.heightMultiplier),
               child: Divider(
-                height: 20,
+                height: 4 * Config.heightMultiplier,
                 color: Colors.red,
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 370),
+              padding: EdgeInsets.only(top: 52 * Config.heightMultiplier),
               child: Container(
-                height: 100,
+                height: 20 * Config.heightMultiplier,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -127,17 +128,47 @@ class _OrderCartState extends State<OrderCart> {
                                   padding: EdgeInsets.only(
                                     left: 1 * Config.widthMultiplier,
                                   ),
-                                  child: Text('Grand Total: '),
+                                  child: Text(
+                                    'Grand Total: ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 1.8 * Config.textMultiplier,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.normal,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                    textScaleFactor: 1,
+                                  ),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(
                                       top: 2 * Config.heightMultiplier),
-                                  child: Text('Sub Fee: '),
+                                  child: Text(
+                                    'Sub Fee: ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 1.8 * Config.textMultiplier,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.normal,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                    textScaleFactor: 1,
+                                  ),
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(
                                       top: 2 * Config.heightMultiplier),
-                                  child: Text('Booking Fee: '),
+                                  child: Text(
+                                    'Booking Fee: ',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 1.8 * Config.textMultiplier,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.normal,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                    textScaleFactor: 1,
+                                  ),
                                 ),
                               ],
                             ),
@@ -148,19 +179,38 @@ class _OrderCartState extends State<OrderCart> {
                     Padding(
                       padding:
                           EdgeInsets.only(top: .2 * Config.heightMultiplier),
-                      child: Text('Preparation Time: '),
+                      child: Text(
+                        'Preparation Time: ',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 1.8 * Config.textMultiplier,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.normal,
+                          fontFamily: 'Poppins',
+                        ),
+                        textScaleFactor: 1,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 510),
+              padding: EdgeInsets.only(top: 69 * Config.heightMultiplier),
               child: RaisedButton(
-                onPressed: () {
-                },
-                child: Text(' PROCEED '),
-                color: Colors.deepOrange[400],
+                onPressed: () {},
+                child: Text(
+                  ' PROCEED ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 2.4 * Config.textMultiplier,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                    fontFamily: 'Poppins',
+                  ),
+                  textScaleFactor: 1,
+                ),
+                color: Config.appColor,
                 textColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(18.0),
@@ -186,8 +236,8 @@ class CardItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            height: 80,
-            width: 80,
+            height: 11 * Config.heightMultiplier,
+            width: 22 * Config.widthMultiplier,
             padding: EdgeInsets.all(2 * Config.imageSizeMultiplier),
             decoration: BoxDecoration(
               color: Colors.grey[300],
@@ -204,7 +254,7 @@ class CardItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                width: 100.0,
+                width: 27 * Config.widthMultiplier,
                 child: Text(
                   'Product Name and thier Price',
                   style: TextStyle(
@@ -214,16 +264,17 @@ class CardItem extends StatelessWidget {
                     fontStyle: FontStyle.normal,
                     fontFamily: 'Poppins',
                   ),
+                  textScaleFactor: 1,
                 ),
               ),
               SizedBox(
-                height: 4.0,
+                height: 1 * Config.heightMultiplier,
               ),
               Row(
                 children: <Widget>[
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 8 * Config.widthMultiplier,
+                    height: 8 * Config.heightMultiplier,
                     child: Stack(
                       alignment: AlignmentDirectional.center,
                       children: [
@@ -231,12 +282,12 @@ class CardItem extends StatelessWidget {
                           splashRadius: 10.0,
                           alignment: Alignment.center,
                           splashColor: Colors.red,
-                          iconSize: 10.0,
+                          iconSize: 4 * Config.imageSizeMultiplier,
                           onPressed: () {},
                           icon: Icon(
                             Icons.remove,
                             color: Colors.black,
-                            size: 20,
+                            size: 5.5 * Config.imageSizeMultiplier,
                           ),
                         ),
                       ],
@@ -254,24 +305,25 @@ class CardItem extends StatelessWidget {
                         fontStyle: FontStyle.normal,
                         fontFamily: 'Poppins',
                       ),
+                      textScaleFactor: 1,
                     ),
                   ),
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 5 * Config.widthMultiplier,
+                    height: 5 * Config.heightMultiplier,
                     child: Stack(
-                      alignment: AlignmentDirectional.center,
+                      alignment: AlignmentDirectional.centerStart,
                       children: [
                         IconButton(
                           splashRadius: 10.0,
-                          alignment: Alignment.center,
+                          alignment: Alignment.centerLeft,
                           splashColor: Colors.red,
-                          iconSize: 10.0,
+                          iconSize: 4 * Config.imageSizeMultiplier,
                           onPressed: () {},
                           icon: Icon(
                             Icons.add,
                             color: Colors.black,
-                            size: 20,
+                            size: 5.5 * Config.imageSizeMultiplier,
                           ),
                         ),
                       ],
@@ -292,7 +344,8 @@ class CardItem extends StatelessWidget {
               onPressed: () {},
               child: Text(
                 "Product Options",
-                style: TextStyle(fontSize: 10),
+                style: TextStyle(fontSize: 1.9 * Config.textMultiplier),
+                textScaleFactor: 1,
               ),
             ),
           ),

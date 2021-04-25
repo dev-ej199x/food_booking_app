@@ -95,10 +95,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               borderRadius: BorderRadius.circular(100.0),
                             ),
                             onPressed: () {},
-                            child: Text("Cash",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
+                            child: Text(
+                              "Cash",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                              textScaleFactor: 1,
+                            ),
                           ),
                         ],
                       ),
@@ -114,16 +117,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         children: [
                           Text(
                             'Item Fee: ',
+                            textScaleFactor: 1,
                             style: TextStyle(
                                 fontSize: 1.6 * Config.textMultiplier),
                           ),
                           Text(
                             'Booking Fee: ',
+                            textScaleFactor: 1,
                             style: TextStyle(
                                 fontSize: 1.6 * Config.textMultiplier),
                           ),
                           Text(
                             'Grand Fee: ',
+                            textScaleFactor: 1,
                             style: TextStyle(
                                 fontSize: 1.6 * Config.textMultiplier),
                           ),
@@ -146,6 +152,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 onPressed: () {},
                 child: Text("SUBMIT",
+                    textScaleFactor: 1,
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ),
@@ -162,6 +169,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 onPressed: () {},
                 child: Text("CANCEL",
+                    textScaleFactor: 1,
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ),

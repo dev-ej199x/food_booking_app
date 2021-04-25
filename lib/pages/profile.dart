@@ -104,6 +104,7 @@ class _ProfileState extends State<Profile> {
                   fontStyle: FontStyle.normal,
                   fontFamily: 'Poppins',
                 ),
+                textScaleFactor: 1,
               ),
             ),
           ),
@@ -116,7 +117,7 @@ class _ProfileState extends State<Profile> {
             child: Stack(
               children: <Widget>[
                 Container(
-                  height: 140.0,
+                  height: 19 * Config.heightMultiplier,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
@@ -133,8 +134,8 @@ class _ProfileState extends State<Profile> {
                     alignment: Alignment.bottomCenter,
                     children: [
                       Container(
-                        height: 130,
-                        width: 130,
+                        height: 20 * Config.heightMultiplier,
+                        width: 45 * Config.widthMultiplier,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(width: 3, color: Colors.red),
@@ -155,8 +156,8 @@ class _ProfileState extends State<Profile> {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          width: 30,
-                          height: 30,
+                          width: 7 * Config.widthMultiplier,
+                          height: 5 * Config.heightMultiplier,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(width: 3, color: Colors.white),
@@ -188,9 +189,9 @@ class _ProfileState extends State<Profile> {
                           padding: EdgeInsets.only(
                               bottom: 2 * Config.heightMultiplier),
                           child: Container(
-                            alignment: Alignment.topCenter,
-                            height: 40,
-                            width: 300,
+                            alignment: Alignment.center,
+                            height: 5.5 * Config.heightMultiplier,
+                            width: 85 * Config.widthMultiplier,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.all(
@@ -246,9 +247,9 @@ class _ProfileState extends State<Profile> {
                           padding: EdgeInsets.only(
                               bottom: 2 * Config.heightMultiplier),
                           child: Container(
-                            alignment: Alignment.topCenter,
-                            height: 40,
-                            width: 300,
+                            alignment: Alignment.center,
+                            height: 5.5 * Config.heightMultiplier,
+                            width: 85 * Config.widthMultiplier,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.all(
@@ -300,16 +301,16 @@ class _ProfileState extends State<Profile> {
                           ),
                         ),
                         Container(
-                          alignment: Alignment.topCenter,
-                          height: 40,
-                          width: 300,
+                          alignment: Alignment.center,
+                          height: 5.5 * Config.heightMultiplier,
+                          width: 85 * Config.widthMultiplier,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.all(
                               Radius.circular(10 * Config.imageSizeMultiplier),
                             ),
                             border: Border.all(
-                              width: 1.0,
+                              width: .2 * Config.widthMultiplier,
                               color: const Color(0x40707090),
                             ),
                           ),
@@ -375,6 +376,7 @@ class _ProfileState extends State<Profile> {
                         fontSize: 2 * Config.textMultiplier,
                         fontWeight: FontWeight.bold,
                       ),
+                      textScaleFactor: 1,
                     ),
                   ),
                 ),

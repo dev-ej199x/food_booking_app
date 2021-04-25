@@ -207,7 +207,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                     ),
                   ),
                   content: Container(
-                    height: 460.0,
+                    height: 70 * Config.heightMultiplier,
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -257,6 +257,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                   fontStyle: FontStyle.normal,
                                   color: Colors.black,
                                 ),
+                                textScaleFactor: 1,
                               ),
                             ),
                             Padding(
@@ -272,6 +273,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                   fontStyle: FontStyle.normal,
                                   color: Colors.black,
                                 ),
+                                textScaleFactor: 1,
                               ),
                             ),
                             Padding(
@@ -283,11 +285,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                   children: [
                                     Padding(
                                       padding: EdgeInsets.only(
+                                        right: 2 * Config.widthMultiplier,
                                         bottom: 1 * Config.heightMultiplier,
                                       ),
                                       child: Container(
-                                        width: 55,
-                                        height: 20,
+                                        width: 13 * Config.widthMultiplier,
+                                        height: 4 * Config.heightMultiplier,
                                         child: MaterialButton(
                                           minWidth: 2.0,
                                           child: Icon(Icons.arrow_drop_up),
@@ -313,8 +316,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       padding: EdgeInsets.only(
                                           left: 1 * Config.widthMultiplier),
                                       child: Container(
-                                        width: 25,
-                                        height: 15,
+                                        width: 5 * Config.widthMultiplier,
+                                        height: 1 * Config.heightMultiplier,
                                         child: TextFormField(
                                           controller: _productController,
                                           keyboardType:
@@ -328,29 +331,33 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 20,
-                                      width: 55,
-                                      child: MaterialButton(
-                                        minWidth: 2.0,
-                                        child: Icon(Icons.arrow_drop_down),
-                                        onPressed: () {
-                                          int _priceValue = int.parse(
-                                              _variants[count]['variantPrice']
-                                                  .toString());
-                                          int currentValue = int.parse(
-                                              _productController.text);
-                                          setState(
-                                            () {
-                                              _priceValue =
-                                                  _priceValue - _priceValue;
-                                              currentValue--;
-                                              _productController.text =
-                                                  (currentValue)
-                                                      .toString(); // decrementing value
-                                            },
-                                          );
-                                        },
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          right: 3 * Config.widthMultiplier),
+                                      child: Container(
+                                        height: 3 * Config.heightMultiplier,
+                                        width: 12 * Config.widthMultiplier,
+                                        child: MaterialButton(
+                                          minWidth: 2.0,
+                                          child: Icon(Icons.arrow_drop_down),
+                                          onPressed: () {
+                                            int _priceValue = int.parse(
+                                                _variants[count]['variantPrice']
+                                                    .toString());
+                                            int currentValue = int.parse(
+                                                _productController.text);
+                                            setState(
+                                              () {
+                                                _priceValue =
+                                                    _priceValue - _priceValue;
+                                                currentValue--;
+                                                _productController.text =
+                                                    (currentValue)
+                                                        .toString(); // decrementing value
+                                              },
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -415,6 +422,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                   fontSize: 3.2 *
                                                       Config.textMultiplier,
                                                   fontWeight: FontWeight.bold),
+                                              textScaleFactor: 1,
                                             ),
                                           if (_productOptions[index]
                                                   ['productOptSelection'] ==
@@ -442,13 +450,17 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                       groupValue:
                                                           _selected[count]
                                                               [index],
-                                                      title: Text(_productOptions[
-                                                                      index][
-                                                                  'productOptionItem']
-                                                              [itemindex][
-                                                          'productOptItmName']),
+                                                      title: Text(
+                                                        _productOptions[index][
+                                                                    'productOptionItem']
+                                                                [itemindex][
+                                                            'productOptItmName'],
+                                                        textScaleFactor: 1,
+                                                      ),
                                                       secondary: Text(
-                                                          '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00'),
+                                                        '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00',
+                                                        textScaleFactor: 1,
+                                                      ),
                                                       onChanged:
                                                           (valuechanged) {
                                                         setstate(
@@ -486,14 +498,21 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                 padding:
                                                                     EdgeInsets
                                                                         .only(
+                                                                  right: 2.6 *
+                                                                      Config
+                                                                          .widthMultiplier,
                                                                   bottom: 1 *
                                                                       Config
                                                                           .heightMultiplier,
                                                                 ),
                                                                 child:
                                                                     Container(
-                                                                  width: 55,
-                                                                  height: 20,
+                                                                  width: 13 *
+                                                                      Config
+                                                                          .widthMultiplier,
+                                                                  height: 3 *
+                                                                      Config
+                                                                          .heightMultiplier,
                                                                   child:
                                                                       MaterialButton(
                                                                     minWidth:
@@ -540,8 +559,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                             .widthMultiplier),
                                                                 child:
                                                                     Container(
-                                                                  width: 25,
-                                                                  height: 15,
+                                                                  width: 6 *
+                                                                      Config
+                                                                          .widthMultiplier,
+                                                                  height: 2 *
+                                                                      Config
+                                                                          .heightMultiplier,
                                                                   child:
                                                                       TextFormField(
                                                                     controller: _controllers[count]
@@ -562,35 +585,47 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                                   ),
                                                                 ),
                                                               ),
-                                                              Container(
-                                                                height: 20,
-                                                                width: 55,
+                                                              Padding(
+                                                                padding: EdgeInsets.only(
+                                                                    right: 8 *
+                                                                        Config
+                                                                            .widthMultiplier),
                                                                 child:
-                                                                    MaterialButton(
-                                                                  minWidth: 2.0,
-                                                                  child: Icon(Icons
-                                                                      .arrow_drop_down),
-                                                                  onPressed:
-                                                                      () {
-                                                                    int _priceValue =
-                                                                        int.parse(
-                                                                            _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
-                                                                    int currentValue =
-                                                                        int.parse(
-                                                                            _controllers[count][index][itemindex].text);
-                                                                    setState(
-                                                                      () {
-                                                                        _priceValue =
-                                                                            _priceValue -
-                                                                                _priceValue;
-                                                                        currentValue--;
-                                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
-                                                                            (_priceValue).toString();
-                                                                        _controllers[count][index][itemindex].text =
-                                                                            (currentValue).toString(); // decrementing value
-                                                                      },
-                                                                    );
-                                                                  },
+                                                                    Container(
+                                                                  height: 3 *
+                                                                      Config
+                                                                          .heightMultiplier,
+                                                                  width: 8 *
+                                                                      Config
+                                                                          .widthMultiplier,
+                                                                  child:
+                                                                      MaterialButton(
+                                                                    minWidth:
+                                                                        2.0,
+                                                                    child: Icon(
+                                                                        Icons
+                                                                            .arrow_drop_down),
+                                                                    onPressed:
+                                                                        () {
+                                                                      int _priceValue =
+                                                                          int.parse(
+                                                                              _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString());
+                                                                      int currentValue =
+                                                                          int.parse(
+                                                                              _controllers[count][index][itemindex].text);
+                                                                      setState(
+                                                                        () {
+                                                                          _priceValue =
+                                                                              _priceValue - _priceValue;
+                                                                          currentValue--;
+                                                                          _productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'] =
+                                                                              (_priceValue).toString();
+                                                                          _controllers[count][index][itemindex].text =
+                                                                              (currentValue).toString(); // decrementing value
+                                                                        },
+                                                                      );
+                                                                    },
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ],
@@ -615,11 +650,13 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                 value: _selected[count][index]
                                                     .asMap()
                                                     .containsValue(itemindex),
-                                                title: Text(_productOptions[
-                                                                index][
-                                                            'productOptionItem']
-                                                        [itemindex]
-                                                    ['productOptItmName']),
+                                                title: Text(
+                                                  _productOptions[index][
+                                                              'productOptionItem']
+                                                          [itemindex]
+                                                      ['productOptItmName'],
+                                                  textScaleFactor: 1,
+                                                ),
                                                 onChanged: (valuechanged) {
                                                   if (valuechanged) {
                                                     setstate(
@@ -709,7 +746,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(new SnackBar(
                                               content: Text(
-                                                  'Single Selection is Required!'),
+                                                'Single Selection is Required!',
+                                                textScaleFactor: 1,
+                                              ),
                                               duration: Duration(
                                                   seconds: 2,
                                                   milliseconds: 155),
@@ -782,7 +821,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(new SnackBar(
                                               content: Text(
-                                                  'Multi Selection is Required!'),
+                                                'Multi Selection is Required!',
+                                                textScaleFactor: 1,
+                                              ),
                                               duration: Duration(
                                                   seconds: 2,
                                                   milliseconds: 155),
@@ -995,7 +1036,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              size: 35.0,
+              size: 10 * Config.imageSizeMultiplier,
             ),
             onPressed: () {
               Navigator.pop(context);
@@ -1011,7 +1052,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                 padding: EdgeInsets.zero,
                 child: Container(
                   alignment: Alignment.topCenter,
-                  height: 165.0,
+                  height: 20 * Config.heightMultiplier,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
@@ -1022,8 +1063,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                   child: Stack(
                     children: <Widget>[
                       Container(
-                        width: 270,
-                        height: 130,
+                        width: 69 * Config.widthMultiplier,
+                        height: 18 * Config.heightMultiplier,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15.0),
                           color: Color(0xffe8971d),
@@ -1055,7 +1096,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 child: Container(
                                   //width must be coincide with the lenght of the Text
                                   width: 20 * Config.textMultiplier,
-                                  height: 20,
+                                  height: 3 * Config.heightMultiplier,
                                   decoration: BoxDecoration(
                                     color: Colors.red,
                                     borderRadius: BorderRadius.only(
@@ -1074,6 +1115,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       fontStyle: FontStyle.normal,
                                       color: Colors.white,
                                     ),
+                                    textScaleFactor: 1,
                                   ),
                                 ),
                               ),
@@ -1085,7 +1127,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       Alignment.bottomCenter,
                                       Alignment.bottomRight,
                                       0),
-                                  height: 20,
+                                  height: 3 * Config.heightMultiplier,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                     color: Color(0xff484545),
@@ -1108,6 +1150,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                       fontStyle: FontStyle.normal,
                                       color: Colors.white,
                                     ),
+                                    textScaleFactor: 1,
                                   ),
                                 ),
                               ),
@@ -1141,7 +1184,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                     ),
                     controller: _refreshController,
                     child: _variants.length == 0
-                        ? Center(child: Text('No products available'))
+                        ? Center(
+                            child: Text(
+                            'No products available',
+                            textScaleFactor: 1,
+                          ))
                         : ListView.builder(
                             shrinkWrap: true,
                             itemCount: _variants.length,
@@ -1158,15 +1205,22 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                               20 * Config.imageSizeMultiplier,
                                           fit: BoxFit.fill,
                                         )
-                                      : Text('No Image Loaded'),
+                                      : Text(
+                                          'No Image Loaded',
+                                          textScaleFactor: 1,
+                                        ),
                                   title: Text(_variants[index]['variantName'],
+                                      textScaleFactor: 1,
                                       textAlign: TextAlign.center),
                                   subtitle: Text(
                                     _variants[index]['variantDescription'],
+                                    textScaleFactor: 1,
                                     textAlign: TextAlign.center,
                                   ),
                                   trailing: Text(
-                                      '₱ ${_variants[index]['variantPrice'].toString()}.00'),
+                                    '₱ ${_variants[index]['variantPrice'].toString()}.00',
+                                    textScaleFactor: 1,
+                                  ),
                                   onTap: () {
                                     _variantDialog(index);
                                   },

@@ -415,6 +415,7 @@ class _HomePageState extends State<HomePage> {
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.2),
+                                textScaleFactor: 1,
                               ),
                               InkWell(
                                 onTap: () {
@@ -457,6 +458,7 @@ class _HomePageState extends State<HomePage> {
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.2),
+                                textScaleFactor: 1,
                               ),
                               InkWell(
                                 onTap: () {
@@ -559,8 +561,9 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * Config.heightMultiplier,
+                        horizontal: .5 * Config.widthMultiplier),
                     child: ElevatedButton(
                       onPressed: () {
                         _onTheGo(index);
@@ -581,12 +584,14 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white,
                           fontFamily: 'Poppins',
                         ),
+                        textScaleFactor: 1,
                       ),
                     ),
                   ),
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * Config.heightMultiplier,
+                        horizontal: .5 * Config.widthMultiplier),
                     child: Text(
                       'OR',
                       style: TextStyle(
@@ -594,11 +599,13 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 15.0,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Poppins'),
+                      textScaleFactor: 1,
                     ),
                   ),
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * Config.heightMultiplier,
+                        horizontal: .5 * Config.widthMultiplier),
                     child: ElevatedButton(
                       onPressed: () {
                         _booking(index);
@@ -617,6 +624,7 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Poppins'),
+                        textScaleFactor: 1,
                       ),
                     ),
                   ),
@@ -806,11 +814,12 @@ class _HomePageState extends State<HomePage> {
                 child: Padding(
                   padding: EdgeInsets.zero,
                   child: Container(
-                    height: 40.0,
+                    height: 6 * Config.heightMultiplier,
                     width: 80 * Config.widthMultiplier,
                     alignment: Alignment.center,
-                    margin: EdgeInsets.only(top: 80.0),
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    margin: EdgeInsets.only(top: 10 * Config.heightMultiplier),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 4 * Config.widthMultiplier),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius:
@@ -843,7 +852,7 @@ class _HomePageState extends State<HomePage> {
           // Establishment Banner
           Padding(
             padding: EdgeInsets.only(
-                top: 10.0,
+                top: 1 * Config.heightMultiplier,
                 left: 8 * Config.widthMultiplier,
                 right: 8 * Config.widthMultiplier),
             child: Row(
@@ -857,6 +866,7 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.normal,
                         color: Color(0xff707070)),
+                    textScaleFactor: 1,
                   ),
                   TextButton(
                     onPressed: () {},
@@ -876,10 +886,10 @@ class _HomePageState extends State<HomePage> {
           // featured restaurant information
           Padding(
             padding: EdgeInsets.only(
-              top: 10.0,
+              top: 2 * Config.heightMultiplier,
             ),
             child: Container(
-              height: 150.0,
+              height: 18 * Config.heightMultiplier,
               width: double.infinity,
               child: CarouselSlider.builder(
                 itemCount: _restaurants.length,
@@ -893,7 +903,7 @@ class _HomePageState extends State<HomePage> {
 
           Padding(
             padding: EdgeInsets.only(
-                top: 5.0,
+                top: 1 * Config.heightMultiplier,
                 left: 8 * Config.widthMultiplier,
                 right: 8 * Config.widthMultiplier),
             child: Row(
@@ -907,17 +917,19 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.normal,
                       color: Color(0xff707070)),
+                  textScaleFactor: 1,
                 ),
                 TextButton(
                   onPressed: () {},
                   child: Text(
-                    'See All',
+                    'See All Nearby',
                     style: TextStyle(
                         fontSize: 1.2 * Config.textMultiplier,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.normal,
                         color: Color(0xff707070)),
+                    textScaleFactor: 1,
                   ),
                 ),
               ],
@@ -1015,6 +1027,7 @@ class _HomePageState extends State<HomePage> {
                                                           FontStyle.normal,
                                                       color: Colors.white,
                                                     ),
+                                                    textScaleFactor: 1,
                                                   ),
                                                   Text(
                                                     '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
@@ -1028,6 +1041,7 @@ class _HomePageState extends State<HomePage> {
                                                           FontStyle.normal,
                                                       color: Colors.white,
                                                     ),
+                                                    textScaleFactor: 1,
                                                   ),
                                                 ],
                                               ),
@@ -1067,6 +1081,7 @@ class _HomePageState extends State<HomePage> {
                                                     fontStyle: FontStyle.normal,
                                                     color: Colors.white,
                                                   ),
+                                                  textScaleFactor: 1,
                                                 ),
                                               ],
                                             ),
@@ -1078,7 +1093,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             )
-                          : Center(child: Text('No restaurants to show')))))
+                          : Center(
+                              child: Text(
+                              'No restaurants to show',
+                              textScaleFactor: 1,
+                            )))))
         ],
       ),
     );

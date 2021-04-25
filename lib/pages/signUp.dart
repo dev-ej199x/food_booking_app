@@ -51,18 +51,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _getCurrentLocation();
     _configure();
   }
 
   _getCurrentLocation() {
     Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: true)
+            forceAndroidLocationManager: false)
         .then((Position position) {
       setState(() {
         _currentPosition = position;
         _getAddressFromLatLng();
       });
+      print(_currentPosition);
     }).catchError((e) {
       print(e);
     });
@@ -78,6 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _currentAddress = "${place.street},${place.locality}, ${place.country}";
       });
+      print(_currentAddress);
     } catch (e) {
       print(e);
     }
@@ -411,8 +414,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   children: <Widget>[
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -420,8 +422,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -444,8 +445,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.person_outline_rounded,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -467,8 +467,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   fontSize: 2.2 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration:
-                                                    new InputDecoration(
+                                                decoration: new InputDecoration(
                                                   hintStyle: TextStyle(
                                                     fontFamily: 'Poppins',
                                                     color: Colors.black
@@ -478,8 +477,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   ),
                                                   labelStyle: TextStyle(
                                                     fontFamily: 'Poppins',
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: Colors.black,
                                                     fontSize: 2.2 *
                                                         Config.textMultiplier,
@@ -501,8 +499,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -510,8 +507,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -534,8 +530,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.location_city,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -555,8 +550,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -564,8 +558,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -588,8 +581,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.contact_phone_outlined,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -610,8 +602,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   fontSize: 2.2 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration:
-                                                    new InputDecoration(
+                                                decoration: new InputDecoration(
                                                   hintStyle: TextStyle(
                                                     fontFamily: 'Poppins',
                                                     color: Colors.black
@@ -621,8 +612,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   ),
                                                   labelStyle: TextStyle(
                                                     fontFamily: 'Poppins',
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: Colors.black,
                                                     fontSize: 2.2 *
                                                         Config.textMultiplier,
@@ -644,8 +634,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -653,8 +642,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -677,8 +665,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.alternate_email_rounded,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -699,8 +686,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   fontSize: 2.2 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration:
-                                                    new InputDecoration(
+                                                decoration: new InputDecoration(
                                                   hintStyle: TextStyle(
                                                     fontFamily: 'Poppins',
                                                     color: Colors.black
@@ -710,8 +696,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   ),
                                                   labelStyle: TextStyle(
                                                     fontFamily: 'Poppins',
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: Colors.black,
                                                     fontSize: 2.2 *
                                                         Config.textMultiplier,
@@ -733,8 +718,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -742,8 +726,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -766,8 +749,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.lock_open_rounded,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -775,8 +757,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: TextFormField(
                                                 textInputAction:
                                                     TextInputAction.next,
-                                                controller:
-                                                    _passwordController,
+                                                controller: _passwordController,
                                                 focusNode: _passwordFocus,
                                                 obscureText: _hidePassword,
                                                 onFieldSubmitted: (value) {
@@ -790,8 +771,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   fontSize: 2.2 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration:
-                                                    new InputDecoration(
+                                                decoration: new InputDecoration(
                                                   hintStyle: TextStyle(
                                                     fontFamily: 'Poppins',
                                                     color: Colors.black
@@ -801,8 +781,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   ),
                                                   labelStyle: TextStyle(
                                                     fontFamily: 'Poppins',
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: Colors.black,
                                                     fontSize: 2.2 *
                                                         Config.textMultiplier,
@@ -840,8 +819,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     Padding(
                                       padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              1 * Config.heightMultiplier,
+                                          vertical: 1 * Config.heightMultiplier,
                                           horizontal:
                                               8 * Config.widthMultiplier),
                                       child: Container(
@@ -849,8 +827,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         height: 5 * Config.heightMultiplier,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
-                                              10 *
-                                                  Config.imageSizeMultiplier),
+                                              10 * Config.imageSizeMultiplier),
                                           color: const Color(0xffffffff),
                                           border: Border.all(
                                             width: 1.0,
@@ -873,8 +850,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               child: Icon(
                                                 Icons.lock_open_rounded,
                                                 size: 5 *
-                                                    Config
-                                                        .imageSizeMultiplier,
+                                                    Config.imageSizeMultiplier,
                                                 color: Color(0xff908787),
                                               ),
                                             ),
@@ -884,8 +860,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                     TextInputAction.next,
                                                 controller:
                                                     _retypePasswordController,
-                                                focusNode:
-                                                    _retypePasswordFocus,
+                                                focusNode: _retypePasswordFocus,
                                                 obscureText: _hidePassword,
                                                 onFieldSubmitted: (value) {
                                                   FocusScope.of(context)
@@ -897,8 +872,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   fontSize: 2.2 *
                                                       Config.textMultiplier,
                                                 ),
-                                                decoration:
-                                                    new InputDecoration(
+                                                decoration: new InputDecoration(
                                                   hintStyle: TextStyle(
                                                     fontFamily: 'Poppins',
                                                     color: Colors.black
@@ -908,14 +882,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   ),
                                                   labelStyle: TextStyle(
                                                     fontFamily: 'Poppins',
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                     color: Colors.black,
                                                     fontSize: 2.2 *
                                                         Config.textMultiplier,
                                                   ),
-                                                  hintText:
-                                                      "Re-type Password",
+                                                  hintText: "Re-type Password",
                                                   enabledBorder:
                                                       InputBorder.none,
                                                   focusedBorder:
@@ -960,10 +932,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           },
                                           color: Color(0xffeb4d4d),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10 *
-                                                    Config
-                                                        .imageSizeMultiplier),
+                                            borderRadius: BorderRadius.circular(
+                                                10 *
+                                                    Config.imageSizeMultiplier),
                                           ),
                                           splashColor:
                                               Colors.white.withOpacity(.4),
@@ -984,44 +955,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                       ),
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal:
-                                              8 * Config.widthMultiplier,
-                                          vertical:
-                                              1 * Config.heightMultiplier),
-                                      child: ButtonTheme(
-                                        height: 7 * Config.heightMultiplier,
-                                        child: RaisedButton(
-                                          onPressed: () {
-                                            _getCurrentLocation();
-                                          },
-                                          color: Color(0xffeb4d4d),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10 *
-                                                    Config
-                                                        .imageSizeMultiplier),
-                                          ),
-                                          splashColor:
-                                              Colors.white.withOpacity(.4),
-                                          child: Container(
-                                            child: Center(
-                                              child: Text(
-                                                "Get Address",
-                                                textScaleFactor: 1,
-                                                style: TextStyle(
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // Padding(
+                                    //   padding: EdgeInsets.symmetric(
+                                    //       horizontal:
+                                    //           8 * Config.widthMultiplier,
+                                    //       vertical:
+                                    //           1 * Config.heightMultiplier),
+                                    //   child: ButtonTheme(
+                                    //     height: 7 * Config.heightMultiplier,
+                                    //     child: RaisedButton(
+                                    //       onPressed: () {
+                                    //         _getCurrentLocation();
+                                    //       },
+                                    //       color: Color(0xffeb4d4d),
+                                    //       shape: RoundedRectangleBorder(
+                                    //         borderRadius: BorderRadius.circular(
+                                    //             10 *
+                                    //                 Config.imageSizeMultiplier),
+                                    //       ),
+                                    //       splashColor:
+                                    //           Colors.white.withOpacity(.4),
+                                    //       child: Container(
+                                    //         child: Center(
+                                    //           child: Text(
+                                    //             "Get Address",
+                                    //             textScaleFactor: 1,
+                                    //             style: TextStyle(
+                                    //                 fontSize: 2.2 *
+                                    //                     Config.textMultiplier,
+                                    //                 color: Colors.white,
+                                    //                 fontWeight:
+                                    //                     FontWeight.bold),
+                                    //           ),
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                               ),

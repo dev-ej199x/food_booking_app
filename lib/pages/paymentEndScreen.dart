@@ -58,6 +58,7 @@ class _PaymentEndScreenState extends State<PaymentEndScreen> {
                       color: const Color(0xff5F5959),
                       fontWeight: FontWeight.bold,
                     ),
+                    textScaleFactor: 1,
                   ),
                 ),
                 Padding(

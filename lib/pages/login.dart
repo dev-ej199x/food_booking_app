@@ -228,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 20.0),
+                padding: EdgeInsets.only(top: 3 * Config.heightMultiplier),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -388,7 +388,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     decoration: new InputDecoration(
                                       suffixIcon: IconButton(
                                         icon: Icon(
-                                          _hidePassword?Icons.visibility:Icons.visibility_off,
+                                          _hidePassword
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
                                         ),
                                         color: Colors.black,
                                         focusColor: Colors.black,
@@ -441,6 +443,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(
                                       fontFamily: 'Poppins',
                                       color: Colors.white),
+                                  textScaleFactor: 1,
                                 ),
                               ),
                             ),

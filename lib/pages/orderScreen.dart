@@ -55,7 +55,9 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   _getProducts() async {
-    var response = await Http(url: 'restaurants/${widget.details['id']}', body: {}).getWithHeader();
+    var response =
+        await Http(url: 'restaurants/${widget.details['id']}', body: {})
+            .getWithHeader();
 
     if (response is String) {
       setState(() {
@@ -96,7 +98,8 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
         );
       } else {
-        Map<String, dynamic> restaurant = json.decode(response.body)['restaurant'];
+        Map<String, dynamic> restaurant =
+            json.decode(response.body)['restaurant'];
         List<Map<String, dynamic>> categories = [];
         restaurant['product_category'].forEach((category) {
           List<Map<String, dynamic>> product = [];
@@ -146,7 +149,7 @@ class _OrderScreenState extends State<OrderScreen> {
             "products": product,
           });
         });
-      
+
         setState(() {
           _categories = new List.from(categories);
           _products = new List.from(categories[0]['products']);
@@ -196,9 +199,10 @@ class _OrderScreenState extends State<OrderScreen> {
                             EdgeInsets.only(top: 1 * Config.heightMultiplier),
                         child: Container(
                           width: 85 * Config.widthMultiplier,
-                          height: 40.0,
+                          height: 7 * Config.heightMultiplier,
                           margin: EdgeInsets.only(top: 10.0),
-                          padding: EdgeInsets.symmetric(horizontal: 20.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4 * Config.widthMultiplier),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10.0),
@@ -240,6 +244,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             fontStyle: FontStyle.normal,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.bold),
+                        textScaleFactor: 1,
                       ),
                     ),
                     if (_categories.length > 0)
@@ -253,7 +258,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             elevation: 16,
                             style: TextStyle(color: Colors.white),
                             underline: Container(
-                              height: 2,
+                              height: .2 * Config.heightMultiplier,
                               color: Colors.orange[800],
                             ),
                             onChanged: (String newValue) {
@@ -275,6 +280,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                     ),
+                                    textScaleFactor: 1,
                                     // textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -301,196 +307,176 @@ class _OrderScreenState extends State<OrderScreen> {
                       distance: 4 * Config.heightMultiplier,
                     ),
                     controller: _refreshController,
-                      child: _products.length == 0
-                          ? Center(child: Text('No products available'))
-                          : GridView.builder(
-                                shrinkWrap: true,
-                                itemCount: _products.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2),
-                                itemBuilder:
-                                    (BuildContext context, int index) {
-                                  return Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // // child:
-                                      FlatButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            PageTransition(
-                                              type: PageTransitionType
-                                                  .rightToLeft,
-                                              child: OrderWithVariants(
-                                                  details: _products[index],
-                                                  restaurantDetails:
-                                                      widget.details,
-                                                  index: index),
+                    child: _products.length == 0
+                        ? Center(
+                            child: Text(
+                            'No products available',
+                            textScaleFactor: 1,
+                          ))
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            itemCount: _products.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2),
+                            itemBuilder: (BuildContext context, int index) {
+                              return Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // // child:
+                                  FlatButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        PageTransition(
+                                          type: PageTransitionType.rightToLeft,
+                                          child: OrderWithVariants(
+                                              details: _products[index],
+                                              restaurantDetails: widget.details,
+                                              index: index),
+                                        ),
+                                      );
+                                    },
+                                    child: Hero(
+                                      tag:
+                                          '_orderLogo$index${widget.details['variantID']}',
+                                      // tag: 'orderLogo',
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(15.0)),
+                                          color: Colors.orange,
+                                        ),
+                                        height: 22 * Config.heightMultiplier,
+                                        child: Stack(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(15.0)),
+                                                color: Colors.green,
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                                child: Image.network(
+                                                  _products[index]['banner'],
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  height: 18 *
+                                                      Config.heightMultiplier,
+                                                  fit: BoxFit.fill,
+                                                ),
+                                              ),
                                             ),
-                                          );
-                                        },
-                                        child: Hero(
-                                          tag:
-                                              '_orderLogo$index${widget.details['variantID']}',
-                                          // tag: 'orderLogo',
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(
-                                                          15.0)),
-                                              color: Colors.orange,
-                                            ),
-                                            height: 160.0,
-                                            child: Stack(
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                15.0)),
-                                                    color: Colors.green,
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius
-                                                            .circular(15),
-                                                    child: Image.network(
-                                                      _products[index]
-                                                          ['banner'],
-                                                      width: MediaQuery.of(
-                                                              context)
-                                                          .size
-                                                          .width,
-                                                      height: 120.0,
-                                                      fit: BoxFit.fill,
-                                                    ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 1.0 *
+                                                      Config.heightMultiplier),
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: .4 *
+                                                        Config
+                                                            .heightMultiplier),
+                                                width:
+                                                    36 * Config.widthMultiplier,
+                                                height:
+                                                    3 * Config.heightMultiplier,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topRight: Radius.circular(5 *
+                                                        Config
+                                                            .imageSizeMultiplier),
+                                                    bottomRight: Radius.circular(5 *
+                                                        Config
+                                                            .imageSizeMultiplier),
                                                   ),
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 1.0 *
-                                                          Config
-                                                              .heightMultiplier),
-                                                  child: Container(
-                                                    width: 100,
-                                                    height: 20,
-                                                    decoration:
-                                                        BoxDecoration(
-                                                      color: Colors.red,
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                        topRight: Radius
-                                                            .circular(5 *
-                                                                Config
-                                                                    .imageSizeMultiplier),
-                                                        bottomRight: Radius
-                                                            .circular(5 *
-                                                                Config
-                                                                    .imageSizeMultiplier),
-                                                      ),
-                                                    ),
-                                                    //Product Name
-                                                    child: Text(
-                                                      _products[index]
-                                                          ['productName'],
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontSize: 2 *
-                                                            Config
-                                                                .textMultiplier,
-                                                        fontFamily:
-                                                            'Segoe UI',
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontStyle: FontStyle
-                                                            .normal,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
+                                                //Product Name
+                                                child: Text(
+                                                  _products[index]
+                                                      ['productName'],
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 2 *
+                                                        Config.textMultiplier,
+                                                    fontFamily: 'Segoe UI',
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle: FontStyle.normal,
+                                                    color: Colors.white,
                                                   ),
+                                                  textScaleFactor: 1,
                                                 ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 16 *
-                                                          Config
-                                                              .heightMultiplier),
-                                                  child: Container(
-                                                    alignment:
-                                                        AlignmentGeometry.lerp(
-                                                            Alignment
-                                                                .bottomCenter,
-                                                            Alignment
-                                                                .bottomRight,
-                                                            0),
-                                                    height: 20,
-                                                    width: double.infinity,
-                                                    decoration:
-                                                        BoxDecoration(
-                                                      color:
-                                                          Color(0xff484545),
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                        bottomLeft: Radius
-                                                            .circular(4 *
-                                                                Config
-                                                                    .imageSizeMultiplier),
-                                                        bottomRight: Radius
-                                                            .circular(4 *
-                                                                Config
-                                                                    .imageSizeMultiplier),
-                                                      ),
-                                                    ),
-                                                    //Product Description
-                                                    child: Text(
-                                                      _products[index][
-                                                          'productDescription'],
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontSize: 2 *
-                                                            Config
-                                                                .textMultiplier,
-                                                        fontFamily:
-                                                            'Segoe UI',
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontStyle: FontStyle
-                                                            .normal,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 18.5 *
-                                                          Config
-                                                              .heightMultiplier,
-                                                      left: 2 *
-                                                          Config
-                                                              .widthMultiplier),
-                                                  child: SmoothStarRating(
-                                                    borderColor:
-                                                        Colors.yellow,
-                                                    color: Colors.yellow,
-                                                    allowHalfRating: false,
-                                                    starCount: 5,
-                                                  ),
-                                                )
-                                              ],
+                                              ),
                                             ),
-                                          ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 16 *
+                                                      Config.heightMultiplier),
+                                              child: Container(
+                                                alignment:
+                                                    AlignmentGeometry.lerp(
+                                                        Alignment.bottomCenter,
+                                                        Alignment.bottomRight,
+                                                        0),
+                                                height:
+                                                    3 * Config.heightMultiplier,
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  color: Color(0xff484545),
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    bottomLeft: Radius.circular(4 *
+                                                        Config
+                                                            .imageSizeMultiplier),
+                                                    bottomRight: Radius.circular(4 *
+                                                        Config
+                                                            .imageSizeMultiplier),
+                                                  ),
+                                                ),
+                                                //Product Description
+                                                child: Text(
+                                                  _products[index]
+                                                      ['productDescription'],
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 2 *
+                                                        Config.textMultiplier,
+                                                    fontFamily: 'Segoe UI',
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle: FontStyle.normal,
+                                                    color: Colors.white,
+                                                  ),
+                                                  textScaleFactor: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 18.5 *
+                                                      Config.heightMultiplier,
+                                                  left: 2 *
+                                                      Config.widthMultiplier),
+                                              child: SmoothStarRating(
+                                                borderColor: Colors.yellow,
+                                                color: Colors.yellow,
+                                                allowHalfRating: false,
+                                                starCount: 5,
+                                              ),
+                                            )
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  );
-                                },
-                              ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                   ),
                 ),
               ),
