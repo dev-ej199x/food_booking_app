@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 
 class Profile extends StatefulWidget {
@@ -221,11 +220,23 @@ class _ProfileState extends State<Profile> {
                                   right: 0 * Config.widthMultiplier),
                               iconSize: 18,
                               onPressed: () {
-                                FocusScope.of(context).unfocus();
-                                _check();
+                                _edit = !_edit;
                                 setState(() {
-                                  _edit = !_edit;
+                                  // _edit
+                                  //     ? FocusScope.of(context)
+                                  //         .requestFocus(_nameFocus)
+                                  //     :
+                                  FocusScope.of(context).unfocus();
                                 });
+                                _check();
+                                // if (_edit == true) {
+                                //   FocusScope.of(context)
+                                //       .requestFocus(_nameFocus);
+                                //   _edit = !_edit;
+                                // } else {
+                                //   FocusScope.of(context).unfocus();
+                                //   _edit = _edit;
+                                // }
                               },
                               icon: Icon(Icons.edit),
                               color: Colors.white),
@@ -271,6 +282,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                                 Expanded(
                                   child: TextFormField(
+                                    autofocus: !_edit ? false : true,
                                     enabled: _edit ? true : false,
                                     controller: _nameController,
                                     focusNode: _nameFocus,
