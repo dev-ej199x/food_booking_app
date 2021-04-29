@@ -7,7 +7,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/config.dart';
-import 'package:food_booking_app/defaults/images.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:food_booking_app/pages/login.dart';
 import 'package:food_booking_app/pages/orderScreen.dart';
 import 'package:http/http.dart';
@@ -789,317 +789,688 @@ class _HomePageState extends State<HomePage> {
                   child: Icon(Icons.logout))),
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          Stack(
-            children: [
-              Container(
-                height: 100.0,
-                width: double.infinity,
-                child: CarouselSlider.builder(
-                  itemCount: _restaurants.length,
-                  options: CarouselOptions(
-                    height: 150.0,
-                    enlargeCenterPage: false,
-                    viewportFraction: 1,
-                    autoPlay: true,
-                  ),
-                  itemBuilder:
-                      (BuildContext context, int itemIndex, int index) =>
-                          Image.network(_restaurants[itemIndex]['images']),
-                ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: EdgeInsets.zero,
-                  child: Container(
-                    height: 6 * Config.heightMultiplier,
-                    width: 80 * Config.widthMultiplier,
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(top: 10 * Config.heightMultiplier),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 4 * Config.widthMultiplier),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(2 * Config.imageSizeMultiplier),
-                      // border: Border.all(color: Colors.grey[800]),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.4),
-                          offset: Offset(0, 1),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          icon: Icon(Icons.search, color: Colors.grey[800]),
-                          hintText: ('Search Restaurant'),
-                          hintStyle: TextStyle(
-                            color: Colors.grey[800],
-                            fontFamily: 'Poppins',
-                          ),
-                        ).copyWith(isDense: true)),
-                  ),
-                ),
-              )
-            ],
-          ),
-          // Establishment Banner
-          Padding(
-            padding: EdgeInsets.only(
-                top: 1 * Config.heightMultiplier,
-                left: 8 * Config.widthMultiplier,
-                right: 8 * Config.widthMultiplier),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Featured Restaurant',
-                    style: TextStyle(
-                        fontSize: 2 * Config.textMultiplier,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.normal,
-                        color: Color(0xff707070)),
-                    textScaleFactor: 1,
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'See All Featured',
-                      textScaleFactor: 1,
-                      style: TextStyle(
-                          fontSize: 1.2 * Config.textMultiplier,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.normal,
-                          color: Color(0xff707070)),
-                    ),
-                  ),
-                ]),
-          ),
-          // featured restaurant information
-          Padding(
-            padding: EdgeInsets.only(
-              top: 2 * Config.heightMultiplier,
-            ),
-            child: Container(
-              height: 18 * Config.heightMultiplier,
-              width: double.infinity,
-              child: CarouselSlider.builder(
-                itemCount: _restaurants.length,
-                options: CarouselOptions(
-                    enlargeCenterPage: true, viewportFraction: .7),
-                itemBuilder: (BuildContext context, int itemIndex, int index) =>
-                    Image.network(_restaurants[itemIndex]['images']),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: EdgeInsets.only(
-                top: 1 * Config.heightMultiplier,
-                left: 8 * Config.widthMultiplier,
-                right: 8 * Config.widthMultiplier),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: _restaurants.isNotEmpty && _restaurants.length > 0
+          ? Column(
               children: <Widget>[
-                Text(
-                  'Nearby Restaurants',
-                  style: TextStyle(
-                      fontSize: 2 * Config.textMultiplier,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.normal,
-                      color: Color(0xff707070)),
-                  textScaleFactor: 1,
+                Stack(
+                  children: [
+                    Container(
+                      height: 100.0,
+                      width: double.infinity,
+                      child: CarouselSlider.builder(
+                        itemCount: _restaurants.length,
+                        options: CarouselOptions(
+                          height: 150.0,
+                          enlargeCenterPage: false,
+                          viewportFraction: 1,
+                          autoPlay: true,
+                        ),
+                        itemBuilder: (BuildContext context, int itemIndex,
+                                int index) =>
+                            Image.network(_restaurants[itemIndex]['images']),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: EdgeInsets.zero,
+                        child: Container(
+                          height: 6 * Config.heightMultiplier,
+                          width: 80 * Config.widthMultiplier,
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(
+                              top: 10 * Config.heightMultiplier),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4 * Config.widthMultiplier),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                                2 * Config.imageSizeMultiplier),
+                            // border: Border.all(color: Colors.grey[800]),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(.4),
+                                offset: Offset(0, 1),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                icon:
+                                    Icon(Icons.search, color: Colors.grey[800]),
+                                hintText: ('Search Restaurant'),
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[800],
+                                  fontFamily: 'Poppins',
+                                ),
+                              ).copyWith(isDense: true)),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'See All Nearby',
-                    style: TextStyle(
-                        fontSize: 1.2 * Config.textMultiplier,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.normal,
-                        color: Color(0xff707070)),
-                    textScaleFactor: 1,
+                // Establishment Banner
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: 1 * Config.heightMultiplier,
+                      left: 8 * Config.widthMultiplier,
+                      right: 8 * Config.widthMultiplier),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Featured Restaurant',
+                          style: TextStyle(
+                              fontSize: 2 * Config.textMultiplier,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              color: Color(0xff707070)),
+                          textScaleFactor: 1,
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'See All Featured',
+                            textScaleFactor: 1,
+                            style: TextStyle(
+                                fontSize: 1.2 * Config.textMultiplier,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.normal,
+                                color: Color(0xff707070)),
+                          ),
+                        ),
+                      ]),
+                ),
+                // featured restaurant information
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: 2 * Config.heightMultiplier,
+                  ),
+                  child: Container(
+                    height: 18 * Config.heightMultiplier,
+                    width: double.infinity,
+                    child: CarouselSlider.builder(
+                      itemCount: _restaurants.length,
+                      options: CarouselOptions(
+                          enlargeCenterPage: true, viewportFraction: .7),
+                      itemBuilder:
+                          (BuildContext context, int itemIndex, int index) =>
+                              Image.network(_restaurants[itemIndex]['images']),
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Container(
-              child: Expanded(
-                  child: SmartRefresher(
-                      enablePullDown: !_loading,
-                      onRefresh: () {
-                        setState(() {
-                          _restaurants.clear();
-                          _loading = true;
-                        });
-                        _getEstablishments();
-                      },
-                      physics: BouncingScrollPhysics(),
-                      header: WaterDropMaterialHeader(
-                        backgroundColor: Config.appColor,
-                        color: Colors.white,
-                        distance: 4 * Config.heightMultiplier,
+
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: 1 * Config.heightMultiplier,
+                      left: 8 * Config.widthMultiplier,
+                      right: 8 * Config.widthMultiplier),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        'Nearby Restaurants',
+                        style: TextStyle(
+                            fontSize: 2 * Config.textMultiplier,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal,
+                            color: Color(0xff707070)),
+                        textScaleFactor: 1,
                       ),
-                      controller: _refreshController,
-                      child: _restaurants.length > 0
-                          ? ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: _restaurants.length,
-                              itemBuilder: (BuildContext context, int index) =>
-                                  Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 1 * Config.heightMultiplier,
-                                    horizontal: 4 * Config.widthMultiplier),
-                                child: FlatButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () {
-                                    _createAlertDialog(index);
-                                  },
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          2 * Config.imageSizeMultiplier)),
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 1 * Config.heightMultiplier,
-                                        horizontal:
-                                            0.4 * Config.widthMultiplier),
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topRight,
-                                          end: Alignment.topLeft,
-                                          colors: [
-                                            Colors.orange.shade900,
-                                            Colors.white60
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                            2 * Config.imageSizeMultiplier)),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'See All Nearby',
+                          style: TextStyle(
+                              fontSize: 1.2 * Config.textMultiplier,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              color: Color(0xff707070)),
+                          textScaleFactor: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                    child: Expanded(
+                        child: SmartRefresher(
+                            enablePullDown: !_loading,
+                            onRefresh: () {
+                              setState(() {
+                                _restaurants.clear();
+                                _loading = true;
+                              });
+                              _getEstablishments();
+                            },
+                            physics: BouncingScrollPhysics(),
+                            header: WaterDropMaterialHeader(
+                              backgroundColor: Config.appColor,
+                              color: Colors.white,
+                              distance: 4 * Config.heightMultiplier,
+                            ),
+                            controller: _refreshController,
+                            child: _restaurants.length > 0
+                                ? ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: _restaurants.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) =>
                                             Padding(
-                                              padding: EdgeInsets.only(
-                                                  left: 2 *
-                                                      Config.widthMultiplier),
-                                              child: Image.network(
-                                                _restaurants[index]['images'],
-                                                fit: BoxFit.fill,
-                                                width: 35 *
-                                                    Config.imageSizeMultiplier,
-                                                height: 10 *
-                                                    Config.imageSizeMultiplier,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 1 * Config.heightMultiplier,
+                                          horizontal:
+                                              4 * Config.widthMultiplier),
+                                      child: FlatButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () {
+                                          _createAlertDialog(index);
+                                        },
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                2 *
+                                                    Config
+                                                        .imageSizeMultiplier)),
+                                        child: Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          padding: EdgeInsets.symmetric(
+                                              vertical:
+                                                  1 * Config.heightMultiplier,
+                                              horizontal:
+                                                  0.4 * Config.widthMultiplier),
+                                          decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topRight,
+                                                end: Alignment.topLeft,
+                                                colors: [
+                                                  Colors.orange.shade900,
+                                                  Colors.white60
+                                                ],
                                               ),
-                                            ),
-                                            // SizedBox(width: 27.0),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  right: 1.8 *
-                                                      Config.widthMultiplier),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
+                                              borderRadius:
+                                                  BorderRadius.circular(2 *
+                                                      Config
+                                                          .imageSizeMultiplier)),
+                                          child: Column(
+                                            children: <Widget>[
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: <Widget>[
-                                                  Text(
-                                                    _restaurants[index]['name'],
-                                                    style: TextStyle(
-                                                      fontSize: 1.9 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Poppins',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                      color: Colors.white,
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 2 *
+                                                            Config
+                                                                .widthMultiplier),
+                                                    child: Image.network(
+                                                      _restaurants[index]
+                                                          ['images'],
+                                                      fit: BoxFit.fill,
+                                                      width: 35 *
+                                                          Config
+                                                              .imageSizeMultiplier,
+                                                      height: 10 *
+                                                          Config
+                                                              .imageSizeMultiplier,
                                                     ),
-                                                    textScaleFactor: 1,
                                                   ),
-                                                  Text(
-                                                    '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
-                                                    style: TextStyle(
-                                                      fontSize: 1.4 *
-                                                          Config.textMultiplier,
-                                                      fontFamily: 'Poppins',
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontStyle:
-                                                          FontStyle.normal,
-                                                      color: Colors.white,
+                                                  // SizedBox(width: 27.0),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        right: 1.8 *
+                                                            Config
+                                                                .widthMultiplier),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: <Widget>[
+                                                        Text(
+                                                          _restaurants[index]
+                                                              ['name'],
+                                                          style: TextStyle(
+                                                            fontSize: 1.9 *
+                                                                Config
+                                                                    .textMultiplier,
+                                                            fontFamily:
+                                                                'Poppins',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontStyle: FontStyle
+                                                                .normal,
+                                                            color: Colors.white,
+                                                          ),
+                                                          textScaleFactor: 1,
+                                                        ),
+                                                        Text(
+                                                          '${_restaurants[index]['opentime']} - ${_restaurants[index]['closetime']}',
+                                                          style: TextStyle(
+                                                            fontSize: 1.4 *
+                                                                Config
+                                                                    .textMultiplier,
+                                                            fontFamily:
+                                                                'Poppins',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontStyle: FontStyle
+                                                                .normal,
+                                                            color: Colors.white,
+                                                          ),
+                                                          textScaleFactor: 1,
+                                                        ),
+                                                      ],
                                                     ),
-                                                    textScaleFactor: 1,
                                                   ),
                                                 ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        Align(
-                                          alignment: Alignment.bottomLeft,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 2.5 *
-                                                    Config.widthMultiplier),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                SmoothStarRating(
-                                                  starCount: 5,
-                                                  color: Colors.yellow,
-                                                  borderColor: Colors.black,
-                                                  defaultIconData:
-                                                      Icons.star_border_rounded,
-                                                  filledIconData:
-                                                      Icons.star_rounded,
-                                                  halfFilledIconData:
-                                                      Icons.star_half_rounded,
-                                                ),
-                                                Text(
-                                                  _restaurants[index]
-                                                      ['address'],
-                                                  style: TextStyle(
-                                                    fontSize: 2 *
-                                                        Config.textMultiplier,
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    fontStyle: FontStyle.normal,
-                                                    color: Colors.white,
+                                              Align(
+                                                alignment: Alignment.bottomLeft,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 2.5 *
+                                                          Config
+                                                              .widthMultiplier),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: <Widget>[
+                                                      SmoothStarRating(
+                                                        starCount: 5,
+                                                        color: Colors.yellow,
+                                                        borderColor:
+                                                            Colors.black,
+                                                        defaultIconData: Icons
+                                                            .star_border_rounded,
+                                                        filledIconData:
+                                                            Icons.star_rounded,
+                                                        halfFilledIconData: Icons
+                                                            .star_half_rounded,
+                                                      ),
+                                                      Text(
+                                                        _restaurants[index]
+                                                            ['address'],
+                                                        style: TextStyle(
+                                                          fontSize: 2 *
+                                                              Config
+                                                                  .textMultiplier,
+                                                          fontFamily: 'Poppins',
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontStyle:
+                                                              FontStyle.normal,
+                                                          color: Colors.white,
+                                                        ),
+                                                        textScaleFactor: 1,
+                                                      ),
+                                                    ],
                                                   ),
-                                                  textScaleFactor: 1,
                                                 ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Center(
+                                    child: Text(
+                                    'No restaurants to show',
+                                    textScaleFactor: 1,
+                                  )))))
+              ],
+            )
+          : Shimmer.fromColors(
+              child: Column(
+                children: <Widget>[
+                  Stack(
+                    children: [
+                      Container(
+                        height: 100.0,
+                        width: double.infinity,
+                        child: CarouselSlider.builder(
+                          itemCount: _restaurants.length,
+                          options: CarouselOptions(
+                            height: 150.0,
+                            enlargeCenterPage: false,
+                            viewportFraction: 1,
+                            autoPlay: true,
+                          ),
+                          itemBuilder: (BuildContext context, int itemIndex,
+                                  int index) =>
+                              Icon(Icons.image, size: 80.0),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.zero,
+                          child: Container(
+                            height: 6 * Config.heightMultiplier,
+                            width: 80 * Config.widthMultiplier,
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(
+                                top: 10 * Config.heightMultiplier),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4 * Config.widthMultiplier),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                  2 * Config.imageSizeMultiplier),
+                              // border: Border.all(color: Colors.grey[800]),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(.4),
+                                  offset: Offset(0, 1),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                                textAlignVertical: TextAlignVertical.center,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(Icons.search,
+                                      color: Colors.grey[800]),
+                                  hintText: ('Search Restaurant'),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[800],
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ).copyWith(isDense: true)),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  // Establishment Banner
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: 1 * Config.heightMultiplier,
+                        left: 8 * Config.widthMultiplier,
+                        right: 8 * Config.widthMultiplier),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            'Featured Restaurant',
+                            style: TextStyle(
+                                fontSize: 2 * Config.textMultiplier,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.normal,
+                                color: Color(0xff707070)),
+                            textScaleFactor: 1,
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'See All Featured',
+                              textScaleFactor: 1,
+                              style: TextStyle(
+                                  fontSize: 1.2 * Config.textMultiplier,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.normal,
+                                  color: Color(0xff707070)),
+                            ),
+                          ),
+                        ]),
+                  ),
+                  // featured restaurant information
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 2 * Config.heightMultiplier,
+                    ),
+                    child: Container(
+                      height: 18 * Config.heightMultiplier,
+                      width: double.infinity,
+                      child: CarouselSlider.builder(
+                        itemCount: _restaurants.length,
+                        options: CarouselOptions(
+                            enlargeCenterPage: true, viewportFraction: .7),
+                        itemBuilder:
+                            (BuildContext context, int itemIndex, int index) =>
+                                Icon(Icons.image, size: 50.0),
+                      ),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: 1 * Config.heightMultiplier,
+                        left: 8 * Config.widthMultiplier,
+                        right: 8 * Config.widthMultiplier),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Nearby Restaurants',
+                          style: TextStyle(
+                              fontSize: 2 * Config.textMultiplier,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              color: Color(0xff707070)),
+                          textScaleFactor: 1,
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'See All Nearby',
+                            style: TextStyle(
+                                fontSize: 1.2 * Config.textMultiplier,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.normal,
+                                color: Color(0xff707070)),
+                            textScaleFactor: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                      child: Expanded(
+                          child: SmartRefresher(
+                              enablePullDown: !_loading,
+                              onRefresh: () {},
+                              physics: BouncingScrollPhysics(),
+                              header: WaterDropMaterialHeader(
+                                backgroundColor: Config.appColor,
+                                color: Colors.white,
+                                distance: 4 * Config.heightMultiplier,
+                              ),
+                              controller: _refreshController,
+                              child: _restaurants.length > 0
+                                  ? ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: _restaurants.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) =>
+                                              Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical:
+                                                1 * Config.heightMultiplier,
+                                            horizontal:
+                                                4 * Config.widthMultiplier),
+                                        child: FlatButton(
+                                          padding: EdgeInsets.zero,
+                                          onPressed: () {},
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(2 *
+                                                      Config
+                                                          .imageSizeMultiplier)),
+                                          child: Container(
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    1 * Config.heightMultiplier,
+                                                horizontal: 0.4 *
+                                                    Config.widthMultiplier),
+                                            decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topRight,
+                                                  end: Alignment.topLeft,
+                                                  colors: [
+                                                    Colors.orange.shade900,
+                                                    Colors.white60
+                                                  ],
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(2 *
+                                                        Config
+                                                            .imageSizeMultiplier)),
+                                            child: Column(
+                                              children: <Widget>[
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: <Widget>[
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 2 *
+                                                              Config
+                                                                  .widthMultiplier),
+                                                      child: Image.network(
+                                                        '',
+                                                        fit: BoxFit.fill,
+                                                        width: 35 *
+                                                            Config
+                                                                .imageSizeMultiplier,
+                                                        height: 10 *
+                                                            Config
+                                                                .imageSizeMultiplier,
+                                                      ),
+                                                    ),
+                                                    // SizedBox(width: 27.0),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 1.8 *
+                                                              Config
+                                                                  .widthMultiplier),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: <Widget>[
+                                                          Text(
+                                                            '',
+                                                            style: TextStyle(
+                                                              fontSize: 1.9 *
+                                                                  Config
+                                                                      .textMultiplier,
+                                                              fontFamily:
+                                                                  'Poppins',
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .normal,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            textScaleFactor: 1,
+                                                          ),
+                                                          Text(
+                                                            '',
+                                                            style: TextStyle(
+                                                              fontSize: 1.4 *
+                                                                  Config
+                                                                      .textMultiplier,
+                                                              fontFamily:
+                                                                  'Poppins',
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .normal,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            textScaleFactor: 1,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomLeft,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.symmetric(
+                                                        horizontal: 2.5 *
+                                                            Config
+                                                                .widthMultiplier),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: <Widget>[
+                                                        SmoothStarRating(
+                                                          starCount: 5,
+                                                          color: Colors.yellow,
+                                                          borderColor:
+                                                              Colors.black,
+                                                          defaultIconData: Icons
+                                                              .star_border_rounded,
+                                                          filledIconData: Icons
+                                                              .star_rounded,
+                                                          halfFilledIconData: Icons
+                                                              .star_half_rounded,
+                                                        ),
+                                                        Text(
+                                                          '',
+                                                          style: TextStyle(
+                                                            fontSize: 2 *
+                                                                Config
+                                                                    .textMultiplier,
+                                                            fontFamily:
+                                                                'Poppins',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontStyle: FontStyle
+                                                                .normal,
+                                                            color: Colors.white,
+                                                          ),
+                                                          textScaleFactor: 1,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                )
                                               ],
                                             ),
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Center(
-                              child: Text(
-                              'No restaurants to show',
-                              textScaleFactor: 1,
-                            )))))
-        ],
-      ),
+                                        ),
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Text(
+                                      'No restaurants to show',
+                                      textScaleFactor: 1,
+                                    )))))
+                ],
+              ),
+              period: Duration(seconds: 2),
+              baseColor: Colors.grey,
+              highlightColor: Config.appColor),
     );
   }
 }
