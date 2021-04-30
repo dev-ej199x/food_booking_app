@@ -9,7 +9,7 @@ import 'config.dart';
 
 class Http {
   SharedPreferences _sharedPreferences;
-  String ip = 'http://192.168.1.109:8000';
+  String ip = 'http://192.168.68.100:8000';
   final String url;
   final dynamic body;
 

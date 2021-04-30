@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController =
       RefreshController(initialLoadStatus: LoadStatus.loading);
-  TextEditingController _quantity = TextEditingController();
+  TextEditingController _quantity = TextEditingController(text: '1');
   TextEditingController _datedPick = TextEditingController();
   TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
   TextEditingController _timeController = TextEditingController();
@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> {
 
   _onTheGo(int index) {
     _quantity.clear();
+    _quantity.text = '1';
     return showDialog(
         context: context,
         builder: (context) {
@@ -165,6 +166,7 @@ class _HomePageState extends State<HomePage> {
                                           onTap: () {
                                             int currentValue =
                                                 int.parse(_quantity.text);
+                                            if (currentValue > 1)
                                             setState(() {
                                               currentValue--;
                                               _quantity.text = (currentValue > 0
@@ -194,6 +196,7 @@ class _HomePageState extends State<HomePage> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 4 * Config.widthMultiplier),
                             onPressed: () {
+                              Navigator.pop(context);
                               // print(_restaurants[index]);
                               Navigator.push(
                                 context,
@@ -505,6 +508,7 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * Config.widthMultiplier),
                           onPressed: () {
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               PageTransition(
@@ -566,6 +570,7 @@ class _HomePageState extends State<HomePage> {
                         horizontal: .5 * Config.widthMultiplier),
                     child: ElevatedButton(
                       onPressed: () {
+                        Navigator.pop(context);
                         _onTheGo(index);
                       },
                       // color: Color(0xffD32F2F),
@@ -608,6 +613,7 @@ class _HomePageState extends State<HomePage> {
                         horizontal: .5 * Config.widthMultiplier),
                     child: ElevatedButton(
                       onPressed: () {
+                        Navigator.pop(context);
                         _booking(index);
                       },
                       style: ButtonStyle(
