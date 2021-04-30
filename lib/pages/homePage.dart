@@ -60,6 +60,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  _searchRestaurants(String search) {
+    _restaurants.forEach((restaurant) {
+      if (restaurant['name']
+          .toString()
+          .toLowerCase()
+          .contains(search.toLowerCase())) {
+        setState(() {
+          _restaurants.add(restaurant);
+        });
+      }
+    });
+  }
+
   _onTheGo(int index) {
     _quantity.clear();
     return showDialog(
@@ -789,7 +802,7 @@ class _HomePageState extends State<HomePage> {
                   child: Icon(Icons.logout))),
         ),
       ),
-      body: _restaurants.isNotEmpty && _restaurants.length > 0
+      body: _restaurants.isNotEmpty
           ? Column(
               children: <Widget>[
                 Stack(
@@ -836,6 +849,15 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           child: TextField(
+                              onSubmitted: (text) {
+                                FocusScope.of(context).unfocus();
+                                setState(() {
+                                  _restaurants.clear();
+                                });
+                                _searchRestaurants(text);
+                              },
+                              autocorrect: false,
+                              enabled: false,
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
@@ -1147,7 +1169,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                           itemBuilder: (BuildContext context, int itemIndex,
                                   int index) =>
-                              Icon(Icons.image, size: 80.0),
+                              Icon(Icons.image,
+                                  size: 20 * Config.imageSizeMultiplier),
                         ),
                       ),
                       Align(
@@ -1240,7 +1263,8 @@ class _HomePageState extends State<HomePage> {
                             enlargeCenterPage: true, viewportFraction: .7),
                         itemBuilder:
                             (BuildContext context, int itemIndex, int index) =>
-                                Icon(Icons.image, size: 50.0),
+                                Icon(Icons.image,
+                                    size: 45 * Config.imageSizeMultiplier),
                       ),
                     ),
                   ),
@@ -1280,192 +1304,36 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   Container(
-                      child: Expanded(
-                          child: SmartRefresher(
-                              enablePullDown: !_loading,
-                              onRefresh: () {},
-                              physics: BouncingScrollPhysics(),
-                              header: WaterDropMaterialHeader(
-                                backgroundColor: Config.appColor,
-                                color: Colors.white,
-                                distance: 4 * Config.heightMultiplier,
-                              ),
-                              controller: _refreshController,
-                              child: _restaurants.length > 0
-                                  ? ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: _restaurants.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) =>
-                                              Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical:
-                                                1 * Config.heightMultiplier,
-                                            horizontal:
-                                                4 * Config.widthMultiplier),
-                                        child: FlatButton(
-                                          padding: EdgeInsets.zero,
-                                          onPressed: () {},
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(2 *
-                                                      Config
-                                                          .imageSizeMultiplier)),
-                                          child: Container(
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            padding: EdgeInsets.symmetric(
-                                                vertical:
-                                                    1 * Config.heightMultiplier,
-                                                horizontal: 0.4 *
-                                                    Config.widthMultiplier),
-                                            decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topRight,
-                                                  end: Alignment.topLeft,
-                                                  colors: [
-                                                    Colors.orange.shade900,
-                                                    Colors.white60
-                                                  ],
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(2 *
-                                                        Config
-                                                            .imageSizeMultiplier)),
-                                            child: Column(
-                                              children: <Widget>[
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 2 *
-                                                              Config
-                                                                  .widthMultiplier),
-                                                      child: Image.network(
-                                                        '',
-                                                        fit: BoxFit.fill,
-                                                        width: 35 *
-                                                            Config
-                                                                .imageSizeMultiplier,
-                                                        height: 10 *
-                                                            Config
-                                                                .imageSizeMultiplier,
-                                                      ),
-                                                    ),
-                                                    // SizedBox(width: 27.0),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          right: 1.8 *
-                                                              Config
-                                                                  .widthMultiplier),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            '',
-                                                            style: TextStyle(
-                                                              fontSize: 1.9 *
-                                                                  Config
-                                                                      .textMultiplier,
-                                                              fontFamily:
-                                                                  'Poppins',
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontStyle:
-                                                                  FontStyle
-                                                                      .normal,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            textScaleFactor: 1,
-                                                          ),
-                                                          Text(
-                                                            '',
-                                                            style: TextStyle(
-                                                              fontSize: 1.4 *
-                                                                  Config
-                                                                      .textMultiplier,
-                                                              fontFamily:
-                                                                  'Poppins',
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontStyle:
-                                                                  FontStyle
-                                                                      .normal,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            textScaleFactor: 1,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Align(
-                                                  alignment:
-                                                      Alignment.bottomLeft,
-                                                  child: Padding(
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal: 2.5 *
-                                                            Config
-                                                                .widthMultiplier),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: <Widget>[
-                                                        SmoothStarRating(
-                                                          starCount: 5,
-                                                          color: Colors.yellow,
-                                                          borderColor:
-                                                              Colors.black,
-                                                          defaultIconData: Icons
-                                                              .star_border_rounded,
-                                                          filledIconData: Icons
-                                                              .star_rounded,
-                                                          halfFilledIconData: Icons
-                                                              .star_half_rounded,
-                                                        ),
-                                                        Text(
-                                                          '',
-                                                          style: TextStyle(
-                                                            fontSize: 2 *
-                                                                Config
-                                                                    .textMultiplier,
-                                                            fontFamily:
-                                                                'Poppins',
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontStyle: FontStyle
-                                                                .normal,
-                                                            color: Colors.white,
-                                                          ),
-                                                          textScaleFactor: 1,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Center(
-                                      child: Text(
-                                      'No restaurants to show',
-                                      textScaleFactor: 1,
-                                    )))))
+                    child: Expanded(
+                        child: ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (BuildContext context, int index) =>
+                          ListTile(
+                        leading: Icon(Icons.image,
+                            size: 25 * Config.imageSizeMultiplier),
+                        title: SizedBox(
+                          child: Container(
+                            color: Colors.green,
+                          ),
+                          height: 2 * Config.heightMultiplier,
+                        ),
+                        subtitle: SizedBox(
+                          child: Container(
+                            color: Colors.green,
+                          ),
+                          width: 100 * Config.widthMultiplier,
+                          height: 2 * Config.heightMultiplier,
+                        ),
+                      ),
+                    )
+                        // : Center(
+                        //     child: Text(
+                        //       'No restaurants to show',
+                        //       textScaleFactor: 1,
+                        //     ),
+                        //   ),
+                        ),
+                  ),
                 ],
               ),
               period: Duration(seconds: 2),

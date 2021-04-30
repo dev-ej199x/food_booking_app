@@ -10,6 +10,7 @@ import 'package:food_booking_app/pages/orderWithVariants.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _OrderScreenState extends State<OrderScreen> {
   bool _loading = false;
 
   void initState() {
-    log(widget.details.toString());
+    // log(widget.details.toString());
     // TODO: implement initState
     super.initState();
     _categories = new List.from(widget.details['productCategories']);
@@ -41,11 +42,25 @@ class _OrderScreenState extends State<OrderScreen> {
       _categories.forEach((category) {
         _categoriesNames.add(category['categoriesName']);
       });
+      print(_categories.toString());
     }
 
     // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
     //   _getproduct();
     // });
+  }
+
+  _searchProduts(String search) {
+    _products.forEach((product) {
+      if (product['name']
+          .toString()
+          .toLowerCase()
+          .contains(search.toLowerCase())) {
+        setState(() {
+          _products.add(product);
+        });
+      }
+    });
   }
 
   _category(int index) async {
@@ -58,7 +73,6 @@ class _OrderScreenState extends State<OrderScreen> {
     var response =
         await Http(url: 'restaurants/${widget.details['id']}', body: {})
             .getWithHeader();
-
     if (response is String) {
       setState(() {
         _loading = false;
@@ -142,7 +156,6 @@ class _OrderScreenState extends State<OrderScreen> {
               "productVariants": variant,
             });
           });
-          log(product.toString());
           categories.add({
             "categoriesID": category['id'],
             "categoriesName": category['name'],
@@ -212,12 +225,19 @@ class _OrderScreenState extends State<OrderScreen> {
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               icon: Icon(Icons.search, color: Colors.grey[800]),
-                              hintText: ('Search Restaurant'),
+                              hintText: ('Search Product'),
                               hintStyle: TextStyle(
                                 color: Colors.grey[800],
                                 fontFamily: 'Segoe UI',
                               ),
                             ),
+                            onSubmitted: (text) {
+                              FocusScope.of(context).unfocus();
+                              setState(() {
+                                _products.clear();
+                              });
+                              _searchProduts(text);
+                            },
                           ),
                         ),
                       ),
@@ -299,6 +319,24 @@ class _OrderScreenState extends State<OrderScreen> {
                         _loading = true;
                       });
                       _getProducts();
+                      Shimmer.fromColors(
+                          child: ListView.builder(
+                            itemCount: 3,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: Icon(Icons.image, size: 50.0),
+                                title: SizedBox(
+                                  child: Container(
+                                    color: Colors.green,
+                                  ),
+                                  height: 20.0,
+                                ),
+                              );
+                            },
+                          ),
+                          period: Duration(seconds: 2),
+                          baseColor: Colors.grey,
+                          highlightColor: Config.appColor);
                     },
                     physics: BouncingScrollPhysics(),
                     header: WaterDropMaterialHeader(
@@ -307,7 +345,7 @@ class _OrderScreenState extends State<OrderScreen> {
                       distance: 4 * Config.heightMultiplier,
                     ),
                     controller: _refreshController,
-                    child: _products.length == 0
+                    child: _products.length < 0
                         ? Center(
                             child: Text(
                             'No products available',

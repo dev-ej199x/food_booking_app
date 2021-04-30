@@ -9,6 +9,7 @@ import 'package:food_booking_app/defaults/http.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OrderWithVariants extends StatefulWidget {
@@ -1174,6 +1175,24 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         _variants.clear();
                         _loading = true;
                       });
+                      Shimmer.fromColors(
+                          child: ListView.builder(
+                            itemCount: 3,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: Icon(Icons.image, size: 50.0),
+                                title: SizedBox(
+                                  child: Container(
+                                    color: Colors.green,
+                                  ),
+                                  height: 20.0,
+                                ),
+                              );
+                            },
+                          ),
+                          period: Duration(seconds: 2),
+                          baseColor: Colors.grey,
+                          highlightColor: Config.appColor);
                       _getVariants();
                     },
                     physics: BouncingScrollPhysics(),

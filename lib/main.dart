@@ -25,10 +25,9 @@ class MyApp extends StatelessWidget {
       return OrientationBuilder(builder: (context, orientation) {
         Config().init(constraints, orientation);
         return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Food Booking',
-          home: LandingScreen()
-        );
+            debugShowCheckedModeBanner: false,
+            title: 'Food Booking',
+            home: LandingScreen());
       });
     });
   }
