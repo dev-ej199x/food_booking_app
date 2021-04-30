@@ -41,7 +41,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   //
   //
   _getVariants() async {
-    print('products/${widget.details['productId']}');
     var response =
         await Http(url: 'products/${widget.details['productId']}', body: {})
             .getWithHeader();
@@ -125,7 +124,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   }
 
   void initState() {
-    log(widget.details.toString());
 
     //TODO: implement initstate
     super.initState();
@@ -376,8 +374,9 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                             decoration: InputDecoration(
                               labelText: 'NOTE',
                               hintStyle: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 2 * Config.textMultiplier),
+                                color: Colors.grey[400],
+                                fontSize: 2 * Config.textMultiplier
+                              ),
                               hintText: 'YOUR NOTE',
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.grey[700]),
@@ -402,125 +401,71 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                     //  color: Color(0xffFF6347),
                                     width: MediaQuery.of(context).size.width,
                                     child: Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 1 * Config.heightMultiplier),
+                                      padding: EdgeInsets.only(top: 1 * Config.heightMultiplier),
                                       child: Column(
                                         children: [
-                                          if (_productOptions[index]
-                                                  ['productOptionItem']
-                                              .isNotEmpty)
+                                          if (_productOptions[index]['productOptionItem'].isNotEmpty)
                                             Divider(
                                               height: 0,
                                               color: Colors.red,
                                             ),
-                                          if (_productOptions[index]
-                                                  ['productOptionItem']
-                                              .isNotEmpty)
+                                          if (_productOptions[index]['productOptionItem'].isNotEmpty)
                                             Text(
                                               'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
                                               style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 3.2 *
-                                                      Config.textMultiplier,
-                                                  fontWeight: FontWeight.bold),
+                                                fontFamily: 'Poppins',
+                                                fontSize: 3.2 * Config.textMultiplier,
+                                                fontWeight: FontWeight.bold
+                                              ),
                                               textScaleFactor: 1,
                                             ),
-                                          if (_productOptions[index]
-                                                  ['productOptSelection'] ==
-                                              'single')
+                                          if (_productOptions[index]['productOptSelection'] == 'single')
                                             Container(
                                               child: ListView.builder(
-                                                // physics: ScrollPhysics(),
+                                                physics: NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
-                                                itemCount: _productOptions[
-                                                            index]
-                                                        ['productOptionItem']
-                                                    .length,
-                                                itemBuilder:
-                                                    (context, itemindex) => Row(
+                                                itemCount: _productOptions[index]['productOptionItem'].length,
+                                                itemBuilder: (context, itemindex) => Row(
                                                   children: [
                                                     Expanded(
-                                                        child: RadioListTile(
-                                                      value: _productOptions[
-                                                                          index]
-                                                                      [
-                                                                      'productOptionItem']
-                                                                  [itemindex][
-                                                              'productOptItmId'] +
-                                                          itemindex,
-                                                      groupValue:
-                                                          _selected[count]
-                                                              [index],
+                                                      child: RadioListTile(
+                                                      // value: _productOptions[index]['productOptionItem'][itemindex]['productOptItmId'] + itemindex,
+                                                      value: itemindex,
+                                                      groupValue: _selected[count][index],
                                                       title: Text(
-                                                        _productOptions[index][
-                                                                    'productOptionItem']
-                                                                [itemindex][
-                                                            'productOptItmName'],
+                                                        _productOptions[index]['productOptionItem'][itemindex]['productOptItmName'],
                                                         textScaleFactor: 1,
                                                       ),
                                                       secondary: Text(
                                                         '₱ ${_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()}.00',
                                                         textScaleFactor: 1,
                                                       ),
-                                                      onChanged:
-                                                          (valuechanged) {
-                                                        setstate(
-                                                          () {
-                                                            _selected[count]
-                                                                    [index] =
-                                                                valuechanged;
-                                                          },
-                                                        );
-                                                        setState(
-                                                          () {
-                                                            _selected[count]
-                                                                    [index] =
-                                                                valuechanged;
-                                                          },
-                                                        );
+                                                      onChanged: (valuechanged) {
+                                                        setstate(() {
+                                                          _selected[count][index] = valuechanged;
+                                                        });
+                                                        setState(() {
+                                                          _selected[count][index] = valuechanged;
+                                                        });
                                                       },
                                                     )),
                                                     Container(
-                                                      height: 11 *
-                                                          Config
-                                                              .heightMultiplier,
+                                                      height: 11 * Config.heightMultiplier,
                                                       child: Padding(
-                                                        padding: EdgeInsets.symmetric(
-                                                            vertical: 1 *
-                                                                Config
-                                                                    .heightMultiplier,
-                                                            horizontal: 1 *
-                                                                Config
-                                                                    .widthMultiplier),
+                                                        padding: EdgeInsets.symmetric(vertical: 1 * Config.heightMultiplier, horizontal: 1 * Config.widthMultiplier),
                                                         child: Center(
                                                           child: Column(
                                                             children: <Widget>[
                                                               Padding(
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .only(
-                                                                  right: 2.6 *
-                                                                      Config
-                                                                          .widthMultiplier,
-                                                                  bottom: 1 *
-                                                                      Config
-                                                                          .heightMultiplier,
-                                                                ),
-                                                                child:
-                                                                    Container(
-                                                                  width: 13 *
-                                                                      Config
-                                                                          .widthMultiplier,
-                                                                  height: 3 *
-                                                                      Config
-                                                                          .heightMultiplier,
-                                                                  child:
-                                                                      MaterialButton(
-                                                                    minWidth:
-                                                                        2.0,
+                                                                padding: EdgeInsets.only(right: 2.6 * Config.widthMultiplier, bottom: 1 * Config.heightMultiplier),
+                                                                child: Container(
+                                                                  width: 13 * Config.widthMultiplier,
+                                                                  height: 3 * Config.heightMultiplier,
+                                                                  child: MaterialButton(
+                                                                    minWidth: 2.0,
                                                                     child: Icon(
-                                                                        Icons
-                                                                            .arrow_drop_up),
+                                                                      Icons.arrow_drop_up
+                                                                    ),
                                                                     onPressed:
                                                                         () {
                                                                       int _priceValue =
@@ -640,7 +585,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                             )
                                           else
                                             ListView.builder(
-                                              // physics: ScrollPhysics(),
+                                              physics: NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
                                               itemCount: _productOptions[index]
                                                       ['productOptionItem']
@@ -731,172 +676,102 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                     horizontal: 4 * Config.widthMultiplier),
                                 onPressed: () {
                                   List product_options = [];
-                                  bool proceed = false;
-                                  _selected[count]
-                                      .asMap()
-                                      .forEach((index, selected) {
-                                    if (_productOptions[index]
-                                            ['productOptSelection'] ==
-                                        'single') {
-                                      if (_productOptions[index]
-                                              ['productOptType'] ==
-                                          'required') {
-                                        if (selected.runtimeType.toString() ==
-                                            "int") {
-                                          if (selected <= -1) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(new SnackBar(
+                                  bool proceed = true;
+                                  double price = 0;
+                                  _selected[count].asMap().forEach((index, selected) {
+                                    if (proceed) {
+                                      if (_productOptions[index]['productOptSelection'] == 'single') {
+                                        //pag required tapos walang pinili
+                                        if (_productOptions[index]['productOptType'] == 'required' && selected <= -1) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            new SnackBar(
                                               content: Text(
-                                                'Single Selection is Required!',
+                                                '${_productOptions[index]['productOptName']} Selection is Required!',
                                                 textScaleFactor: 1,
                                               ),
                                               duration: Duration(
-                                                  seconds: 2,
-                                                  milliseconds: 155),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ));
-                                            proceed = !proceed;
-                                          } else {
-                                            proceed = true;
-                                            product_options.add({
-                                              'id': _productOptions[
-                                                      _selected[index]
-                                                          .indexOf(selected)]
-                                                  ['productOptId'],
-                                              'name': _productOptions[
-                                                      _selected[index]
-                                                          .indexOf(selected)]
-                                                  ['productOptName'],
-                                              'product_option_items': [
-                                                {
-                                                  'id': _productOptItems[
-                                                          _selected[index]
-                                                              .indexOf(
-                                                                  selected)]
-                                                      ['productOptItmId'],
-                                                  'name': _productOptItems[
-                                                          _selected[index]
-                                                              .indexOf(
-                                                                  selected)]
-                                                      ['productOptItmName'],
-                                                }
-                                              ]
-                                            });
-                                          }
-                                        }
-                                      } else {
-                                        proceed = true;
-                                        product_options.add({
-                                          'id': _productOptions[_selected[count]
-                                                  .indexOf(selected)]
-                                              ['productOptId'],
-                                          'name': _productOptions[
-                                                  _selected[count]
-                                                      .indexOf(selected)]
-                                              ['productOptName'],
-                                          'product_option_items': [
-                                            {
-                                              'id': _productOptItems[
-                                                      _selected[count]
-                                                          .indexOf(selected)]
-                                                  ['productOptItmId'],
-                                              'name': _productOptItems[
-                                                      _selected[count]
-                                                          .indexOf(selected)]
-                                                  ['productOptItmName'],
-                                            }
-                                          ]
-                                        });
-                                      }
-                                    }
-                                    if (_productOptions[index]
-                                            ['productOptSelection'] ==
-                                        'multiple') {
-                                      if (_productOptions[index]
-                                              ['productOptType'] ==
-                                          'required') {
-                                        if (selected.runtimeType.toString() ==
-                                            "List<dynamic>") {
-                                          if (selected.length == 0) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(new SnackBar(
-                                              content: Text(
-                                                'Multi Selection is Required!',
-                                                textScaleFactor: 1,
+                                                seconds: 2,
+                                                milliseconds: 155
                                               ),
-                                              duration: Duration(
-                                                  seconds: 2,
-                                                  milliseconds: 155),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ));
-                                            proceed = !proceed;
-                                          } else {
-                                            proceed = true;
-                                            List product_option_items = [];
-                                            selected.forEach((id) {
-                                              product_option_items.add({
-                                                'id': _productOptItems[
-                                                        _selected[count]
-                                                            .indexOf(selected)]
-                                                    ['productOptItmId'],
-                                                'name': _productOptItems[
-                                                        _selected[count]
-                                                            .indexOf(selected)]
-                                                    ['productOptItmName']
-                                              });
-                                            });
-                                            product_options.add({
-                                              'id': _productOptions[
-                                                      _selected[count]
-                                                          .indexOf(selected)]
-                                                  ['productOptId'],
-                                              'name': _productOptions[
-                                                      _selected[count]
-                                                          .indexOf(selected)]
-                                                  ['productOptName'],
-                                              'product_option_items':
-                                                  product_option_items
-                                            });
-                                          }
+                                              behavior: SnackBarBehavior.floating,
+                                            )
+                                          );
+                                          proceed = false;
+                                          return;
                                         }
-                                      } else {
-                                        proceed = true;
-                                        List product_option_items = [];
-                                        selected.forEach((id) {
-                                          product_option_items.add({
-                                            'id': _productOptItems[
-                                                    _selected[count]
-                                                        .indexOf(selected)]
-                                                ['productOptItmId'],
-                                            'name': _productOptItems[
-                                                    _selected[count]
-                                                        .indexOf(selected)]
-                                                ['productOptItmName']
+                                        //pag may pinili
+                                        else if (selected > -1){
+                                          proceed = true;
+                                          product_options.add({
+                                            'id': _productOptions[index]['productOptId'],
+                                            'name': _productOptions[index]['productOptName'],
+                                            'product_option_items': [
+                                              {
+                                                'id': _productOptions[index]['productOptionItem'][selected]['productOptItmId'],
+                                                'name': _productOptions[index]['productOptionItem'][selected]['productOptItmName'],
+                                              }
+                                            ]
                                           });
-                                        });
-                                        product_options.add({
-                                          'id': _productOptions[_selected[count]
-                                                  .indexOf(selected)]
-                                              ['productOptId'],
-                                          'name': _productOptions[
-                                                  _selected[count]
-                                                      .indexOf(selected)]
-                                              ['productOptName'],
-                                          'product_option_items':
-                                              product_option_items
-                                        });
+                                          print(_productOptions[index]['productOptionItem'][selected]['productOptItmPrice']);
+                                          price += (_productOptions[index]['productOptionItem'][selected]['productOptItmPrice']);
+                                        }
+                                        //pag walang pinili pero d naman sya required
+                                        else {
+                                          proceed = true;
+                                        }
+                                      }
+                                      if (_productOptions[index]['productOptSelection'] =='multiple') {
+                                        //pag required tapos walang pinili
+                                        if (_productOptions[index]['productOptType'] == 'required' && selected.length == 0) {
+                                          ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
+                                            content: Text(
+                                              '${_productOptions[index]['productOptName']} Selection is Required!',
+                                              textScaleFactor: 1,
+                                            ),
+                                            duration: Duration(
+                                              seconds: 2,
+                                              milliseconds: 155
+                                            ),
+                                            behavior:SnackBarBehavior.floating,
+                                          ));
+                                          proceed = false;
+                                          return;
+                                        }
+                                        //pag may pinili
+                                        else if (selected.length > 0){
+                                          proceed = true;
+                                          List product_option_items = [];
+                                          selected.forEach((id) {
+                                            product_option_items.add({
+                                              'id': _productOptions[index]['productOptionItem'][id]['productOptItmId'],
+                                              'name': _productOptions[index]['productOptionItem'][id]['productOptItmName']
+                                            });
+                                            price += (_productOptions[index]['productOptionItem'][id]['productOptItmPrice']);
+                                          });
+                                          product_options.add({
+                                            'id': _productOptions[index]['productOptId'],
+                                            'name': _productOptions[index]['productOptName'],
+                                            'product_option_items': product_option_items
+                                          });
+                                        }
+                                        //pag walang pinili pero d naman sya required
+                                        else {
+                                          proceed = true;
+                                        }
                                       }
                                     }
                                   });
                                   if (proceed) {
+                                    print(_variants[count]['variantPrice']);
+                                    print((price  + _variants[count]['variantPrice']) * int.parse(_productController.text));
                                     _addToCart(
-                                        _variants[count]['variantName'],
-                                        _variants[count]['variantId'],
-                                        int.parse(_productController.text),
-                                        _noteController.text,
-                                        product_options);
+                                      _variants[count]['variantName'],
+                                      _variants[count]['variantId'],
+                                      int.parse(_productController.text),
+                                      _noteController.text,
+                                      product_options,
+                                      (price  + _variants[count]['variantPrice']) * int.parse(_productController.text),
+                                    );
                                   }
                                 },
                                 color: Color(0xffE44D36),
@@ -972,14 +847,15 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   // }
 
   _addToCart(String variantName, int variantId, int quantity, String note,
-      List productOptions) async {
+      List productOptions, double price) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var cart = {};
     if (sharedPreferences.getString('cart') != null &&
         sharedPreferences.get('cart') != 'null') {
       cart = json.decode(sharedPreferences.getString('cart'));
       if (cart['restaurant_id'] != widget.restaurantDetails['id']) {
-        SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
+          new SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
           content: Text(
@@ -991,24 +867,69 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
               fontSize: 2.2 * Config.textMultiplier,
             ),
           ),
-        );
+        ));
         return;
       } else {
-        cart['order_request_products'].add({
-          'product_name': widget.details['productName'],
-          'variant_id': variantId,
-          'name': variantName,
-          'quantity': quantity,
-          'note': note,
-          'product_options': productOptions
+        bool samecart = false;
+        cart['order_request_products'].forEach((cart) {
+          var newcart = {
+            'product_name': widget.details['productName'],
+            'variant_id': variantId,
+            'name': variantName,
+            'note': note,
+            'product_options': productOptions
+          };
+          var oldcart = {
+            'product_name': cart['product_name'],
+            'variant_id': cart['variant_id'],
+            'name': cart['name'],
+            'note': cart['note'],
+            'product_options': cart['product_options']
+          };
+          if (oldcart.toString() == newcart.toString()) {
+            samecart = true;
+            cart['quantity'] = int.parse(cart['quantity'].toString()) + quantity;
+          }
         });
-        await sharedPreferences.setString('cart', json.encode(cart));
+        if (!samecart) {
+          cart['order_request_products'].add({
+            'price': price,
+            'image': widget.details['banner'],
+            'product_name': widget.details['productName'],
+            'variant_id': variantId,
+            'name': variantName,
+            'quantity': quantity,
+            'note': note,
+            'product_options': productOptions
+          });
+        }
+
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          new SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            'Added to cart',
+            textScaleFactor: .8,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ));
+
+        sharedPreferences.setString('cart', json.encode(cart));
+        log(sharedPreferences.getString('cart'));
       }
     } else {
       cart = {
         'restaurant_id': widget.restaurantDetails['id'],
         'order_request_products': [
           {
+            'price': price,
+            'image': widget.details['banner'],
             'product_name': widget.details['productName'],
             'variant_id': variantId,
             'name': variantName,
@@ -1019,10 +940,26 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         ]
       };
 
-      await sharedPreferences.setString('cart', json.encode(cart));
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        new SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Color(0xFF323232),
+        content: Text(
+          'Added to cart',
+          textScaleFactor: .8,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            color: Colors.white,
+            fontSize: 2.2 * Config.textMultiplier,
+          ),
+        ),
+      ));
+
+      sharedPreferences.setString('cart', json.encode(cart));
+      log(sharedPreferences.getString('cart'));
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -52,6 +52,7 @@ dependencies:
   geocoding:
   geolocator:
   pull_to_refresh: ^1.6.4
+  shimmer:
   
 dev_dependencies:
   flutter_test:

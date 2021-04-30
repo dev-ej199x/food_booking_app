@@ -92,6 +92,7 @@ class _OrderScreenState extends State<OrderScreen> {
         ),
       );
     } else if (response is Response) {
+      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;
