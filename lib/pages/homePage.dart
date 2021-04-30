@@ -180,13 +180,14 @@ class _HomePageState extends State<HomePage> {
                                             int currentValue =
                                                 int.parse(_quantity.text);
                                             if (currentValue > 1)
-                                            setState(() {
-                                              currentValue--;
-                                              _quantity.text = (currentValue > 0
-                                                      ? currentValue
-                                                      : 0)
-                                                  .toString(); // decrementing value
-                                            });
+                                              setState(() {
+                                                currentValue--;
+                                                _quantity.text = (currentValue >
+                                                            0
+                                                        ? currentValue
+                                                        : 0)
+                                                    .toString(); // decrementing value
+                                              });
                                           },
                                         ),
                                       ],
@@ -745,7 +746,7 @@ class _HomePageState extends State<HomePage> {
                 "productVariants": variant,
               });
             });
-            log(product.toString());
+
             categories.add({
               "categoriesID": category['id'],
               "categoriesName": category['name'],
@@ -862,8 +863,6 @@ class _HomePageState extends State<HomePage> {
                                 });
                                 _searchRestaurants(text);
                               },
-                              autocorrect: false,
-                              enabled: false,
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 border: InputBorder.none,

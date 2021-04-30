@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class OrderCart extends StatefulWidget {
+  //  Map<String, dynamic> restaurantDetails;
+  // int index;
+  // OrderCart({
+  //   Key key,@required this.restaurantDetails,
+  //     @required this.index}): super(key: key);
   @override
   _OrderCartState createState() => _OrderCartState();
 }
@@ -15,9 +21,13 @@ class _OrderCartState extends State<OrderCart> {
   TextEditingController _noteController = TextEditingController();
   SharedPreferences _sharedPreferences;
   var _cart = {};
+  // var _restaurants = {};
   double _total = 0;
   double _subFee = 0;
-  double _bookingFee = 0;
+  double _conciergeFee = 0;
+  double _priceWithConcierge = 0;
+  double _priceWithMarkup = 0;
+  double _markUpFee = 0;
   double _preparationTime = 0;
 
   @override
@@ -27,7 +37,7 @@ class _OrderCartState extends State<OrderCart> {
     _configure();
   }
 
-  _configure() async{
+  _configure() async {
     _sharedPreferences = await SharedPreferences.getInstance();
     // _sharedPreferences.setString('cart', null);
     setState(() {
@@ -41,202 +51,467 @@ class _OrderCartState extends State<OrderCart> {
     _cart['order_request_products'].forEach((product) {
       setState(() {
         _subFee += product['price'];
+        // _conciergeFee = product['concierge_percentage'];
+        // _markUpFee = product['markup_percentage'];
       });
     });
     setState(() {
-      _bookingFee = 0;
-      _total = _bookingFee + _subFee;
+      // _priceWithConcierge = _subFee * _conciergeFee;
+      // _priceWithMarkup = _subFee * _markUpFee;
+      // _total = _subFee + _priceWithConcierge + _priceWithMarkup;
+      _total = _subFee;
     });
-    
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80.0),
-        child: AppBar(
-          backgroundColor: Color(0xffeb4d4d),
-          title: Center(
-            child: Text(
-              'CART',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 5 * Config.textMultiplier,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.normal,
-                fontFamily: 'Poppins',
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(80.0),
+          child: AppBar(
+            backgroundColor: Color(0xffeb4d4d),
+            title: Center(
+              child: Text(
+                'CART',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 5 * Config.textMultiplier,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.normal,
+                  fontFamily: 'Poppins',
+                ),
+                textScaleFactor: 1,
               ),
-              textScaleFactor: 1,
             ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 1 * Config.widthMultiplier),
-        child: SingleChildScrollView(
-          child: Column(
-          // alignment: Alignment.topCenter,
-            children: [
-              ListView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                children: <Widget>[
-                  if (_cart.containsKey('order_request_products'))
-                  for(var product in _cart['order_request_products'])
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 1 * Config.heightMultiplier),
-                    child: CardItem(product: product),
-                  ),
-                ],
-              ),
-              Divider(
-                height: 4 * Config.heightMultiplier,
-                color: Colors.red,
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 2 * Config.heightMultiplier),
-                child: Container(
-                  height: 20 * Config.heightMultiplier,
+        body: _cart.length > 0
+            ? Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 1 * Config.widthMultiplier),
+                child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // alignment: Alignment.topCenter,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              maxLines: 2,
-                              controller: _noteController,
-                              decoration: InputDecoration(
-                                labelText: 'NOTE',
-                                hintStyle: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 2 * Config.textMultiplier),
-                                hintText: 'YOUR NOTE',
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey[700]),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color(0xffFF6347),
-                                  ),
-                                ),
+                      ListView(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: <Widget>[
+                          if (_cart.containsKey('order_request_products'))
+                            for (var product in _cart['order_request_products'])
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 1 * Config.heightMultiplier),
+                                child: CardItem(product: product),
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4 * Config.widthMultiplier),
-                              child: Column(
+                        ],
+                      ),
+                      Divider(
+                        height: 4 * Config.heightMultiplier,
+                        color: Colors.red,
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.only(top: 2 * Config.heightMultiplier),
+                        child: Container(
+                          height: 20 * Config.heightMultiplier,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Sub Fee: ${_subFee.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 1.8 * Config.textMultiplier,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.normal,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                    textScaleFactor: 1,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        top: 2 * Config.heightMultiplier),
-                                    child: Text(
-                                      'Booking Fee: ${_bookingFee.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 1.8 * Config.textMultiplier,
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.normal,
-                                        fontFamily: 'Poppins',
+                                  Expanded(
+                                    child: TextField(
+                                      maxLines: 2,
+                                      controller: _noteController,
+                                      decoration: InputDecoration(
+                                        labelText: 'NOTE',
+                                        hintStyle: TextStyle(
+                                            color: Colors.grey[400],
+                                            fontSize:
+                                                2 * Config.textMultiplier),
+                                        hintText: 'YOUR NOTE',
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.grey[700]),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffFF6347),
+                                          ),
+                                        ),
                                       ),
-                                      textScaleFactor: 1,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        top: 2 * Config.heightMultiplier),
-                                    child: Text(
-                                      'Grand Total: ${_total.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 1.8 * Config.textMultiplier,
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.normal,
-                                        fontFamily: 'Poppins',
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              4 * Config.widthMultiplier),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Sub Fee: ${_subFee.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize:
+                                                  1.8 * Config.textMultiplier,
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle: FontStyle.normal,
+                                              fontFamily: 'Poppins',
+                                            ),
+                                            textScaleFactor: 1,
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 2 *
+                                                    Config.heightMultiplier),
+                                            child: Text(
+                                              'Concierge Fee: ${_conciergeFee.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize:
+                                                    1.8 * Config.textMultiplier,
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle: FontStyle.normal,
+                                                fontFamily: 'Poppins',
+                                              ),
+                                              textScaleFactor: 1,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 2 *
+                                                    Config.heightMultiplier),
+                                            child: Text(
+                                              'Mark-up Fee: ${_markUpFee.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize:
+                                                    1.8 * Config.textMultiplier,
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle: FontStyle.normal,
+                                                fontFamily: 'Poppins',
+                                              ),
+                                              textScaleFactor: 1,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 2 *
+                                                    Config.heightMultiplier),
+                                            child: Text(
+                                              'Grand Total: ${_total.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize:
+                                                    1.8 * Config.textMultiplier,
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle: FontStyle.normal,
+                                                fontFamily: 'Poppins',
+                                              ),
+                                              textScaleFactor: 1,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      textScaleFactor: 1,
                                     ),
                                   ),
                                 ],
+                              ),
+                              // Padding(
+                              //   padding:
+                              //       EdgeInsets.only(top: .2 * Config.heightMultiplier),
+                              //   child: Text(
+                              //     'Preparation Time: ',
+                              //     style: TextStyle(
+                              //       color: Colors.black,
+                              //       fontSize: 1.8 * Config.textMultiplier,
+                              //       fontWeight: FontWeight.bold,
+                              //       fontStyle: FontStyle.normal,
+                              //       fontFamily: 'Poppins',
+                              //     ),
+                              //     textScaleFactor: 1,
+                              //   ),
+                              // ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 2 * Config.heightMultiplier),
+                        child: RaisedButton(
+                          onPressed: () {},
+                          child: Text(
+                            ' PROCEED ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 2.4 * Config.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal,
+                              fontFamily: 'Poppins',
+                            ),
+                            textScaleFactor: 1,
+                          ),
+                          color: Config.appColor,
+                          textColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(18.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ))
+            : Shimmer.fromColors(
+                child: ListView(children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 1 * Config.widthMultiplier),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        // alignment: Alignment.topCenter,
+                        children: [
+                          ListView(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 1 * Config.heightMultiplier),
+                                child: Container(
+                                  child: Row(children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical:
+                                              1 * Config.heightMultiplier),
+                                      child: Icon(Icons.image,
+                                          size:
+                                              20 * Config.imageSizeMultiplier),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              4 * Config.widthMultiplier,
+                                          vertical:
+                                              1 * Config.heightMultiplier),
+                                      child: SizedBox(
+                                        child: Container(
+                                          color: Colors.green,
+                                        ),
+                                        width: 7 * Config.widthMultiplier,
+                                        height: 3 * Config.heightMultiplier,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              4 * Config.widthMultiplier,
+                                          vertical:
+                                              1 * Config.heightMultiplier),
+                                      child: SizedBox(
+                                        child: Container(
+                                          color: Colors.green,
+                                        ),
+                                        width: 5 * Config.widthMultiplier,
+                                        height: 3 * Config.heightMultiplier,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 3 * Config.heightMultiplier,
+                                          horizontal:
+                                              8 * Config.widthMultiplier),
+                                      child: RaisedButton(
+                                        splashColor: Colors.white,
+                                        color: Colors.grey[200],
+                                        shape: StadiumBorder(),
+                                        onPressed: () {},
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(
+                            height: 4 * Config.heightMultiplier,
+                            color: Colors.red,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: 2 * Config.heightMultiplier),
+                            child: Container(
+                              height: 20 * Config.heightMultiplier,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          maxLines: 2,
+                                          controller: _noteController,
+                                          decoration: InputDecoration(
+                                            labelText: '',
+                                            hintStyle: TextStyle(
+                                                color: Colors.grey[400],
+                                                fontSize:
+                                                    2 * Config.textMultiplier),
+                                            hintText: '',
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.grey[700]),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Color(0xffFF6347),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal:
+                                                  4 * Config.widthMultiplier),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                child: Container(
+                                                  color: Colors.green,
+                                                ),
+                                                height:
+                                                    3 * Config.heightMultiplier,
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 2 *
+                                                        Config
+                                                            .heightMultiplier),
+                                                child: SizedBox(
+                                                  child: Container(
+                                                    color: Colors.green,
+                                                  ),
+                                                  height: 3 *
+                                                      Config.heightMultiplier,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 2 *
+                                                        Config
+                                                            .heightMultiplier),
+                                                child: SizedBox(
+                                                  child: Container(
+                                                    color: Colors.green,
+                                                  ),
+                                                  height: 3 *
+                                                      Config.heightMultiplier,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 2 *
+                                                        Config
+                                                            .heightMultiplier),
+                                                child: SizedBox(
+                                                  child: Container(
+                                                    color: Colors.green,
+                                                  ),
+                                                  height: 3 *
+                                                      Config.heightMultiplier,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // Padding(
+                                  //   padding:
+                                  //       EdgeInsets.only(top: .2 * Config.heightMultiplier),
+                                  //   child: Text(
+                                  //     'Preparation Time: ',
+                                  //     style: TextStyle(
+                                  //       color: Colors.black,
+                                  //       fontSize: 1.8 * Config.textMultiplier,
+                                  //       fontWeight: FontWeight.bold,
+                                  //       fontStyle: FontStyle.normal,
+                                  //       fontFamily: 'Poppins',
+                                  //     ),
+                                  //     textScaleFactor: 1,
+                                  //   ),
+                                  // ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 2 * Config.heightMultiplier),
+                            child: RaisedButton(
+                              onPressed: () {},
+                              child: Text(
+                                '',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 2.4 * Config.textMultiplier,
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.normal,
+                                  fontFamily: 'Poppins',
+                                ),
+                                textScaleFactor: 1,
+                              ),
+                              color: Config.appColor,
+                              textColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(18.0),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      Padding(
-                        padding:
-                            EdgeInsets.only(top: .2 * Config.heightMultiplier),
-                        child: Text(
-                          'Preparation Time: ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 1.8 * Config.textMultiplier,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.normal,
-                            fontFamily: 'Poppins',
-                          ),
-                          textScaleFactor: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 2 * Config.heightMultiplier),
-                child: RaisedButton(
-                  onPressed: () {},
-                  child: Text(
-                    ' PROCEED ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 2.4 * Config.textMultiplier,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.normal,
-                      fontFamily: 'Poppins',
                     ),
-                    textScaleFactor: 1,
-                  ),
-                  color: Config.appColor,
-                  textColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(18.0),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )
-      ),
-    );
+                  )
+                ]),
+                period: Duration(seconds: 2),
+                baseColor: Colors.grey,
+                highlightColor: Config.appColor));
   }
 }
 
-class CardItem extends StatelessWidget {
+class CardItem extends StatefulWidget {
   var product;
 
-  CardItem({
-    Key key,
-    @required this.product
-  }) : super(key: key);
+  CardItem({Key key, @required this.product}) : super(key: key);
+
+  @override
+  _CardItemState createState() => _CardItemState();
+}
+
+class _CardItemState extends State<CardItem> {
+  // List<dynamic> _productOptionItems;
+  // _cartOptItems(int index) async {
+  //     setState(
+  //                 () {
+  //                   _productOptionItems = new List.from(widget
+  //                       .product['product_options']['product_option_items']);
+
+  //                 },
+  //               );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -249,17 +524,15 @@ class CardItem extends StatelessWidget {
             width: 22 * Config.widthMultiplier,
             // padding: EdgeInsets.all(2 * Config.imageSizeMultiplier),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.all(
-                Radius.circular(5 * Config.imageSizeMultiplier),
-              ),
-              image: DecorationImage(
-                image: CachedNetworkImageProvider(
-                  product['image'],
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.all(
+                  Radius.circular(5 * Config.imageSizeMultiplier),
                 ),
-                fit: BoxFit.fill
-              )
-            ),
+                image: DecorationImage(
+                    image: CachedNetworkImageProvider(
+                      widget.product['image'],
+                    ),
+                    fit: BoxFit.fill)),
           ),
           Padding(
             padding:
@@ -271,7 +544,7 @@ class CardItem extends StatelessWidget {
               Container(
                 width: 27 * Config.widthMultiplier,
                 child: Text(
-                  product['product_name'],
+                  widget.product['product_name'],
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 2 * Config.textMultiplier,
@@ -312,7 +585,7 @@ class CardItem extends StatelessWidget {
                     padding: EdgeInsets.symmetric(
                         horizontal: 2 * Config.widthMultiplier),
                     child: Text(
-                      product['quantity'].toString(),
+                      widget.product['quantity'].toString(),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 1.8 * Config.textMultiplier,
@@ -356,7 +629,95 @@ class CardItem extends StatelessWidget {
               splashColor: Colors.white,
               color: Colors.grey[200],
               shape: StadiumBorder(),
-              onPressed: () {},
+              onPressed: () {
+                return showDialog(
+                  context: context,
+                  builder: (context) {
+                    return StatefulBuilder(
+                      builder: (context, setstate) => AlertDialog(
+                        contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8 * Config.imageSizeMultiplier),
+                          ),
+                        ),
+                        content: Container(
+                          height: 50 * Config.heightMultiplier,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(
+                                        8 * Config.imageSizeMultiplier),
+                                    topRight: Radius.circular(
+                                        8 * Config.imageSizeMultiplier),
+                                  ),
+                                  color: Color(0xff323030),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 1 * Config.heightMultiplier),
+                                  child: Text(
+                                    'Product Options',
+                                    textAlign: TextAlign.center,
+                                    textScaleFactor: 1,
+                                    style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 4 * Config.textMultiplier,
+                                        color: Color(0xffeb4d4d),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: SizedBox(
+                                  height: MediaQuery.of(context).size.height,
+                                  child: ListView.builder(
+                                      shrinkWrap: true,
+                                      // itemCount: _productOptionItems.length,
+                                      itemBuilder: (context, index) => Column(
+                                            children: [
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                child: Column(
+                                                  children: [
+                                                    Text(widget.product[
+                                                            'product_options']
+                                                        [index]['name']),
+                                                    Row(
+                                                      children: [
+                                                        Text(widget.product[
+                                                                        'product_options']
+                                                                    [index][
+                                                                'product_option_items']
+                                                            [index]['name']),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          )),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
               child: Text(
                 "Product Options",
                 style: TextStyle(fontSize: 1.9 * Config.textMultiplier),
