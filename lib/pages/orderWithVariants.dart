@@ -939,8 +939,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       cart = json.decode(sharedPreferences.getString('cart'));
       print(widget.restaurantDetails['id']);
       print(cart['restaurants']['restaurant_id']);
-      print(cart['restaurants']['restaurant_id'] != widget.restaurantDetails['id']);
-      if (cart['restaurants']['restaurant_id'] != widget.restaurantDetails['id']) {
+      print(cart['restaurants']['restaurant_id'] !=
+          widget.restaurantDetails['id']);
+      if (cart['restaurants']['restaurant_id'] !=
+          widget.restaurantDetails['id']) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
