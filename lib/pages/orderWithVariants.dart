@@ -937,7 +937,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     if (sharedPreferences.getString('cart') != null &&
         sharedPreferences.get('cart') != 'null') {
       cart = json.decode(sharedPreferences.getString('cart'));
-      if (cart['restaurant_id'] != widget.restaurantDetails['id']) {
+      print(widget.restaurantDetails['id']);
+      print(cart['restaurants']['restaurant_id']);
+      print(cart['restaurants']['restaurant_id'] != widget.restaurantDetails['id']);
+      if (cart['restaurants']['restaurant_id'] != widget.restaurantDetails['id']) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
@@ -1008,14 +1011,12 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       }
     } else {
       cart = {
-        'restaurants': [
-          {
-            'restaurant_id': widget.restaurantDetails['id'],
-            'conciergePercentage':
-                widget.restaurantDetails['concierge_percentage'],
-            'markupPercentage': widget.restaurantDetails['markup_percentage'],
-          }
-        ],
+        'restaurants': {
+          'restaurant_id': widget.restaurantDetails['id'],
+          'conciergePercentage':
+              widget.restaurantDetails['concierge_percentage'],
+          'markupPercentage': widget.restaurantDetails['markup_percentage'],
+        },
         'order_request_products': [
           {
             'price': price,

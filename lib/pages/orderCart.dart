@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
+import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -43,7 +47,7 @@ class _OrderCartState extends State<OrderCart> {
     setState(() {
       _cart = json.decode(_sharedPreferences.getString('cart'));
     });
-    print(_cart);
+    log(_cart.toString());
     _computeTotal();
   }
 
@@ -61,6 +65,93 @@ class _OrderCartState extends State<OrderCart> {
       // _total = _subFee + _priceWithConcierge + _priceWithMarkup;
       _total = _subFee;
     });
+  }
+
+  _createOrder() async {
+    Http().showLoadingOverlay(context);
+
+    List order_request_products = [];
+    _cart['order_request_products'].forEach((product) {
+      List order_request_product_items = [];
+      product['product_options'].forEach((option) {
+        option['product_option_items'].forEach((item) {
+          order_request_product_items.add({'id': item['id']});
+        });
+      });
+      order_request_products.add({
+        'variant_id': product['variant_id'],
+        'quantity': product['quantity'],
+        'note': product['note'],
+        'order_request_product_items': order_request_product_items
+      });
+    });
+    var request = {
+      'restaurant_id': _cart['restaurants']['restaurant_id'],
+      'booking_time': DateFormat('hh:mm:ss').format(DateTime.now()),
+      'booking_date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      'number_of_person': '1',
+      'customers_note': _noteController.text,
+      'payment_method': 'COD',
+      'longitude': '6.999',
+      'latitude': '6.999',
+      'order_request_products': order_request_products
+    };
+    print(request);
+    var response =
+        await Http(url: 'orderRequests', body: request).postWithHeader();
+    if (response is String) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            response,
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * Config.textMultiplier,
+            ),
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      print(response.body);
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Color(0xFF323232),
+              content: Text(
+                response.body,
+                textScaleFactor: .8,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                ),
+              ),
+            ),
+          );
+      } else {
+        ScaffoldMessenger.of(context)
+          ..showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Color(0xFF323232),
+              content: Text(
+                'SUCCESS',
+                textScaleFactor: .8,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                  fontSize: 2.2 * Config.textMultiplier,
+                ),
+              ),
+            ),
+          );
+      }
+    }
   }
 
   @override
@@ -246,7 +337,9 @@ class _OrderCartState extends State<OrderCart> {
                         padding: EdgeInsets.symmetric(
                             vertical: 2 * Config.heightMultiplier),
                         child: RaisedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _createOrder();
+                          },
                           child: Text(
                             ' PROCEED ',
                             style: TextStyle(
@@ -684,7 +777,8 @@ class _CardItemState extends State<CardItem> {
                                   height: MediaQuery.of(context).size.height,
                                   child: ListView.builder(
                                       shrinkWrap: true,
-                                      itemCount: _productOptionItems.length,
+                                      itemCount: widget
+                                          .product['product_options'].length,
                                       itemBuilder: (context, index) => Column(
                                             children: [
                                               Container(
@@ -693,44 +787,23 @@ class _CardItemState extends State<CardItem> {
                                                     .width,
                                                 child: Column(
                                                   children: [
-                                                    Center(
-                                                      child: Text(
-                                                          widget
-                                                                      .product[
-                                                                  'product_options']
-                                                              [index]['name'],
-                                                          style: TextStyle(
-                                                              fontFamily:
-                                                                  'Poppins',
-                                                              fontSize: 3.2 *
-                                                                  Config
-                                                                      .textMultiplier,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                          textScaleFactor: 1),
-                                                    ),
-                                                    Divider(
-                                                      height: 0,
-                                                      color: Colors.red,
+                                                    Text(
+                                                      widget.product[
+                                                              'product_options']
+                                                          [index]['name'],
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
                                                     ),
                                                     Row(
                                                       children: [
-                                                        Text(
-                                                            widget.product['product_options']
-                                                                        [index][
-                                                                    'product_option_items']
-                                                                [index]['name'],
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    'Poppins',
-                                                                fontSize: 2.2 *
-                                                                    Config
-                                                                        .textMultiplier,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                            textScaleFactor: 1),
+                                                        for (var item in widget
+                                                                        .product[
+                                                                    'product_options']
+                                                                [index][
+                                                            'product_option_items'])
+                                                          Text(
+                                                              '${item['name']}${widget.product['product_options'][index]['product_option_items'].indexOf(item) == widget.product['product_options'][index]['product_option_items'].length - 1 ? '' : ','}'),
                                                       ],
                                                     )
                                                   ],
