@@ -753,6 +753,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                 ['productOptId'],
                                             'name': _productOptions[index]
                                                 ['productOptName'],
+                                            'selection': _productOptions[index]
+                                                ['productOptSelection'],
+                                            'type': _productOptions[index]
+                                                ['productOptType'],
                                             'product_option_items': [
                                               {
                                                 'id': _productOptions[index][
@@ -821,6 +825,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                                 ['productOptId'],
                                             'name': _productOptions[index]
                                                 ['productOptName'],
+                                            'selection': _productOptions[index]
+                                                ['productOptSelection'],
+                                            'type': _productOptions[index]
+                                                ['productOptType'],
                                             'product_option_items':
                                                 product_option_items
                                           });

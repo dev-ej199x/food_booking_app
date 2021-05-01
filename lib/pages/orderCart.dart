@@ -502,12 +502,12 @@ class CardItem extends StatefulWidget {
 }
 
 class _CardItemState extends State<CardItem> {
-  // List<dynamic> _productOptionItems;
+  List<dynamic> _productOptionItems;
   // _cartOptItems(int index) async {
   //     setState(
   //                 () {
   //                   _productOptionItems = new List.from(widget
-  //                       .product['product_options']['product_option_items']);
+  //                       .product['product_options']);
 
   //                 },
   //               );
@@ -515,6 +515,7 @@ class _CardItemState extends State<CardItem> {
 
   @override
   Widget build(BuildContext context) {
+    _productOptionItems = new List.from(widget.product['product_options']);
     return Container(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -630,6 +631,7 @@ class _CardItemState extends State<CardItem> {
               color: Colors.grey[200],
               shape: StadiumBorder(),
               onPressed: () {
+                print(_productOptionItems.length);
                 return showDialog(
                   context: context,
                   builder: (context) {
@@ -682,7 +684,7 @@ class _CardItemState extends State<CardItem> {
                                   height: MediaQuery.of(context).size.height,
                                   child: ListView.builder(
                                       shrinkWrap: true,
-                                      // itemCount: _productOptionItems.length,
+                                      itemCount: _productOptionItems.length,
                                       itemBuilder: (context, index) => Column(
                                             children: [
                                               Container(
@@ -691,16 +693,44 @@ class _CardItemState extends State<CardItem> {
                                                     .width,
                                                 child: Column(
                                                   children: [
-                                                    Text(widget.product[
-                                                            'product_options']
-                                                        [index]['name']),
+                                                    Center(
+                                                      child: Text(
+                                                          widget
+                                                                      .product[
+                                                                  'product_options']
+                                                              [index]['name'],
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  'Poppins',
+                                                              fontSize: 3.2 *
+                                                                  Config
+                                                                      .textMultiplier,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                          textScaleFactor: 1),
+                                                    ),
+                                                    Divider(
+                                                      height: 0,
+                                                      color: Colors.red,
+                                                    ),
                                                     Row(
                                                       children: [
-                                                        Text(widget.product[
-                                                                        'product_options']
-                                                                    [index][
-                                                                'product_option_items']
-                                                            [index]['name']),
+                                                        Text(
+                                                            widget.product['product_options']
+                                                                        [index][
+                                                                    'product_option_items']
+                                                                [index]['name'],
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    'Poppins',
+                                                                fontSize: 2.2 *
+                                                                    Config
+                                                                        .textMultiplier,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                            textScaleFactor: 1),
                                                       ],
                                                     )
                                                   ],
