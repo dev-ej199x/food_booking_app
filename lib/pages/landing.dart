@@ -7,6 +7,7 @@ import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/flutter_setting.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
@@ -23,7 +24,7 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   SharedPreferences _sharedPreferences;
 
   _configure() async {
@@ -72,25 +73,29 @@ class _LandingScreenState extends State<LandingScreen> {
     return WillPopScope(
       onWillPop: () {
       },
-      child: Scaffold(
+      child: ScaffoldMessenger(
         key: _scaffoldKey,
-        backgroundColor: Color(0xFFEB4D4D),
-        resizeToAvoidBottomInset: false,
-        body: Center(
-          child: Text(
-            'COMPANY NAME',
-            textScaleFactor: 1,
-            style: TextStyle(
-              fontFamily: 'Segoe UI',
-              fontSize: 4 * Config.textMultiplier,
-              color: Colors.white,
-              fontStyle: FontStyle.normal,
-              fontWeight: FontWeight.w300,
+        child: Scaffold(
+          backgroundColor: Color(0xFFEB4D4D),
+          resizeToAvoidBottomInset: false,
+          body: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              _scaffoldKey.currentState.removeCurrentSnackBar();
+            },
+            child: Center(
+              child: CustomText(
+                text: 'CHEEBOOK',
+                size: 4,
+                color: Colors.white,
+                weight: FontWeight.w300,
+                align:TextAlign.left,
+              ),
             ),
-            textAlign: TextAlign.left,
           ),
-        ),
-      ),
+        )
+      )
     );
   }
 }

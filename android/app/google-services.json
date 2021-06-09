@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "520331363298",
+    "project_id": "cheebook-7f9d8",
+    "storage_bucket": "cheebook-7f9d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520331363298:android:67ec9de5cea5a1905fafbb",
+        "android_client_info": {
+          "package_name": "com.cheebook.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "520331363298-smo93p5b7d9b5s4m38o41osmcs3200c2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cheebook.app",
+            "certificate_hash": "22d9b55ab09fafa6985743e8467dd421f39e9ff9"
+          }
+        },
+        {
+          "client_id": "520331363298-fev23l1rmnmhf9pr7or0n81ce9v52u9d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC29ujAujlFNYi0vNTx4Usl9FahGvoIO54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "520331363298-fev23l1rmnmhf9pr7or0n81ce9v52u9d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

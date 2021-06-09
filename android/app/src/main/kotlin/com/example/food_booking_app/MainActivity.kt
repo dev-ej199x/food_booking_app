@@ -1,4 +1,4 @@
-package com.example.food_booking_app
+package com.cheebook.app
 
 import io.flutter.embedding.android.FlutterActivity
 

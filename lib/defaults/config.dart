@@ -2,21 +2,23 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+double _screenWidth;
+double _screenHeight;
+double _blockWidth = 0;
+double _blockHeight = 0;
+
+double textMultiplier;
+double imageSizeMultiplier;
+double heightMultiplier;
+double widthMultiplier;
+bool isPortrait = true;
+bool isMobilePortrait = false;
+
+Color appColor = Color(0xFFFEB4D4D);
+
+//text size / 7.2
+
 class Config {
-  static double _screenWidth;
-  static double _screenHeight;
-  static double _blockWidth = 0;
-  static double _blockHeight = 0;
-
-  static double textMultiplier;
-  static double imageSizeMultiplier;
-  static double heightMultiplier;
-  static double widthMultiplier;
-  static bool isPortrait = true;
-  static bool isMobilePortrait = false;
-
-  static Color appColor = Color(0xFFFEB4D4D);
-
   void init(BoxConstraints constraints, Orientation orientation) {
     if (orientation == Orientation.portrait) {
       _screenWidth = constraints.maxWidth;
@@ -45,7 +47,7 @@ class Config {
     String openOrClose = 'Close';
     DateTime openTime;
     DateTime closeTime;
-    switch (DateTime.now().weekday) {
+    switch(DateTime.now().weekday) {
       case DateTime.sunday:
         openTime = new DateFormat("HH:mm:ss").parse(schedule['sunday_from']);
         closeTime = new DateFormat("HH:mm:ss").parse(schedule['sunday_to']);
@@ -75,12 +77,12 @@ class Config {
         closeTime = new DateFormat("HH:mm:ss").parse(schedule['saturday_to']);
         break;
     }
-    if (DateTime.now().hour > openTime.hour &&
-        DateTime.now().hour < closeTime.hour) openOrClose = 'Open';
-    if (DateTime.now().hour == openTime.hour &&
-        DateTime.now().minute >= openTime.minute) openOrClose = 'Open';
-    if (DateTime.now().hour == closeTime.hour &&
-        DateTime.now().minute < closeTime.minute) openOrClose = 'Open';
+    if (DateTime.now().hour > openTime.hour && DateTime.now().hour < closeTime.hour)
+      openOrClose = 'Open';
+    if (DateTime.now().hour == openTime.hour && DateTime.now().minute >= openTime.minute)
+      openOrClose = 'Open';
+    if (DateTime.now().hour == closeTime.hour && DateTime.now().minute < closeTime.minute)
+      openOrClose = 'Open';
 
     return openOrClose;
   }

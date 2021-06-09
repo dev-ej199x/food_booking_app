@@ -3,11 +3,17 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
+import 'package:food_booking_app/defaults/filled-button.dart';
+import 'package:food_booking_app/defaults/firebase_settings.dart';
 import 'package:food_booking_app/defaults/images.dart';
+import 'package:food_booking_app/defaults/location.dart';
+import 'package:food_booking_app/defaults/text.dart';
+import 'package:food_booking_app/defaults/textbox.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
+import 'package:location/location.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,72 +28,82 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  Position _currentPosition;
-  String _currentAddress;
+  GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   SharedPreferences _sharedPreferences;
 
   bool _hidePassword = true;
 
   FocusNode _passwordFocus = FocusNode();
   FocusNode _retypePasswordFocus = FocusNode();
-  FocusNode _firstNameFocus = FocusNode();
+  FocusNode _nameFocus = FocusNode();
   FocusNode _numberFocus = FocusNode();
   FocusNode _addressFocus = FocusNode();
   FocusNode _userNameFocus = FocusNode();
 
-  TextEditingController _username = TextEditingController();
-
-  TextEditingController _firstnameController = TextEditingController();
-
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
   TextEditingController _numberController = TextEditingController();
-
   TextEditingController _retypePasswordController = TextEditingController();
-
   TextEditingController _passwordController = TextEditingController();
-
   TextEditingController _addressController = TextEditingController();
+
+  LocationData _locationData;
 
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getCurrentLocation();
     _configure();
-  }
-
-  _getCurrentLocation() {
-    Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: false)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-        _getAddressFromLatLng();
-      });
-      print(_currentPosition);
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  _getAddressFromLatLng() async {
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          _currentPosition.latitude, _currentPosition.longitude);
-
-      Placemark place = placemarks[0];
-
-      setState(() {
-        _currentAddress = "${place.street},${place.locality}, ${place.country}";
-      });
-      print(_currentAddress);
-    } catch (e) {
-      print(e);
-    }
   }
 
   _configure() async {
     _sharedPreferences = await SharedPreferences.getInstance();
+    await _getLocation();
+  }
+
+  _getLocation() async{
+    WidgetsBinding.instance.addPostFrameCallback((_) async {Http().showLoadingOverlay(context);});
+    var data = await CustomLocator().getLocation();
+    if (data != 'Service not enabled' && data != 'Permission denied') {
+      _locationData = data;
+      await _reverseGeocode(_locationData);
+      Navigator.pop(context);
+    }
+    else{
+      Navigator.pop(context);
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: Text(
+            'Can\'t fetch location',
+            textScaleFactor: .8,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 2.2 * textMultiplier,
+              fontFamily: 'Poppins'
+            )
+          )
+        )
+      );
+    }
+  }
+
+  _reverseGeocode(LocationData loc) async{
+    final coordinates = new Coordinates(loc.latitude, loc. longitude);
+    await Geocoder.google('AIzaSyBv6XJUF7GFim1QVmVMoEG23jSaa5BF12w').findAddressesFromCoordinates(coordinates)
+    .then((google) {
+      setState(() {
+        _addressController.text = google.first.addressLine == ''? 'Zamboanga City':google.first.addressLine;
+      });
+    })
+    .catchError((error) async {
+      await Geocoder.local.findAddressesFromCoordinates(coordinates)
+      .then((local) {
+        setState(() {
+          _addressController.text = local.first.addressLine == ''? 'Zamboanga City':local.first.addressLine;
+        });
+      });
+    });
   }
 
   _check() async {
@@ -95,38 +111,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
         r'^[a-zA-Z0-9]([._](?![._])|[a-zA-Z0-9]){6,18}[a-zA-Z0-9]$';
     RegExp regex = new RegExp(pattern);
     FocusScope.of(context).unfocus();
-    if (_firstnameController.text.isEmpty ||
-        _username.text.isEmpty ||
-        _retypePasswordController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
+    if (
+      _usernameController.text.isEmpty ||
+      _nameController.text.isEmpty ||
+      _numberController.text.isEmpty ||
+      _retypePasswordController.text.isEmpty ||
+      _passwordController.text.isEmpty ||
+      _addressController.text.isEmpty
+    ) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(
-            'Fill all fields properly!',
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
+          content: CustomText(
+            align: TextAlign.left,
+            text: 'Fill all fields properly!',
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
           ),
         ),
       );
       return;
     }
-    if (_username.text.isNotEmpty && !regex.hasMatch(_username.text)) {
+    if (_usernameController.text.isNotEmpty && !regex.hasMatch(_usernameController.text)) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(
-            'This Username is not valid ',
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
+          content: CustomText(
+            align: TextAlign.left,
+            text: 'This Username is not valid ',
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
           ),
         ),
       );
@@ -134,71 +152,86 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     // _numberController.text.length  <= 11
-    if (_username.text.length < 8 || _passwordController.text.length < 8) {
+    if (_usernameController.text.length < 8 || _passwordController.text.length < 8) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(
-            '${_username.text.length < 8 ? "Username" : "Password"} must be at least 8 characters',
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
+          content: CustomText(
+            align: TextAlign.left,
+            text: '${_usernameController.text.length < 8 ? "Username" : "Password"} must be at least 8 characters',
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
           ),
         ),
       );
       return;
     }
+
+    if (_passwordController.text.compareTo(_retypePasswordController.text) != 0) {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: CustomText(
+            align: TextAlign.left,
+            text: 'Passwords don\'t match',
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
+          ),
+        ),
+      );
+      return;
+    }
+
     _signUp();
   }
 
   _signUp() async {
-    _getCurrentLocation();
     Http().showLoadingOverlay(context);
-    var response = await Http(url: 'signup', body: {
-      'username': _username.text,
+    print({
+      'username': _usernameController.text,
       'password': _passwordController.text,
       'password_confirmation': _passwordController.text,
-      'name': _firstnameController.text,
+      'name': _nameController.text,
       'number': _numberController.text,
-      'address': _currentAddress.toString(),
-      'longitude': _currentPosition.longitude.toString(),
-      'latitude': _currentPosition.latitude.toString(),
+      'address': _addressController.text.toString(),
+      'longitude': _locationData.longitude.toString(),
+      'latitude': _locationData.latitude.toString(),
+    });
+    var response = await Http(url: 'signup', body: {
+      'username': _usernameController.text,
+      'password': _passwordController.text,
+      'password_confirmation': _passwordController.text,
+      'name': _nameController.text,
+      'number': _numberController.text,
+      'address': _addressController.text.toString(),
+      'longitude': _locationData.longitude.toString(),
+      'latitude': _locationData.latitude.toString(),
     }).postNoHeader();
+    print(response);
     if (response is String) {
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(
-            response,
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
+          content: CustomText(
+            align: TextAlign.left,
+            text: response,
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
           ),
         ),
       );
     } else if (response is Response) {
+      print('AHAHAH ${response.body}');
       Map<String, dynamic> body = json.decode(response.body);
       if (response.statusCode == 200) {
         _login();
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: Text(
-            'Done',
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
-          ),
-        );
       } else {
         if (body.containsKey('errors')) {
           Navigator.pop(context);
@@ -208,13 +241,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SnackBar(
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: Color(0xFF323232),
-                content: Text(
-                  body['errors'][e][0],
-                  textScaleFactor: .8,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 2.2 * Config.textMultiplier,
-                  ),
+                content: CustomText(
+                  align: TextAlign.left,
+                  text: body['errors'][e][0],
+                  color: Colors.white,
+                  size: 1.6,
+                  weight: FontWeight.normal,
                 ),
               ),
             );
@@ -226,9 +258,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   _login() async {
-    Http().showLoadingOverlay(context);
+    print('hoyaa');
     var response = await Http(url: 'login', body: {
-      'username': _username.text,
+      'username': _usernameController.text,
       'password': _passwordController.text
     }).postNoHeader();
 
@@ -238,13 +270,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
-          content: Text(
-            response,
-            textScaleFactor: .8,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 2.2 * Config.textMultiplier,
-            ),
+          content: CustomText(
+            align: TextAlign.left,
+            text: response,
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
           ),
         ),
       );
@@ -255,55 +286,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
           SnackBar(
             behavior: SnackBarBehavior.floating,
             backgroundColor: Color(0xFF323232),
-            content: Text(
-              response.body,
-              textScaleFactor: .8,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Colors.white,
-                fontSize: 2.2 * Config.textMultiplier,
-              ),
+            content: CustomText(
+              align: TextAlign.left,
+              text: response.body,
+              color: Colors.white,
+              size: 1.6,
+              weight: FontWeight.normal,
             ),
           ),
         );
       } else {
         Map<String, dynamic> body = json.decode(response.body);
-        if (body.containsKey('token')
-            // && body['user']['role'] == 'CUSTOMER'
-            ) {
+        if (body.containsKey('token')) {
           _sharedPreferences.setString('token', body['token']);
-          _sharedPreferences.setInt(
-            'id',
-            int.parse(
-              body['user']['id'].toString(),
-            ),
-          );
+          await FirebaseSettings().updateToken();
+          _sharedPreferences.setInt('id', int.parse(body['user']['id'].toString()));
           _sharedPreferences.setString('username', body['user']['username']);
           _sharedPreferences.setString('role', body['user']['role']);
-          // _sharedPreferences.setInt('role-id', body['user']['profile']['id']);
-          // await FirebaseSettings().updateToken();
           Navigator.of(context).pop();
-          Navigator.push(
-            context,
-            PageTransition(
-              type: PageTransitionType.rightToLeft,
-              child: DashBoard(),
-            ),
-          );
-        } else if (!body.containsKey('token') && body.containsKey('message')) {
+          Navigator.of(context).pop();
+          Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeft, child: DashBoard()));
+        }
+        else if (!body.containsKey('token') && body.containsKey('message')) {
           Navigator.of(context).pop();
           _scaffoldKey.currentState.showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
               backgroundColor: Color(0xFF323232),
-              content: Text(
-                body['message'],
-                textScaleFactor: .8,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.white,
-                  fontSize: 2.2 * Config.textMultiplier,
-                ),
+              content: CustomText(
+                align: TextAlign.left,
+                text: body['message'],
+                color: Colors.white,
+                size: 1.6,
+                weight: FontWeight.normal,
               ),
             ),
           );
@@ -313,14 +328,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
             SnackBar(
               behavior: SnackBarBehavior.floating,
               backgroundColor: Color(0xFF323232),
-              content: Text(
-                'Invalid Credentials',
-                textScaleFactor: .8,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.white,
-                  fontSize: 2.2 * Config.textMultiplier,
-                ),
+              content: CustomText(
+                align: TextAlign.left,
+                text: 'Invalid Credentials',
+                color: Colors.white,
+                size: 1.6,
+                weight: FontWeight.normal,
               ),
             ),
           );
@@ -331,682 +344,285 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMessenger(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        padding: EdgeInsets.only(top: 17 * Config.heightMultiplier),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(Images.signUp),
-            fit: BoxFit.fill,
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40.0),
-                    topRight: Radius.circular(40.0),
-                  ),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0x29000000),
-                      offset: Offset(0, -5),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: Container(
-                    width: double.infinity,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            _scaffoldKey.currentState.removeCurrentSnackBar();
+          },
+          child: Container(
+            padding: EdgeInsets.only(top: 17 * heightMultiplier),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(Images.signUp),
+                fit: BoxFit.fill,
+              ),
+            ),
+            child: SafeArea(
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: <Widget>[
+                  Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(40.0),
                         topRight: Radius.circular(40.0),
                       ),
-                      color: Color(0xffeb4d4d),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          child: Text(
-                            'Sign Up',
-                            textAlign: TextAlign.center,
-                            textScaleFactor: 1,
-                            style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 5 * Config.textMultiplier,
-                                color: const Color(0xffffffff),
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 1.0),
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(40.0),
-                                  topRight: Radius.circular(40.0),
-                                ),
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0x29000000),
-                                    offset: Offset(0, -5),
-                                    blurRadius: 6,
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    top: 1 * Config.heightMultiplier),
-                                child: Column(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.person_outline_rounded,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller:
-                                                    _firstnameController,
-                                                focusNode: _firstNameFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _addressFocus);
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Fullname",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.location_city,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            if (_currentAddress != null)
-                                              Text(
-                                                _currentAddress,
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 1.7 *
-                                                      Config.textMultiplier,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.contact_phone_outlined,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller: _numberController,
-                                                focusNode: _numberFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _retypePasswordFocus);
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Phone Number",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.number,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.alternate_email_rounded,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller: _username,
-                                                focusNode: _userNameFocus,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _passwordFocus);
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Username",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.lock_open_rounded,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller: _passwordController,
-                                                focusNode: _passwordFocus,
-                                                obscureText: _hidePassword,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .requestFocus(
-                                                          _retypePasswordFocus);
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Password",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  right: 0 *
-                                                      Config.widthMultiplier),
-                                              child: FlatButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _hidePassword =
-                                                        !_hidePassword;
-                                                  });
-                                                },
-                                                child: Icon(_hidePassword
-                                                    ? Icons.visibility
-                                                    : Icons.visibility_off),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 1 * Config.heightMultiplier,
-                                          horizontal:
-                                              8 * Config.widthMultiplier),
-                                      child: Container(
-                                        width: 100 * Config.widthMultiplier,
-                                        height: 5 * Config.heightMultiplier,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              10 * Config.imageSizeMultiplier),
-                                          color: const Color(0xffffffff),
-                                          border: Border.all(
-                                            width: 1.0,
-                                            color: const Color(0x40707070),
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(0x29000000),
-                                              offset: Offset(0, 3),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4 *
-                                                      Config.widthMultiplier),
-                                              child: Icon(
-                                                Icons.lock_open_rounded,
-                                                size: 5 *
-                                                    Config.imageSizeMultiplier,
-                                                color: Color(0xff908787),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextFormField(
-                                                textInputAction:
-                                                    TextInputAction.next,
-                                                controller:
-                                                    _retypePasswordController,
-                                                focusNode: _retypePasswordFocus,
-                                                obscureText: _hidePassword,
-                                                onFieldSubmitted: (value) {
-                                                  FocusScope.of(context)
-                                                      .unfocus();
-                                                },
-                                                style: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  color: Colors.black,
-                                                  fontSize: 2.2 *
-                                                      Config.textMultiplier,
-                                                ),
-                                                decoration: new InputDecoration(
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    color: Colors.black
-                                                        .withOpacity(.4),
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  labelStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                  ),
-                                                  hintText: "Re-type Password",
-                                                  enabledBorder:
-                                                      InputBorder.none,
-                                                  focusedBorder:
-                                                      InputBorder.none,
-                                                  border: InputBorder.none,
-                                                ).copyWith(isDense: true),
-                                                keyboardType:
-                                                    TextInputType.text,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  right: 0 *
-                                                      Config.widthMultiplier),
-                                              child: FlatButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _hidePassword =
-                                                        !_hidePassword;
-                                                  });
-                                                },
-                                                child: Icon(_hidePassword
-                                                    ? Icons.visibility
-                                                    : Icons.visibility_off),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal:
-                                              8 * Config.widthMultiplier,
-                                          vertical:
-                                              1 * Config.heightMultiplier),
-                                      child: ButtonTheme(
-                                        height: 7 * Config.heightMultiplier,
-                                        child: RaisedButton(
-                                          onPressed: () {
-                                            _check();
-                                          },
-                                          color: Color(0xffeb4d4d),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                10 *
-                                                    Config.imageSizeMultiplier),
-                                          ),
-                                          splashColor:
-                                              Colors.white.withOpacity(.4),
-                                          child: Container(
-                                            child: Center(
-                                              child: Text(
-                                                "Save",
-                                                textScaleFactor: 1,
-                                                style: TextStyle(
-                                                    fontSize: 2.2 *
-                                                        Config.textMultiplier,
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // Padding(
-                                    //   padding: EdgeInsets.symmetric(
-                                    //       horizontal:
-                                    //           8 * Config.widthMultiplier,
-                                    //       vertical:
-                                    //           1 * Config.heightMultiplier),
-                                    //   child: ButtonTheme(
-                                    //     height: 7 * Config.heightMultiplier,
-                                    //     child: RaisedButton(
-                                    //       onPressed: () {
-                                    //         _getCurrentLocation();
-                                    //       },
-                                    //       color: Color(0xffeb4d4d),
-                                    //       shape: RoundedRectangleBorder(
-                                    //         borderRadius: BorderRadius.circular(
-                                    //             10 *
-                                    //                 Config.imageSizeMultiplier),
-                                    //       ),
-                                    //       splashColor:
-                                    //           Colors.white.withOpacity(.4),
-                                    //       child: Container(
-                                    //         child: Center(
-                                    //           child: Text(
-                                    //             "Get Address",
-                                    //             textScaleFactor: 1,
-                                    //             style: TextStyle(
-                                    //                 fontSize: 2.2 *
-                                    //                     Config.textMultiplier,
-                                    //                 color: Colors.white,
-                                    //                 fontWeight:
-                                    //                     FontWeight.bold),
-                                    //           ),
-                                    //         ),
-                                    //       ),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0x29000000),
+                          offset: Offset(0, -5),
+                          blurRadius: 6,
                         ),
                       ],
                     ),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 10.0),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(40.0),
+                            topRight: Radius.circular(40.0),
+                          ),
+                          color: Color(0xffeb4d4d),
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10.0),
+                              child: CustomText(
+                                text: 'Sign Up',
+                                align:TextAlign.center,
+                                size: 4,
+                                weight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 1.0),
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(40.0),
+                                      topRight: Radius.circular(40.0),
+                                    ),
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0x29000000),
+                                        offset: Offset(0, -5),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        top: 1 * heightMultiplier),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller: _nameController,
+                                              focusNode: _nameFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context).requestFocus(_addressFocus);
+                                              },
+                                              text: "Fullname",
+                                              keyboardType: TextInputType.text,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.person_outline_rounded,
+                                                size: 6 * imageSizeMultiplier,
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller: _addressController,
+                                              focusNode: _addressFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context).requestFocus(_numberFocus);
+                                              },
+                                              text: "Address",
+                                              keyboardType: TextInputType.text,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.location_city_rounded,
+                                                size: 6 * imageSizeMultiplier,
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller: _numberController,
+                                              focusNode: _numberFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context)
+                                                    .requestFocus(
+                                                        _userNameFocus);
+                                              },
+                                              text: "Phone Number",
+                                              keyboardType: TextInputType.number,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.contact_phone_outlined,
+                                                size: 6 * imageSizeMultiplier
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller: _usernameController,
+                                              focusNode: _userNameFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context)
+                                                    .requestFocus(
+                                                        _passwordFocus);
+                                              },
+                                              text: "Username",
+                                              keyboardType: TextInputType.text,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.alternate_email_rounded,
+                                                size: 6 * imageSizeMultiplier
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller: _passwordController,
+                                              focusNode: _passwordFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context)
+                                                    .requestFocus(
+                                                        _retypePasswordFocus);
+                                              },
+                                              text: "Password",
+                                              keyboardType: TextInputType.text,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.lock_open_rounded,
+                                                size: 6 * imageSizeMultiplier
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child:  CustomTextBox(
+                                              type: 'roundedbox',
+                                              shadow: true,
+                                              border: true,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              controller:
+                                                  _retypePasswordController,
+                                              focusNode: _retypePasswordFocus,
+                                              onSubmitted: (value) {
+                                                FocusScope.of(context)
+                                                    .unfocus();
+                                              },
+                                              text: "Re-type Password",
+                                              keyboardType: TextInputType.text,
+                                              enabled: true,
+                                              obscureText: false,
+                                              padding: 8,
+                                              prefixIcon: Icon(
+                                                Icons.lock_open_rounded,
+                                                size: 6 * imageSizeMultiplier
+                                              ),
+                                              suffixIcon: null,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                            child: FilledCustomButton(
+                                              type: 'roundedbox',
+                                              onPressed: () {
+                                                FocusScope.of(context).unfocus();
+                                                _scaffoldKey.currentState.removeCurrentSnackBar();
+                                                _check();
+                                              },
+                                              padding: 8,
+                                              text: 'Save',
+                                              color: Color(0xffeb4d4d)
+                                            )
+                                          ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context).viewInsets.bottom
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        )
+      )
     );
   }
 }

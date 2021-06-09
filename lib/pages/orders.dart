@@ -1,32 +1,34 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class NotificationPage extends StatefulWidget {
+class OrdersScreen extends StatefulWidget {
   @override
-  _NotificationPageState createState() => _NotificationPageState();
+  _OrdersScreenState createState() => _OrdersScreenState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
+class _OrdersScreenState extends State<OrdersScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController = RefreshController();
-  List _notifications = [];
+  List _orders = [];
   bool _loading = true;
 
   @override
   void initState() { 
     super.initState();
-    _getNotifications();
+    _getOrders();
   }
   
-  _getNotifications() async {
+  _getOrders() async {
     var response =
-        await Http(url: 'notifications', body: {})
+        await Http(url: 'orderRequests', body: {})
             .getWithHeader();
 
     if (response is String) {
@@ -47,6 +49,7 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       );
     } else if (response is Response) {
+      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;
@@ -68,10 +71,12 @@ class _NotificationPageState extends State<NotificationPage> {
         print(response.body);
 
         setState(() {
-          _notifications = json.decode(response.body)['orderRequest'];
+          _orders.clear();
+          _orders = json.decode(response.body)['orderRequest'];
           _loading = false;
+          _refreshController.refreshCompleted();
         });
-        print(_notifications);
+        print(_orders[0]['status']);
       }
     }
   }
@@ -99,7 +104,7 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
               child: SafeArea(
                 child: CustomText(
-                  text: ' Notifications',
+                  text: 'Orders',
                   size: 3,
                   weight: FontWeight.bold,
                   align: TextAlign.left,
@@ -117,11 +122,7 @@ class _NotificationPageState extends State<NotificationPage> {
             child: SmartRefresher(
               enablePullDown: !_loading,
               onRefresh: () {
-                setState(() {
-                  _notifications.clear();
-                  _loading = true;
-                });
-                _getNotifications();
+                _getOrders();
               },
               physics: BouncingScrollPhysics(),
               header: CustomHeader(builder: (context, status) {
@@ -149,13 +150,13 @@ class _NotificationPageState extends State<NotificationPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_notifications.isEmpty)
+                    if (_orders.isEmpty)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
                       child: Align(
                         alignment: Alignment.center,
                         child: CustomText(
-                          text: 'No notifications to show',
+                          text: 'No orders to show',
                           align: TextAlign.left,
                           color: Colors.black,
                           size: 1.8,
@@ -164,27 +165,73 @@ class _NotificationPageState extends State<NotificationPage> {
                       )
                     )
                     else
-                    for (var notif in _notifications)
+                    for (var order in _orders)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomText(
-                            text: 'Header',
-                            align: TextAlign.left,
-                            color: Colors.black,
-                            size: 2,
-                            weight: FontWeight.bold,
-                          ),
-                          CustomText(
-                            text: 'Body',
-                            align: TextAlign.left,
-                            color: Color(0xFF222455).withOpacity(.5),
-                            size: 1.8,
-                            weight: FontWeight.normal,
-                          ),
-                        ],
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                        width: 100 * widthMultiplier,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
+                          color: Color(0xFF2D2A2A)
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 4 * widthMultiplier),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: order['restaurant']['image'],
+                                    fit: BoxFit.cover,
+                                    height: 30 * imageSizeMultiplier,
+                                    width: 30 * imageSizeMultiplier,
+                                  ),
+                                ]
+                              )
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    text: order['restaurant']['name'],
+                                    align: TextAlign.left,
+                                    color: Colors.white,
+                                    size: 2,
+                                    weight: FontWeight.bold,
+                                  ),
+                                  CustomText(
+                                    text: '₱ ${order['grand_total'].toStringAsFixed(2)}',
+                                    align: TextAlign.left,
+                                    color: Colors.white,
+                                    size: 1.6,
+                                    weight: FontWeight.normal,
+                                  ),
+                                  CustomText(
+                                    text: '${order['booking_date']} ${order['booking_time']}',
+                                    align: TextAlign.left,
+                                    color: Colors.white,
+                                    size: 1.6,
+                                    weight: FontWeight.normal,
+                                  ),
+                                  CustomText(
+                                    text: order['status']['name'],
+                                    align: TextAlign.left,
+                                    color: order['status']['name'] == 'DELIVERED'?Colors.green:Colors.red,
+                                    size: 1.6,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ]
+                              )
+                            )
+                          ],
+                        ),
                       )
                     )
                   ]
