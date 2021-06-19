@@ -14,7 +14,9 @@ double widthMultiplier;
 bool isPortrait = true;
 bool isMobilePortrait = false;
 
-Color appColor = Color(0xFFFEB4D4D);
+Color appColor = Color(0xFFED1F56);
+// Color lightAppColor = Color(0xFFED1F56);
+// Color appColor = Color(0xFFFEB4D4D);
 
 //text size / 7.2
 

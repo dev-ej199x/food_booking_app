@@ -100,7 +100,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(40.0),
                     bottomRight: Radius.circular(40.0)),
-                color: Color(0xffeb4d4d),
+                color: Color(0xFFED1F56),
               ),
               child: SafeArea(
                 child: CustomText(

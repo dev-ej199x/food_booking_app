@@ -220,7 +220,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         text: 'Variation',
                         align: TextAlign.center,
                         size: 3,
-                        color: Color(0xffeb4d4d),
+                        color: Color(0xFFED1F56),
                         weight: FontWeight.bold,
                       ),
                     ),
@@ -823,7 +823,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           child: Column(
             children: [
               AppBar(
-                backgroundColor: Color(0xffeb4d4d),
+                backgroundColor: Color(0xFFED1F56),
                 elevation: 0,
                 leading: IconButton(
                   icon: Icon(
@@ -861,7 +861,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                     bottomLeft: Radius.circular(40.0),
                     bottomRight: Radius.circular(40.0)
                   ),
-                  color: Color(0xffeb4d4d),
+                  color: Color(0xFFED1F56),
                 ),
                 child: Column(
                   children: <Widget>[

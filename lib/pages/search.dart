@@ -7,12 +7,12 @@ import 'package:food_booking_app/defaults/text.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class NotificationPage extends StatefulWidget {
+class SearchScreen extends StatefulWidget {
   @override
-  _NotificationPageState createState() => _NotificationPageState();
+  _SearchScreenState createState() => _SearchScreenState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
+class _SearchScreenState extends State<SearchScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController = RefreshController();
   List _notifications = [];

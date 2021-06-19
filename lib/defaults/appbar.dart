@@ -36,7 +36,7 @@ class _AppBarStateScreen extends State<AppBarScreen>{
             height: 60,
             width: MediaQuery.of(context).size.width/5,
             decoration: BoxDecoration(
-              color: index ==  _selectedItemIndex ? Colors.white: Color(0xffeb4d4d),
+              color: index ==  _selectedItemIndex ? Colors.white: Color(0xFFED1F56),
             ),
             child: Icon(icon)
           ),

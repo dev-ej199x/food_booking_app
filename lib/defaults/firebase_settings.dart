@@ -40,18 +40,21 @@ class FirebaseSettings {
     this.context = contextt;
     // FirebaseMessaging.onBackgroundMessage(_messageHandler);
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (_sharedPreference.getBool('notify')) {
-        if (message.notification.title == 'Truck is in set disposal area.') {
-          if (_sharedPreference.getBool('notifyAtDisposal')) {
-            _showNotification(message.notification);
-          }
-        }
-        else {
-          _showNotification(message.notification);
-        }
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) async {
+      // if (_sharedPreference.containsKey('notify')) {
+      //   if (_sharedPreference.getBool('notify')) {
+      //     if (message.notification.title == 'Truck is in set disposal area.') {
+      //       if (_sharedPreference.getBool('notifyAtDisposal')) {
+      //         _showNotification(message.notification);
+      //       }
+      //     }
+      //     else {
+      //       _showNotification(message.notification);
+      //     }
+      //   }
+      // }
+      // else {
+        _showNotification(message.notification);
+      // }
     });
   }
 

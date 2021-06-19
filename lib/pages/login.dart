@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/filled-button.dart';
-import 'package:food_booking_app/defaults/flutter_setting.dart';
+import 'package:food_booking_app/defaults/firebase_settings.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           topLeft: Radius.circular(40.0),
                           topRight: Radius.circular(40.0),
                         ),
-                        color: Color(0xffeb4d4d),
+                        color: Color(0xFFED1F56),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x29000000),

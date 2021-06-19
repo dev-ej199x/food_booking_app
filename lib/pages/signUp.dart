@@ -345,25 +345,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: _scaffoldKey,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        resizeToAvoidBottomInset: false,
-        body: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            FocusScope.of(context).unfocus();
-            _scaffoldKey.currentState.removeCurrentSnackBar();
-          },
-          child: Container(
-            padding: EdgeInsets.only(top: 17 * heightMultiplier),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(Images.signUp),
-                fit: BoxFit.fill,
+        key: _scaffoldKey,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: false,
+          body: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              _scaffoldKey.currentState.removeCurrentSnackBar();
+            },
+            child: Container(
+              padding: EdgeInsets.only(top: 17 * heightMultiplier),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(Images.signUp),
+                  fit: BoxFit.fill,
+                ),
               ),
-            ),
-            child: SafeArea(
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: <Widget>[
@@ -382,18 +381,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ],
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(40.0),
-                            topRight: Radius.circular(40.0),
-                          ),
-                          color: Color(0xffeb4d4d),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 3 * heightMultiplier),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(40.0),
+                          topRight: Radius.circular(40.0),
                         ),
+                        color: Color(0xFFED1F56),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x29000000),
+                            offset: Offset(0, -5),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 2 * heightMultiplier,
+                            horizontal: 4 * widthMultiplier),
                         child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 10.0),
@@ -406,219 +418,194 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                             ),
                             Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 1.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(40.0),
-                                      topRight: Radius.circular(40.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller: _nameController,
+                                        focusNode: _nameFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context).requestFocus(_addressFocus);
+                                        },
+                                        text: "Fullname",
+                                        keyboardType: TextInputType.text,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.person_outline_rounded,
+                                          size: 6 * imageSizeMultiplier,
+                                        ),
+                                        suffixIcon: null,
+                                      ),
                                     ),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0x29000000),
-                                        offset: Offset(0, -5),
-                                        blurRadius: 6,
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller: _addressController,
+                                        focusNode: _addressFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context).requestFocus(_numberFocus);
+                                        },
+                                        text: "Address",
+                                        keyboardType: TextInputType.text,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.location_city_rounded,
+                                          size: 6 * imageSizeMultiplier,
+                                        ),
+                                        suffixIcon: null,
                                       ),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        top: 1 * heightMultiplier),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller: _nameController,
-                                              focusNode: _nameFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context).requestFocus(_addressFocus);
-                                              },
-                                              text: "Fullname",
-                                              keyboardType: TextInputType.text,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.person_outline_rounded,
-                                                size: 6 * imageSizeMultiplier,
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller: _addressController,
-                                              focusNode: _addressFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context).requestFocus(_numberFocus);
-                                              },
-                                              text: "Address",
-                                              keyboardType: TextInputType.text,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.location_city_rounded,
-                                                size: 6 * imageSizeMultiplier,
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller: _numberController,
-                                              focusNode: _numberFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context)
-                                                    .requestFocus(
-                                                        _userNameFocus);
-                                              },
-                                              text: "Phone Number",
-                                              keyboardType: TextInputType.number,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.contact_phone_outlined,
-                                                size: 6 * imageSizeMultiplier
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller: _usernameController,
-                                              focusNode: _userNameFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context)
-                                                    .requestFocus(
-                                                        _passwordFocus);
-                                              },
-                                              text: "Username",
-                                              keyboardType: TextInputType.text,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.alternate_email_rounded,
-                                                size: 6 * imageSizeMultiplier
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller: _passwordController,
-                                              focusNode: _passwordFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context)
-                                                    .requestFocus(
-                                                        _retypePasswordFocus);
-                                              },
-                                              text: "Password",
-                                              keyboardType: TextInputType.text,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.lock_open_rounded,
-                                                size: 6 * imageSizeMultiplier
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child:  CustomTextBox(
-                                              type: 'roundedbox',
-                                              shadow: true,
-                                              border: true,
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              controller:
-                                                  _retypePasswordController,
-                                              focusNode: _retypePasswordFocus,
-                                              onSubmitted: (value) {
-                                                FocusScope.of(context)
-                                                    .unfocus();
-                                              },
-                                              text: "Re-type Password",
-                                              keyboardType: TextInputType.text,
-                                              enabled: true,
-                                              obscureText: false,
-                                              padding: 8,
-                                              prefixIcon: Icon(
-                                                Icons.lock_open_rounded,
-                                                size: 6 * imageSizeMultiplier
-                                              ),
-                                              suffixIcon: null,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                            child: FilledCustomButton(
-                                              type: 'roundedbox',
-                                              onPressed: () {
-                                                FocusScope.of(context).unfocus();
-                                                _scaffoldKey.currentState.removeCurrentSnackBar();
-                                                _check();
-                                              },
-                                              padding: 8,
-                                              text: 'Save',
-                                              color: Color(0xffeb4d4d)
-                                            )
-                                          ),
-                                          SizedBox(
-                                            height: MediaQuery.of(context).viewInsets.bottom
-                                          )
-                                        ],
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller: _numberController,
+                                        focusNode: _numberFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context)
+                                              .requestFocus(
+                                                  _userNameFocus);
+                                        },
+                                        text: "Phone Number",
+                                        keyboardType: TextInputType.number,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.contact_phone_outlined,
+                                          size: 6 * imageSizeMultiplier
+                                        ),
+                                        suffixIcon: null,
                                       ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller: _usernameController,
+                                        focusNode: _userNameFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context)
+                                              .requestFocus(
+                                                  _passwordFocus);
+                                        },
+                                        text: "Username",
+                                        keyboardType: TextInputType.text,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.alternate_email_rounded,
+                                          size: 6 * imageSizeMultiplier
+                                        ),
+                                        suffixIcon: null,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller: _passwordController,
+                                        focusNode: _passwordFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context)
+                                              .requestFocus(
+                                                  _retypePasswordFocus);
+                                        },
+                                        text: "Password",
+                                        keyboardType: TextInputType.text,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.lock_open_rounded,
+                                          size: 6 * imageSizeMultiplier
+                                        ),
+                                        suffixIcon: null,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child:  CustomTextBox(
+                                        type: 'roundedbox',
+                                        shadow: true,
+                                        border: true,
+                                        textInputAction:
+                                            TextInputAction.next,
+                                        controller:
+                                            _retypePasswordController,
+                                        focusNode: _retypePasswordFocus,
+                                        onSubmitted: (value) {
+                                          FocusScope.of(context)
+                                              .unfocus();
+                                        },
+                                        text: "Re-type Password",
+                                        keyboardType: TextInputType.text,
+                                        enabled: true,
+                                        obscureText: false,
+                                        padding: 8,
+                                        prefixIcon: Icon(
+                                          Icons.lock_open_rounded,
+                                          size: 6 * imageSizeMultiplier
+                                        ),
+                                        suffixIcon: null,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                                      child: FilledCustomButton(
+                                        type: 'roundedbox',
+                                        onPressed: () {
+                                          FocusScope.of(context).unfocus();
+                                          _scaffoldKey.currentState.removeCurrentSnackBar();
+                                          _check();
+                                        },
+                                        padding: 6,
+                                        text: 'Signup',
+                                        color: Color(0xFF464444),
+                                      )
+                                    ),
+                                    SizedBox(
+                                      height: MediaQuery.of(context).viewInsets.bottom
                                     )
-                                  ),
+                                  ],  
                                 ),
-                              ),
+                              )
                             ),
-                          ],
-                        ),
-                      ),
+                          ]
+                        )
+                      )
                     ),
                   ),
                 ],
-              ),
             ),
           ),
         )

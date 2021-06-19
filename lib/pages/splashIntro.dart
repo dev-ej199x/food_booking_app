@@ -47,7 +47,7 @@ class _SplashIntroScreenState extends State<SplashIntroScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xffeb4d4d),
+      color: Color(0xFFED1F56),
     );
   }
 }

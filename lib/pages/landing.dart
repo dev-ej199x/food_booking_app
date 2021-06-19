@@ -4,7 +4,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/config.dart';
-import 'package:food_booking_app/defaults/flutter_setting.dart';
+import 'package:food_booking_app/defaults/firebase_settings.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
@@ -76,7 +76,7 @@ class _LandingScreenState extends State<LandingScreen> {
       child: ScaffoldMessenger(
         key: _scaffoldKey,
         child: Scaffold(
-          backgroundColor: Color(0xFFEB4D4D),
+          backgroundColor: Color(0xFFED1F56),
           resizeToAvoidBottomInset: false,
           body: GestureDetector(
             behavior: HitTestBehavior.translucent,

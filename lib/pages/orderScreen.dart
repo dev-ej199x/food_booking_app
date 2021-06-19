@@ -192,7 +192,7 @@ class _OrderScreenState extends State<OrderScreen> {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(6 * heightMultiplier),
           child: AppBar(
-            backgroundColor: Color(0xffeb4d4d),
+            backgroundColor: Color(0xFFED1F56),
             elevation: 0,
             leading: IconButton(
               icon: Icon(
@@ -301,7 +301,7 @@ class _OrderScreenState extends State<OrderScreen> {
                   //       borderRadius: BorderRadius.only(
                   //           bottomLeft: Radius.circular(40.0),
                   //           bottomRight: Radius.circular(40.0)),
-                  //       color: Color(0xffeb4d4d),
+                  //       color: Color(0xFFED1F56),
                   //     ),
                   //     child: Column(
                   //       children: <Widget>[

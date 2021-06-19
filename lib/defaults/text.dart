@@ -7,6 +7,7 @@ class CustomText extends StatelessWidget {
   double size;
   FontWeight weight;
   TextAlign align;
+  double spacing;
   
   CustomText({
     Key key,
@@ -15,6 +16,7 @@ class CustomText extends StatelessWidget {
     @required this.size,
     @required this.weight,
     @required this.align,
+    this.spacing,
   }) : super(key: key);
 
   @override
@@ -27,7 +29,8 @@ class CustomText extends StatelessWidget {
         fontFamily: 'Poppins',
         fontSize: size * textMultiplier,
         color: color,
-        fontWeight: weight
+        fontWeight: weight,
+        // letterSpacing: (spacing??0) * widthMultiplier
       ),
     );
   }
