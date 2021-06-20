@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
             FirebaseSettings().init(context);
             Config().init(constraints, orientation);
             return MaterialApp(
-              theme: ThemeData.light().copyWith(accentColor: Color(0xFFED1F56), splashColor:  Color(0xFFED1F56)),
+              theme: ThemeData.light().copyWith(accentColor: Color(0xFFED1F56), primaryColor: Color(0xFFED1F56), splashColor: Colors.black12.withOpacity(0.05)),
               debugShowCheckedModeBanner: false,
               title: 'Cheebook',
               home: _sharedPrefences.containsKey('token')?DashBoard():LandingScreen(),

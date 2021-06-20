@@ -52,20 +52,22 @@ class _DashBoardState extends State<DashBoard> {
             FocusScope.of(context).unfocus();
             _scaffoldKey.currentState.removeCurrentSnackBar();
           },
-          child: Stack(
+          child: Column(
             children: [
-              PageView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                controller: _dashBoardController,
-                itemCount: 5,
-                onPageChanged: (page) {
-                  setState(() {
-                    _selectedItemIndex = page;
-                  });
-                },
-                itemBuilder: (BuildContext context, int itemIndex) {
-                  return buildBody(itemIndex);
-                }
+              Expanded(
+                child: PageView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: _dashBoardController,
+                  itemCount: 5,
+                  onPageChanged: (page) {
+                    setState(() {
+                      _selectedItemIndex = page;
+                    });
+                  },
+                  itemBuilder: (BuildContext context, int itemIndex) {
+                    return buildBody(itemIndex);
+                  }
+                )
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -125,7 +127,15 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Widget buildNavBarItem(IconData icon, int index, String text) {
-    return FlatButton(
+    return TextButton(
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100),
+          ),
+        ),
+      ),
       onPressed: () {
         // if (index == 4) {
         //   _logout();
@@ -137,11 +147,6 @@ class _DashBoardState extends State<DashBoard> {
           });
         // }
       },
-      height: 14 * imageSizeMultiplier,
-      minWidth: 10 * imageSizeMultiplier,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(100),
-      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

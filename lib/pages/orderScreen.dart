@@ -19,7 +19,7 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'orderCart.dart';
 
 class OrderScreen extends StatefulWidget {
-  Map<String, dynamic> details;
+  var details;
   var specifics;
   OrderScreen({Key key, @required this.details, @required this.specifics}) : super(key: key);
   @override
@@ -30,6 +30,7 @@ class _OrderScreenState extends State<OrderScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  var _restaurant = {};
   List _products = [];
   List _categories = [];
   List<String> _categoriesNames = [];
@@ -113,68 +114,18 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
         );
       } else {
-        print(response.body);
-        Map<String, dynamic> restaurant =
-            json.decode(response.body)['restaurant'];
-        List<Map<String, dynamic>> categories = [];
-        restaurant['product_category'].forEach((category) {
-          List<Map<String, dynamic>> product = [];
-          category['products'].forEach((products) {
-            List<Map<String, dynamic>> variant = [];
-            products['variants'].forEach((variants) {
-              List<Map<String, dynamic>> productoption = [];
-              variants['product_options'].forEach((productOptions) {
-                List<Map<String, dynamic>> productoptionitem = [];
-                productOptions['product_option_items']
-                    .forEach((productOptionItem) {
-                  productoptionitem.add({
-                    "productOptItmId": productOptionItem['id'],
-                    "productOptItmName": productOptionItem['item_name'],
-                    "productOptItmPrice": productOptionItem['price'],
-                  });
-                });
-                productoption.add({
-                  "productOptId": productOptions['id'],
-                  "productOptName": productOptions['name'],
-                  "productOptType": productOptions['type'],
-                  "productOptSelection": productOptions['selection'],
-                  "productOptionItem": productoptionitem,
-                });
-              });
-              variant.add({
-                "variantId": variants['id'],
-                "variantName": variants['name'],
-                "variantPrice": variants['price'],
-                "variantDescription": variants['description'],
-                "variantBanner": variants['image'],
-                "vairantOption": productoption,
-              });
-            });
-            product.add({
-              "productId": products['id'],
-              "productName": products['name'],
-              "productDescription": products['description'],
-              "banner": products['image'],
-              "productVariants": variant,
-            });
-          });
-          categories.add({
-            "categoriesID": category['id'],
-            "categoriesName": category['name'],
-            "products": product,
-          });
-        });
 
         setState(() {
+          _restaurant = json.decode(response.body)['restaurant'];
           _categories.clear();
           _categoriesNames.clear();
           _products.clear();
-          _categories = new List.from(categories);
-          dropdownValue = _categories[0]['categoriesName'];
+          _categories = new List.from(_restaurant['product_category']);
+          dropdownValue = _categories[0]['name'];
           _categories.forEach((category) {
-            _categoriesNames.add(category['categoriesName']);
+            _categoriesNames.add(category['name']);
           });
-          _products = new List.from(categories[0]['products']);
+          _products = new List.from(_categories[0]['products']);
           _loading = false;
           _refreshController.refreshCompleted();
         });
@@ -191,35 +142,41 @@ class _OrderScreenState extends State<OrderScreen> {
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(6 * heightMultiplier),
-          child: AppBar(
-            backgroundColor: Color(0xFFED1F56),
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                size: 6 * imageSizeMultiplier,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.shopping_cart_rounded,
-                  size: 6 * imageSizeMultiplier,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                      type: PageTransitionType.rightToLeft,
-                      child: OrderCart(specifics: widget.specifics)
+          child: Container(
+            color: Colors.white,
+            // elevation: 0,
+            child: SafeArea(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      size: 6 * imageSizeMultiplier,
                     ),
-                  );
-                },
-              ),
-            ],
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ]
+              )
+            )
+            // actions: [
+            //   IconButton(
+            //     icon: Icon(
+            //       Icons.shopping_cart_rounded,
+            //       size: 6 * imageSizeMultiplier,
+            //     ),
+            //     onPressed: () {
+            //       Navigator.push(
+            //         context,
+            //         PageTransition(
+            //           type: PageTransitionType.rightToLeft,
+            //           child: OrderCart(specifics: widget.specifics)
+            //         ),
+            //       );
+            //     },
+            //   ),
+            // ],
           ),
         ),
         body: GestureDetector(
@@ -512,7 +469,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                                     borderRadius:
                                                         BorderRadius.circular(15),
                                                     child: Image.network(
-                                                      _products[index]['banner'],
+                                                      _products[index]['image'],
                                                       width: MediaQuery.of(context).size.width,
                                                       fit: BoxFit.fill,
                                                     ),
@@ -565,7 +522,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                                         ),
                                                         //Product Description
                                                         child: CustomText(
-                                                          text: _products[index]['productName'],
+                                                          text: _products[index]['name'],
                                                           // text: _products[index]['productDescription'],
                                                           align: TextAlign.center,
                                                           size: 1.8,

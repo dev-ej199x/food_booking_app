@@ -8,6 +8,8 @@ class CustomText extends StatelessWidget {
   FontWeight weight;
   TextAlign align;
   double spacing;
+  double maxLine;
+  double overflow;
   
   CustomText({
     Key key,
@@ -17,6 +19,8 @@ class CustomText extends StatelessWidget {
     @required this.weight,
     @required this.align,
     this.spacing,
+    this.maxLine,
+    this.overflow,
   }) : super(key: key);
 
   @override
@@ -25,6 +29,8 @@ class CustomText extends StatelessWidget {
       text,
       textScaleFactor: 1,
       textAlign: align,
+      maxLines: maxLine??1,
+      overflow: overflow??TextOverflow.clip,
       style: TextStyle(
         fontFamily: 'Poppins',
         fontSize: size * textMultiplier,

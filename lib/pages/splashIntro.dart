@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/pages/dashBoard.dart';
 import 'package:food_booking_app/pages/login.dart';
 import 'package:page_transition/page_transition.dart';
@@ -47,7 +48,7 @@ class _SplashIntroScreenState extends State<SplashIntroScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFFED1F56),
+      color: appColor,
     );
   }
 }

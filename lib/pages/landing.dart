@@ -76,7 +76,7 @@ class _LandingScreenState extends State<LandingScreen> {
       child: ScaffoldMessenger(
         key: _scaffoldKey,
         child: Scaffold(
-          backgroundColor: Color(0xFFED1F56),
+          backgroundColor: appColor,
           resizeToAvoidBottomInset: false,
           body: GestureDetector(
             behavior: HitTestBehavior.translucent,

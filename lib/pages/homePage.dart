@@ -45,33 +45,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
   String _setTime, _setDate;
   String dateTime;
   List _featuredRestaurants = [];
-  List _nearbyRestaurants = [];
   List _restaurants = [];
   List _banners = [];
   String dropdownValue = '';
   DateTime pickDate;
   bool _loading = false;
-  // AnimationController _animate1;
-  // AnimationController _animate2;
-  // AnimationController _animate3;
+  bool _loadedBanners = false;
+  bool _loadedFeatured = false;
+  bool _loadedAll = false;
+  int _currentBannerIndex = 0;
   
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //  _animate1 = AnimationController(
-    //   vsync: this,
-    //   duration: Duration(milliseconds: 100),
-    // ); 
-    // _animate2 = AnimationController(
-    //   vsync: this,
-    //   duration: Duration(milliseconds: 100),
-    // ); 
-    // _animate3 = AnimationController(
-    //   vsync: this,
-    //   duration: Duration(milliseconds: 100),
-    // ); 
-    // _animate1.forward();
     _datedPick.text = DateFormat.yMd().format(DateTime.now());
 
     _timeController.text = formatDate(
@@ -82,6 +69,165 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _getEstablishments();
     });
+  }
+
+  _getEstablishments() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    await _getAdBanners();
+    await _getFeaturedEstablishments();
+    var response = await Http(url: 'restaurants', body: {}).getWithHeader();
+
+    if (response is String) {
+      setState(() {
+        _loading = false;
+      });
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: CustomText(
+            align: TextAlign.left,
+            text: response,
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        // if (!_loading) Navigator.pop(context);
+        setState(() {
+          _loading = false;
+        });
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: CustomText(
+              align: TextAlign.left,
+              text: response.body,
+              color: Colors.white,
+              size: 1.6,
+              weight: FontWeight.normal,
+            ),
+          ),
+        );
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        setState(() {
+          _restaurants.clear();
+          _restaurants = new List.from(body['restaurant']);
+          _loadedAll = true;
+          _refreshController.refreshCompleted();
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  _getFeaturedEstablishments() async {
+    var response = await Http(url: 'featuredRestaurants', body: {}).getWithHeader();
+
+    if (response is String) {
+      setState(() {
+        _loading = false;
+      });
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: CustomText(
+            align: TextAlign.left,
+            text: response,
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        // if (!_loading) Navigator.pop(context);
+        setState(() {
+          _loading = false;
+        });
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: CustomText(
+              align: TextAlign.left,
+              text: response.body,
+              color: Colors.white,
+              size: 1.6,
+              weight: FontWeight.normal,
+            ),
+          ),
+        );
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        setState(() {
+          _featuredRestaurants.clear();
+          _featuredRestaurants = new List.from(body['featuredRestaurant']);
+          _loadedFeatured = true;
+          _refreshController.refreshCompleted();
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  _getAdBanners() async {
+    var response = await Http(url: 'ad-banners', body: {}).getWithHeader();
+
+    if (response is String) {
+      setState(() {
+        _loading = false;
+      });
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Color(0xFF323232),
+          content: CustomText(
+            align: TextAlign.left,
+            text: response,
+            color: Colors.white,
+            size: 1.6,
+            weight: FontWeight.normal,
+          ),
+        ),
+      );
+    } else if (response is Response) {
+      if (response.statusCode != 200) {
+        // if (!_loading) Navigator.pop(context);
+        setState(() {
+          _loading = false;
+        });
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: CustomText(
+              align: TextAlign.left,
+              text: response.body,
+              color: Colors.white,
+              size: 1.6,
+              weight: FontWeight.normal,
+            ),
+          ),
+        );
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        setState(() {
+          _banners.clear();
+          _banners = new List.from(body['banners']);
+          _loadedBanners = true;
+          _refreshController.refreshCompleted();
+          _loading = false;
+        });
+      }
+    }
   }
 
   _searchRestaurants(String search) {
@@ -97,7 +243,99 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
     });
   }
 
-  _onTheGoDialog(int index) {
+  _onTheGoorBooking(var restaurant) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            // backgroundColor: Color(0xff747473),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(3 * imageSizeMultiplier),
+              ),
+            ),
+            content: Container(
+              width: 60 * widthMultiplier,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * heightMultiplier,
+                        horizontal: .5 * widthMultiplier),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _onTheGoDialog(restaurant);
+                      },
+                      // color: Color(0xffD32F2F),
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                        // shadowColor: MaterialStateProperty.all(Colors.red),
+                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
+                        backgroundColor: MaterialStateProperty.all(
+                          appColor,
+                        ),
+                      ),
+                      child: CustomText(
+                        align: TextAlign.left,
+                        text: 'On the Go',
+                        size: 2,
+                        weight: FontWeight.normal,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * heightMultiplier,
+                        horizontal: .5 * widthMultiplier),
+                    child: CustomText(
+                      align: TextAlign.left,
+                      text: 'OR',
+                      color: appColor,
+                      size: 1.4,
+                      weight: FontWeight.bold,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: 2 * heightMultiplier,
+                        horizontal: .5 * widthMultiplier),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _bookingDialog(restaurant);
+                      },
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                        // shadowColor: MaterialStateProperty.all(Colors.red),
+                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
+                        backgroundColor: MaterialStateProperty.all(
+                          appColor,
+                        ),
+                      ),
+                      child: CustomText(
+                        align: TextAlign.left,
+                        text: 'Booking',
+                        size: 2,
+                        weight: FontWeight.normal,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      }
+    );
+  }
+
+  _onTheGoDialog(var restaurant) {
     _quantity.text = '1';
     return showDialog(
       context: context,
@@ -112,7 +350,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
               ),
             ),
             content: Container(
-              height: 35 * widthMultiplier,
+              width: 60 * widthMultiplier,
+              height: 16 * heightMultiplier,
               child: Center(
                 child: Column(
                   children: <Widget>[
@@ -168,7 +407,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                         onTap: () {
                                           int currentValue =
                                               int.parse(_quantity.text);
-                                          if(currentValue+1<=int.parse(_restaurants[index]['max_persons_per_restaurant'].toString()))
                                           setState(() {
                                             currentValue++;
                                             _quantity.text = (currentValue)
@@ -214,32 +452,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            _sharedPreferences.setString('cart', null);
+                            print({'details': restaurant, 
+                                  'specifics': {
+                                    'type': 'otg',
+                                    'people': int.parse(_quantity.text),
+                                  }});
                             try{
-                              if (int.parse(_quantity.text)%1==0 && int.parse(_quantity.text)<=int.parse(_restaurants[index]['max_persons_per_restaurant'].toString())) {
-                                Navigator.pop(context);
-                                // print(_restaurants[index]);
-                                Navigator.push(
-                                  context,
-                                  PageTransition(
-                                    type: PageTransitionType.rightToLeft,
-                                    child: 
-                                      OrderScreen(details: _restaurants[index], 
-                                      specifics: {
-                                        'type': 'otg',
-                                        'people': int.parse(_quantity.text),
-                                      }
-                                    ),
-                                  ),
-                                );
-                              }
+                            _sharedPreferences.setString('cart', '');
+                            Navigator.pop(context);
+                            // print(_restaurants[index]);
+                            Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                child: 
+                                  OrderScreen(details: restaurant, 
+                                  specifics: {
+                                    'type': 'otg',
+                                    'people': int.parse(_quantity.text),
+                                  }
+                                ),
+                              ),
+                            );
                             }
-                            catch(error) {}
+                            catch(e) {
+                              print(e);
+                            }
                           },
-                          color: Color(0xffE44D36),
+                          color: appColor,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(10 * imageSizeMultiplier),
+                                BorderRadius.circular(2 * imageSizeMultiplier),
                           ),
                           child: Container(
                             child: Center(
@@ -257,7 +500,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                     )
                   ],
                 ),
-              ),
+              )
             ),
           );
         });
@@ -265,39 +508,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
     );
   }
 
-  _pickDate() async {
-    DateTime date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(Duration(days: 1)),
-      firstDate: DateTime.now().add(Duration(days: 1)),
-      lastDate: DateTime(DateTime.now().year + 5),
-    );
-    if (date != null)
-      setState(() {
-        pickDate = date;
-        _datedPick.text = DateFormat.yMd().format(pickDate);
-      });
-  }
-
-  _pickTime() async {
-    TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-    if (picked != null)
-      setState(() {
-        selectedTime = picked;
-        _hour = selectedTime.hour.toString();
-        _minute = selectedTime.minute.toString();
-        _time = _hour + ' : ' + _minute;
-        _timeController.text = _time;
-        _timeController.text = formatDate(
-            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
-            [hh, ':', nn, " ", am]).toString();
-      });
-  }
-
-  _bookingDialog(int index) {
+  _bookingDialog(var restaurant) {
     _quantity.text = '1';
     _datedPick.text = DateFormat('MMMM dd, yyyy').format(DateTime.now().add(Duration(days: 1)));
     _timeController.text = DateFormat('HH:mm a').format(DateTime.now());
@@ -313,7 +524,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
               ),
             ),
             content: Container(
-              height: 60 * widthMultiplier,
+              width: 60 * widthMultiplier,
+              height: 26 * heightMultiplier,
               child: Center(
                 child: Column(
                   children: <Widget>[
@@ -369,7 +581,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                         onTap: () {
                                           int currentValue =
                                               int.parse(_quantity.text);
-                                          if(currentValue+1<=int.parse(_restaurants[index]['max_persons_per_restaurant'].toString()))
                                           setState(() {
                                             currentValue++;
                                             _quantity.text = (currentValue)
@@ -480,7 +691,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            _sharedPreferences.setString('cart', null);
+                            print(_sharedPreferences.getString('token'));
+                            _sharedPreferences.setString('cart', '');
                             print(_timeController.text);
                             Navigator.pop(context);
                             Navigator.push(
@@ -488,7 +700,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               PageTransition(
                                 type: PageTransitionType.rightToLeft,
                                 child:
-                                  OrderScreen(details: _restaurants[index], 
+                                  OrderScreen(details: restaurant, 
                                   specifics: {
                                     'type': 'booking',
                                     'people': int.parse(_quantity.text),
@@ -499,10 +711,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               ),
                             );
                           },
-                          color: Color(0xffE44D36),
+                          color: appColor,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(10 * imageSizeMultiplier),
+                                BorderRadius.circular(2 * imageSizeMultiplier),
                           ),
                           child: Container(
                             child: Center(
@@ -525,146 +737,62 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
         });
   }
 
-  _onTheGoorBooking(int index) {
-    return showDialog(
-        context: context,
-        barrierColor: Colors.black.withOpacity(.6),
-        builder: (context) {
-          return AlertDialog(
-            // backgroundColor: Colors.transparent,
-            backgroundColor: Color(0xff484545),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(3 * imageSizeMultiplier),
+  _pickDate() async {
+    DateTime date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(Duration(days: 1)),
+      firstDate: DateTime.now().add(Duration(days: 1)),
+      lastDate: DateTime(DateTime.now().year + 5),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+              primaryColor: appColor,
+              accentColor: appColor,
+              colorScheme: ColorScheme.light(primary: appColor),
+              buttonTheme: ButtonThemeData(
+                textTheme: ButtonTextTheme.primary
               ),
-            ),
-            content: Container(
-              width: 70 * widthMultiplier,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 2 * heightMultiplier,
-                        horizontal: .5 * widthMultiplier),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _onTheGoDialog(index);
-                      },
-                      // color: Color(0xffD32F2F),
-                      style: ButtonStyle(
-                        // shadowColor: MaterialStateProperty.all(Colors.red),
-                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
-                        backgroundColor: MaterialStateProperty.all(
-                          Color(0xfff96167),
-                        ),
-                      ),
-                      child: CustomText(
-                        align: TextAlign.left,
-                        text: 'On the Go',
-                        size: 2,
-                        weight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 2 * heightMultiplier,
-                        horizontal: .5 * widthMultiplier),
-                    child: CustomText(
-                      align: TextAlign.left,
-                      text: 'OR',
-                      color: Color(0xffFF6347),
-                      size: 1.4,
-                      weight: FontWeight.bold,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 2 * heightMultiplier,
-                        horizontal: .5 * widthMultiplier),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _bookingDialog(index);
-                      },
-                      style: ButtonStyle(
-                        // shadowColor: MaterialStateProperty.all(Colors.red),
-                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
-                        backgroundColor: MaterialStateProperty.all(
-                          Color(0xfff96167),
-                        ),
-                      ),
-                      child: CustomText(
-                        align: TextAlign.left,
-                        text: 'Book',
-                        size: 2,
-                        weight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
+          ),
+          child: child,
+        );
+      },
+    );
+    if (date != null)
+      setState(() {
+        pickDate = date;
+        _datedPick.text = DateFormat.yMd().format(pickDate);
+      });
   }
 
-  _getEstablishments() async {
-    _sharedPreferences = await SharedPreferences.getInstance();
-    // if (!_loading) Http().showLoadingOverlay(context);
-    var response = await Http(url: 'restaurants', body: {}).getWithHeader();
-
-    if (response is String) {
-      // if (!_loading) Navigator.pop(context);
-      setState(() {
-        _loading = false;
-      });
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: CustomText(
-            align: TextAlign.left,
-            text: response,
-            color: Colors.white,
-            size: 1.6,
-            weight: FontWeight.normal,
+  _pickTime() async {
+    TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+              primaryColor: appColor,
+              accentColor: appColor,
+              colorScheme: ColorScheme.light(primary: appColor),
+              buttonTheme: ButtonThemeData(
+                textTheme: ButtonTextTheme.primary
+              ),
           ),
-        ),
-      );
-    } else if (response is Response) {
-      if (response.statusCode != 200) {
-        // if (!_loading) Navigator.pop(context);
-        setState(() {
-          _loading = false;
-        });
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Color(0xFF323232),
-            content: CustomText(
-              align: TextAlign.left,
-              text: response.body,
-              color: Colors.white,
-              size: 1.6,
-              weight: FontWeight.normal,
-            ),
-          ),
+          child: child,
         );
-      } else {
-        Map<String, dynamic> body = json.decode(response.body);
-        setState(() {
-          _restaurants.clear();
-          _restaurants = new List.from(body['restaurant']);
-          _refreshController.refreshCompleted();
-          _loading = false;
-        });
-      }
-    }
+      },
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _hour = selectedTime.hour.toString();
+        _minute = selectedTime.minute.toString();
+        _time = _hour + ' : ' + _minute;
+        _timeController.text = _time;
+        _timeController.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
   }
 
   _logout() async {
@@ -690,7 +818,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(10 * heightMultiplier),
+            preferredSize: Size.fromHeight(7 * heightMultiplier),
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.only(left: 4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
@@ -773,106 +901,341 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                     child:  SingleChildScrollView(
                       child: Column(
                         children: [
-                          if (_restaurants.length > 0)
-                          for (var restaurant in _restaurants)
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 1 * heightMultiplier,
-                                horizontal: 4 * widthMultiplier),
-                            child: CustomButton(
-                              height: 0,
-                              minWidth: 0,
-                              child: TextButton(
-                                style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(2 * imageSizeMultiplier)
-                                    ),
+                          if (_loadedBanners)
+                          if (_banners.length > 0)
+                          Container(
+                            padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                              ],
+                              color: Colors.white
+                            ),
+                            child: Column(
+                              children: [
+                                CarouselSlider(
+                                  options: CarouselOptions(
+                                    height: 20 * heightMultiplier,
+                                    viewportFraction: 1,
+                                    onPageChanged: (value, reason) {
+                                      setState(() {
+                                        _currentBannerIndex = value;
+                                      });
+                                    },
                                   ),
-                                  padding: MaterialStateProperty.all(EdgeInsets.zero),
-                                  backgroundColor: MaterialStateProperty.all(Colors.white),
-                                  alignment: Alignment.center,
-                                ),
-                                onPressed: () {
-                                  _onTheGoorBooking(_restaurants.indexOf(restaurant));
-                                },
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      height: 26 * heightMultiplier,
-                                      width: 100 * widthMultiplier,
-                                      decoration: BoxDecoration(
-                                        // borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
-                                        boxShadow: [
-                                          BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
-                                        ],
-                                        image: DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: CachedNetworkImageProvider(
-                                            restaurant['image'],
+                                  items: _banners.map((i) {
+                                    return Builder(
+                                      builder: (BuildContext context) {
+                                        return Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber
                                           ),
-                                        )
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: CustomText(
-                                              text: restaurant['name'], 
-                                              color: Colors.black, 
-                                              size: 1.8, 
-                                              weight: FontWeight.bold, 
-                                              align: TextAlign.left
-                                            )
-                                          ),
-                                          SmoothStarRating(
-                                            color: appColor,
-                                            borderColor: appColor,
-                                            filledIconData: Icons.star_rounded,
-                                            halfFilledIconData: Icons.star_half_rounded,
-                                            defaultIconData: Icons.star_outline_rounded,
-                                            allowHalfRating: true,
-                                            starCount: 5,
-                                            size: 3 * imageSizeMultiplier,
-                                            rating: restaurant['rating']??1.5,
-                                            isReadOnly: true,
+                                          child: Stack(
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl: i['banner_image'],
+                                                fit: BoxFit.cover,
+                                                width: MediaQuery.of(context).size.width,
+                                                placeholder: (context, string) {
+                                                  return Shimmer.fromColors(
+                                                    baseColor: Colors.black12,
+                                                    highlightColor: Colors.black26,
+                                                    child: Container(
+                                                      padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                                                      height: 20 * heightMultiplier,
+                                                      width: double.infinity, 
+                                                      color: Color(0xFF363636),
+                                                    ),
+                                                  );
+                                                },
+                                                errorWidget: (context, string, _) {
+                                                  return Container(
+                                                    padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                                                    height: 20 * heightMultiplier,
+                                                    width: double.infinity, 
+                                                    color: Color(0xFF363636),
+                                                  );
+                                                },
+                                              ),
+                                              Align(
+                                                alignment: Alignment.bottomCenter,
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    for (int x = 0; x<_banners.length; x++)
+                                                    Padding(
+                                                      padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier, horizontal: 0.2 * widthMultiplier),
+                                                      child: Icon(
+                                                        Icons.circle,
+                                                        color: _currentBannerIndex == x?Colors.black:Colors.grey,
+                                                        size: 2 * imageSizeMultiplier
+                                                      )
+                                                    )
+                                                  ],
+                                                )
+                                              )
+                                            ]
                                           )
-                                        ]
-                                      )
-                                    ),
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
+                                )
+                              ]
+                            )
+                          )
+                          else
+                          Container(),
+                          if (_loadedFeatured)
+                          if (_featuredRestaurants.length > 0)
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(top: (_banners.length > 0 && _loadedBanners?2:0) * heightMultiplier),
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                              ],
+                              color: Colors.white
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                  left: 4 * widthMultiplier, right: 4 * widthMultiplier, top: 1 * heightMultiplier,),
+                                  child: CustomText(
+                                    text: 'Featured Restaurants', 
+                                    color: Colors.black, 
+                                    size: 1.6, 
+                                    weight: FontWeight.normal, 
+                                    align: TextAlign.left
+                                  )
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                  bottom: 2 * widthMultiplier),
+                                  child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        CustomText(
-                                          text: 'Open now', 
-                                          color: appColor, 
-                                          size: 1.2, 
-                                          weight: FontWeight.normal, 
-                                          align: TextAlign.left
-                                        ),
-                                        CustomText(
-                                          text: '\t\t\t●\t\t\t', 
-                                          color: appColor, 
-                                          size: .6, 
-                                          weight: FontWeight.normal, 
-                                          align: TextAlign.left
-                                        ),
-                                        Expanded(
-                                          child: CustomText(
-                                            text: restaurant['address'], 
-                                            color: Colors.black, 
-                                            size: 1.2, 
-                                            weight: FontWeight.normal, 
-                                            align: TextAlign.left
+                                        for (var featuredRestaurant in _featuredRestaurants)
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 1 * heightMultiplier,
+                                              bottom: 1 * heightMultiplier,
+                                              left: (_featuredRestaurants.indexOf(featuredRestaurant) == 0?4:0) * widthMultiplier,
+                                              right: (_featuredRestaurants.indexOf(featuredRestaurant) == _featuredRestaurants.length-1?0:4) * widthMultiplier),
+                                          child: CustomButton(
+                                            height: 0,
+                                            minWidth: 0,
+                                            child: ElevatedButton(
+                                              style: ButtonStyle(
+                                                overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                  RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                                                  ),
+                                                ),
+                                                padding: MaterialStateProperty.all(EdgeInsets.zero),
+                                                backgroundColor: MaterialStateProperty.all(Colors.white),
+                                                alignment: Alignment.center,
+                                              ),
+                                              onPressed: () {
+                                                _onTheGoorBooking(featuredRestaurant['restaurant']);
+                                              },
+                                              child: Container(
+                                                height: 18 * heightMultiplier,
+                                                width: 28 * widthMultiplier,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      height: 12 * heightMultiplier,
+                                                      width: 28 * widthMultiplier,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                        image: DecorationImage(
+                                                          fit: BoxFit.cover,
+                                                          image: CachedNetworkImageProvider(
+                                                            featuredRestaurant['image'],
+                                                          ),
+                                                        )
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier, horizontal: 2 * widthMultiplier),
+                                                      child: CustomText(
+                                                        text: '${featuredRestaurant['restaurant']['name']}', 
+                                                        color: Colors.black, 
+                                                        size: 1.2, 
+                                                        weight: FontWeight.bold, 
+                                                        align: TextAlign.left
+                                                      )
+                                                    ),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(bottom: 0.5 * heightMultiplier, left: 2 * widthMultiplier, right: 2 * widthMultiplier),
+                                                      child: CustomText(
+                                                        text: 'Open now', 
+                                                        color: appColor, 
+                                                        size: 1.2, 
+                                                        weight: FontWeight.normal, 
+                                                        align: TextAlign.left
+                                                      ),
+                                                    )
+                                                  ]
+                                                )
+                                              )
+                                            )
                                           )
                                         ),
                                       ]
                                     )
-                                  ]
+                                  )
                                 )
-                              )
+                              ]
+                            )
+                          )
+                          else
+                          Container(),
+                          if (_loadedAll)
+                          if (_restaurants.length > 0)
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(top: (((_banners.length > 0 && _loadedBanners) || (_featuredRestaurants.length > 0 && _loadedFeatured))?2:0) * heightMultiplier),
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                              ],
+                              color: Colors.white
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                  left: 4 * widthMultiplier, right: 4 * widthMultiplier, top: 1 * heightMultiplier,),
+                                  child: CustomText(
+                                    text: 'All Restaurants', 
+                                    color: Colors.black, 
+                                    size: 1.6, 
+                                    weight: FontWeight.normal, 
+                                    align: TextAlign.left
+                                  )
+                                ),
+                                for (var restaurant in _restaurants)
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 1 * heightMultiplier,
+                                      horizontal: 4 * widthMultiplier),
+                                  child: CustomButton(
+                                    height: 0,
+                                    minWidth: 0,
+                                    child: ElevatedButton(
+                                      style: ButtonStyle(
+                                        overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                                          ),
+                                        ),
+                                        padding: MaterialStateProperty.all(EdgeInsets.zero),
+                                        backgroundColor: MaterialStateProperty.all(Colors.white),
+                                        alignment: Alignment.center,
+                                      ),
+                                      onPressed: () {
+                                        _onTheGoorBooking(restaurant);
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            height: 26 * heightMultiplier,
+                                            width: 100 * widthMultiplier,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                              image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: CachedNetworkImageProvider(
+                                                  restaurant['image'],
+                                                ),
+                                              )
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 2 * widthMultiplier),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: CustomText(
+                                                    text: '${restaurant['name']}', 
+                                                    color: Colors.black, 
+                                                    size: 1.8, 
+                                                    weight: FontWeight.bold, 
+                                                    align: TextAlign.left
+                                                  )
+                                                ),
+                                                SmoothStarRating(
+                                                  color: appColor,
+                                                  borderColor: appColor,
+                                                  filledIconData: Icons.star_rounded,
+                                                  halfFilledIconData: Icons.star_half_rounded,
+                                                  defaultIconData: Icons.star_outline_rounded,
+                                                  allowHalfRating: true,
+                                                  starCount: 5,
+                                                  size: 3 * imageSizeMultiplier,
+                                                  rating: restaurant['rating']??1.5,
+                                                  isReadOnly: true,
+                                                )
+                                              ]
+                                            )
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(bottom: 1 * heightMultiplier, left: 2 * widthMultiplier, right: 2 * widthMultiplier),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                CustomText(
+                                                  text: 'Open now', 
+                                                  color: appColor, 
+                                                  size: 1.2, 
+                                                  weight: FontWeight.normal, 
+                                                  align: TextAlign.left
+                                                ),
+                                                CustomText(
+                                                  text: '\t\t\t●\t\t\t', 
+                                                  color: appColor, 
+                                                  size: .6, 
+                                                  weight: FontWeight.normal, 
+                                                  align: TextAlign.left
+                                                ),
+                                                Expanded(
+                                                  child: CustomText(
+                                                    text: restaurant['address'], 
+                                                    color: Colors.black, 
+                                                    size: 1.2, 
+                                                    weight: FontWeight.normal, 
+                                                    align: TextAlign.left
+                                                  )
+                                                ),
+                                              ]
+                                            )
+                                          )
+                                        ]
+                                      )
+                                    )
+                                  )
+                                )
+                              ]
                             )
                           )
                           else
@@ -886,7 +1249,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               size: 1.8,
                               weight: FontWeight.normal,
                             ),
-                          ),
+                          )
+                          else
+                          Container()
                         ]
                       )
                     )

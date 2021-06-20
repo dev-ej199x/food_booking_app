@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'config.dart';
+
 class CustomButton extends StatelessWidget {
   Widget child;
   double height;
@@ -17,8 +19,8 @@ class CustomButton extends StatelessWidget {
     return ButtonTheme(
       height: height,
       minWidth: minWidth,
-      splashColor: Colors.white.withOpacity(.2),
-      highlightColor: Colors.white.withOpacity(.2),
+      splashColor: appColor.withOpacity(.2),
+      highlightColor: appColor.withOpacity(.2),
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       child: child,

@@ -391,7 +391,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           topLeft: Radius.circular(40.0),
                           topRight: Radius.circular(40.0),
                         ),
-                        color: Color(0xFFED1F56),
+                        color: appColor,
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x29000000),

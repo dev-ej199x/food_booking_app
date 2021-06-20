@@ -197,7 +197,7 @@ class _OrderCartState extends State<OrderCart> {
                         align: TextAlign.center,
                         text: 'Product Options',
                         size: 3,
-                        color: Color(0xFFED1F56),
+                        color: appColor,
                         weight: FontWeight.bold
                       ),
                     ),
@@ -264,7 +264,7 @@ class _OrderCartState extends State<OrderCart> {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(6 * heightMultiplier),
           child: AppBar(
-            backgroundColor: Color(0xFFED1F56),
+            backgroundColor: appColor,
             title: Center(
               child: CustomText(
                 text: 'CART',
@@ -288,7 +288,7 @@ class _OrderCartState extends State<OrderCart> {
                 icon: Icon(
                   Icons.arrow_back,
                   size: 6 * imageSizeMultiplier,
-                  color: Color(0xFFED1F56),
+                  color: appColor,
                 ),
               )
             ],

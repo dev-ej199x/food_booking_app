@@ -100,7 +100,7 @@ class _AddressScreenState extends State<AddressScreen> {
                               height: 37.0,
                               splashColor: Colors.white,
                               child: RaisedButton(
-                                color: const Color(0xFFED1F56),
+                                color: appColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14.0),
                                 
@@ -121,7 +121,7 @@ class _AddressScreenState extends State<AddressScreen> {
                             child: ButtonTheme(
                               minWidth: 230.0,
                               height: 37.0,
-                              splashColor: Color(0xFFED1F56),
+                              splashColor: appColor,
                               child: RaisedButton(
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
@@ -131,7 +131,7 @@ class _AddressScreenState extends State<AddressScreen> {
                                 onPressed: () {},
                                 child: CustomText(
                                   text: "Select Manually",
-                                  color: Color(0xFFED1F56),
+                                  color: appColor,
                                   weight: FontWeight.bold,
                                   align: TextAlign.left,
                                   size: 1.8,

@@ -95,7 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(40.0),
                     bottomRight: Radius.circular(40.0)),
-                color: Color(0xFFED1F56),
+                color: appColor,
               ),
               child: SafeArea(
                 child: CustomText(

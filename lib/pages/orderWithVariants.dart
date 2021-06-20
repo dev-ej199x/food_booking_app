@@ -220,7 +220,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         text: 'Variation',
                         align: TextAlign.center,
                         size: 3,
-                        color: Color(0xFFED1F56),
+                        color: appColor,
                         weight: FontWeight.bold,
                       ),
                     ),
@@ -673,7 +673,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               );
                             }
                           },
-                          // color: Color(0xffE44D36),
+                          // color: appColor,
                           // shape: RoundedRectangleBorder(
                           //   borderRadius: BorderRadius.circular(
                           //       10 * imageSizeMultiplier),
@@ -823,7 +823,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           child: Column(
             children: [
               AppBar(
-                backgroundColor: Color(0xFFED1F56),
+                backgroundColor: appColor,
                 elevation: 0,
                 leading: IconButton(
                   icon: Icon(
@@ -861,7 +861,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                     bottomLeft: Radius.circular(40.0),
                     bottomRight: Radius.circular(40.0)
                   ),
-                  color: Color(0xFFED1F56),
+                  color: appColor,
                 ),
                 child: Column(
                   children: <Widget>[
