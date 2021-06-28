@@ -10,7 +10,7 @@ import 'images.dart';
 
 class Http {
   SharedPreferences _sharedPreferences;
-  // String ip = 'http://192.168.1.75:8000';
+  // String ip = 'http://192.168.1.10:8000';
   String ip = 'http://192.168.68.104:8000';
   // String ip = 'http://139.59.75.22';
   // String ip = 'http://192.168.1.75:8000';

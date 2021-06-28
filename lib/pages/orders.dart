@@ -86,32 +86,28 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return WillPopScope(
       onWillPop: () {},
       child: ScaffoldMessenger(
-      key: _scaffoldKey,
+        key: _scaffoldKey,
         child: Scaffold(
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(16 * heightMultiplier),
-            child: Container(
-              alignment: Alignment.center,
-              height: 16 * heightMultiplier,
+            preferredSize: Size.fromHeight(10 * heightMultiplier),
+            child: Ink(
               width: 100 * widthMultiplier,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40.0),
-                    bottomRight: Radius.circular(40.0)),
-                color: appColor,
-              ),
+              color: Colors.white,
               child: SafeArea(
-                child: CustomText(
-                  text: 'Orders',
-                  size: 3,
-                  weight: FontWeight.bold,
-                  align: TextAlign.left,
-                  color: Colors.white,
-                ),
-              )
-            ),
+                child: Padding(
+                  padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                  child: CustomText(
+                    color: appColor,
+                    align: TextAlign.center,
+                    size: 2,
+                    text: 'ORDERS',
+                    weight: FontWeight.bold,
+                  )
+                )
+              ),
+            )
           ),
           body: GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -160,7 +156,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           align: TextAlign.left,
                           color: Colors.black,
                           size: 1.8,
-                          weight: FontWeight.bold,
+                          weight: FontWeight.normal,
                         )
                       )
                     )
@@ -207,7 +203,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     weight: FontWeight.bold,
                                   ),
                                   CustomText(
-                                    text: '₱ ${order['grand_total'].toStringAsFixed(2)}',
+                                    text: '₱  ${order['grand_total'].toStringAsFixed(2)}',
                                     align: TextAlign.left,
                                     color: Colors.white,
                                     size: 1.6,

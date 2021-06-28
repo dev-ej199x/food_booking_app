@@ -78,117 +78,110 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {},
-      child: ScaffoldMessenger(
+    return ScaffoldMessenger(
       key: _scaffoldKey,
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          resizeToAvoidBottomInset: false,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(16 * heightMultiplier),
-            child: Container(
-              alignment: Alignment.center,
-              height: 16 * heightMultiplier,
-              width: 100 * widthMultiplier,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40.0),
-                    bottomRight: Radius.circular(40.0)),
-                color: appColor,
-              ),
-              child: SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(10 * heightMultiplier),
+          child: Ink(
+            width: 100 * widthMultiplier,
+            color: Colors.white,
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(top: 2 * heightMultiplier),
                 child: CustomText(
-                  text: ' Notifications',
-                  size: 3,
+                  color: appColor,
+                  align: TextAlign.center,
+                  size: 2,
+                  text: 'NOTIFICATIONS',
                   weight: FontWeight.bold,
-                  align: TextAlign.left,
-                  color: Colors.white,
-                ),
+                )
               )
             ),
-          ),
-          body: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              FocusScope.of(context).unfocus();
-              _scaffoldKey.currentState.removeCurrentSnackBar();
+          )
+        ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            _scaffoldKey.currentState.removeCurrentSnackBar();
+          },
+          child: SmartRefresher(
+            enablePullDown: !_loading,
+            onRefresh: () {
+              setState(() {
+                _notifications.clear();
+                _loading = true;
+              });
+              _getNotifications();
             },
-            child: SmartRefresher(
-              enablePullDown: !_loading,
-              onRefresh: () {
-                setState(() {
-                  _notifications.clear();
-                  _loading = true;
-                });
-                _getNotifications();
-              },
-              physics: BouncingScrollPhysics(),
-              header: CustomHeader(builder: (context, status) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      size: 10 * imageSizeMultiplier,
-                      color: appColor
-                    ),
-                    SizedBox(
-                      height: 3 * imageSizeMultiplier,
-                      width: 3 * imageSizeMultiplier,
-                      child: CircularProgressIndicator(
-                        strokeWidth: .2 * imageSizeMultiplier,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            physics: BouncingScrollPhysics(),
+            header: CustomHeader(builder: (context, status) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(
+                    Icons.circle,
+                    size: 10 * imageSizeMultiplier,
+                    color: appColor
+                  ),
+                  SizedBox(
+                    height: 3 * imageSizeMultiplier,
+                    width: 3 * imageSizeMultiplier,
+                    child: CircularProgressIndicator(
+                      strokeWidth: .2 * imageSizeMultiplier,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
+                  )
+                ]
+              );
+            }),
+            controller: _refreshController,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_notifications.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: CustomText(
+                        text: 'No notifications to show',
+                        align: TextAlign.left,
+                        color: Colors.black,
+                        size: 1.8,
+                        weight: FontWeight.normal,
                       )
                     )
-                  ]
-                );
-              }),
-              controller: _refreshController,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_notifications.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: CustomText(
-                          text: 'No notifications to show',
+                  )
+                  else
+                  for (var notif in _notifications)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: 'Header',
                           align: TextAlign.left,
                           color: Colors.black,
-                          size: 1.8,
+                          size: 2,
                           weight: FontWeight.bold,
-                        )
-                      )
+                        ),
+                        CustomText(
+                          text: 'Body',
+                          align: TextAlign.left,
+                          color: Color(0xFF222455).withOpacity(.5),
+                          size: 1.8,
+                          weight: FontWeight.normal,
+                        ),
+                      ],
                     )
-                    else
-                    for (var notif in _notifications)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomText(
-                            text: 'Header',
-                            align: TextAlign.left,
-                            color: Colors.black,
-                            size: 2,
-                            weight: FontWeight.bold,
-                          ),
-                          CustomText(
-                            text: 'Body',
-                            align: TextAlign.left,
-                            color: Color(0xFF222455).withOpacity(.5),
-                            size: 1.8,
-                            weight: FontWeight.normal,
-                          ),
-                        ],
-                      )
-                    )
-                  ]
-                )
+                  )
+                ]
               )
             )
           )

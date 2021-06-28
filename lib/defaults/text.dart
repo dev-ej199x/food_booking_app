@@ -8,7 +8,7 @@ class CustomText extends StatelessWidget {
   FontWeight weight;
   TextAlign align;
   double spacing;
-  double maxLine;
+  int maxLine;
   double overflow;
   
   CustomText({

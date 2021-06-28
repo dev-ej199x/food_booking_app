@@ -9,10 +9,12 @@ import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/defaults/textbox.dart';
+import 'package:food_booking_app/pages/basket.dart';
 import 'package:food_booking_app/pages/orderWithVariants.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
@@ -28,15 +30,18 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
+  SharedPreferences _sharedPreferences;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  TextEditingController _searchController = TextEditingController();
   var _restaurant = {};
   List _products = [];
   List _categories = [];
-  List<String> _categoriesNames = [];
-  String dropdownValue = '';
+  int _selectedCategoryIndex = 0;
   List<String> quantity = [];
   bool _loading = false;
+  int _cartQuantity = 0;
+  var _cart = {};
 
   void initState() {
     // log(widget.details.toString());
@@ -46,7 +51,7 @@ class _OrderScreenState extends State<OrderScreen> {
     // _categories = new List.from(widget.details['productCategories']);
     // if (_categories.isNotEmpty) {
     //   _products = new List.from(_categories[0]['products']);
-    //   dropdownValue = _categories[0]['categoriesName'];
+    //   _selectedCategoryIndex = _categories[0]['categoriesName'];
     //   _categories.forEach((category) {
     //     _categoriesNames.add(category['categoriesName']);
     //   });
@@ -55,15 +60,24 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   _searchProduts(String search) {
+    List products = [];
+    print('HAHSHA ${_products.length}');
+    
     _products.forEach((product) {
+      print('HAHSHA $product');
+      print('HAHSHA $search');
       if (product['name']
           .toString()
           .toLowerCase()
           .contains(search.toLowerCase())) {
         setState(() {
-          _products.add(product);
+          products.add(product);
         });
       }
+    });
+
+    setState(() {
+      _products = new List.from(products);
     });
   }
 
@@ -74,6 +88,15 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   _getProducts() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      print(_sharedPreferences.getString('cart'));
+      print(_sharedPreferences.getString('cart').isNotEmpty);
+      print(_sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['order_request_products'].length:0);
+      _cartQuantity = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['total_items']:0;
+      _cart = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart')):{};
+      print(_cartQuantity);
+    });
     var response =
         await Http(url: 'restaurants/${widget.details['id']}', body: {})
             .getWithHeader();
@@ -118,13 +141,9 @@ class _OrderScreenState extends State<OrderScreen> {
         setState(() {
           _restaurant = json.decode(response.body)['restaurant'];
           _categories.clear();
-          _categoriesNames.clear();
           _products.clear();
           _categories = new List.from(_restaurant['product_category']);
-          dropdownValue = _categories[0]['name'];
-          _categories.forEach((category) {
-            _categoriesNames.add(category['name']);
-          });
+          _selectedCategoryIndex = 0;
           _products = new List.from(_categories[0]['products']);
           _loading = false;
           _refreshController.refreshCompleted();
@@ -138,46 +157,69 @@ class _OrderScreenState extends State<OrderScreen> {
     return ScaffoldMessenger(
       key: _scaffoldKey,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(6 * heightMultiplier),
-          child: Container(
+          preferredSize: Size.fromHeight(10 * heightMultiplier),
+          child: Ink(
+            width: 100 * widthMultiplier,
             color: Colors.white,
-            // elevation: 0,
             child: SafeArea(
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      size: 6 * imageSizeMultiplier,
+              child: Padding(
+                padding: EdgeInsets.only(right: 4 * widthMultiplier, top: 2 * heightMultiplier),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      splashColor: Colors.black12.withOpacity(0.05),
+                      hoverColor: Colors.black12.withOpacity(0.05),
+                      icon: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 6 * imageSizeMultiplier,
+                        color: appColor,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ]
+                    Expanded(
+                      child: CustomTextBox(
+                        controller: _searchController, 
+                        focusNode: null, 
+                        text: 'Search foods', 
+                        obscureText: false, 
+                        enabled: true, 
+                        border: true, 
+                        shadow: false, 
+                        onSubmitted: (text) {
+                          FocusScope.of(context).unfocus();
+                          _searchProduts(text);
+                        }, 
+                        keyboardType: TextInputType.text, 
+                        textInputAction: TextInputAction.search, 
+                        padding: 3, 
+                        prefixIcon: null, 
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            if (_searchController.text.length>0) {
+                              _searchController.clear();
+                              _getProducts();
+                            }
+                          },
+                          icon: Icon(
+                            _searchController.text.length>0?Icons.close_rounded:Icons.search,
+                            size: 6 * imageSizeMultiplier
+                          ),
+                        ), 
+                        type: 'roundedbox'
+                      ),
+                    ),
+                  ]
+                )
               )
-            )
-            // actions: [
-            //   IconButton(
-            //     icon: Icon(
-            //       Icons.shopping_cart_rounded,
-            //       size: 6 * imageSizeMultiplier,
-            //     ),
-            //     onPressed: () {
-            //       Navigator.push(
-            //         context,
-            //         PageTransition(
-            //           type: PageTransitionType.rightToLeft,
-            //           child: OrderCart(specifics: widget.specifics)
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ],
-          ),
+            ),
+          )
         ),
         body: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -185,371 +227,303 @@ class _OrderScreenState extends State<OrderScreen> {
             FocusScope.of(context).unfocus();
             _scaffoldKey.currentState.removeCurrentSnackBar();
           },
-          child: Stack(
+          child: Column(
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(top: 2 * heightMultiplier),
-                    padding: EdgeInsets.only(left: 2 * widthMultiplier, right: 2 * widthMultiplier),
-                    decoration: BoxDecoration(
-                      // color: Color(0xFF363636),
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
-                      border: Border.all(color: Color(0xFF707070).withOpacity(.25)),
-                      boxShadow: [
-                        BoxShadow(color: Color(0xFF707070).withOpacity(.25), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 3))
-                      ]
-                    ),
-                    height: 6 * heightMultiplier,
-                    width: 80 * widthMultiplier,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            enabled: true,
-                            // controller: _searchController,
-                            onFieldSubmitted: (text) {
-                              FocusScope.of(context).unfocus();
-                              setState(() {
-                                _products.clear();
-                              });
-                              _searchProduts(text);
-                            },
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.search,
-                            textAlignVertical: TextAlignVertical.center,
-                            decoration: InputDecoration(
-                              focusColor: appColor,
-                              prefixIconConstraints: BoxConstraints(minWidth: 11 * widthMultiplier, minHeight: 0),
-                              prefixIcon: Icon(
-                                Icons.sort_rounded,
-                                size: 6 * imageSizeMultiplier
-                              ),
-                              suffixIcon: Icon(
-                                Icons.search,
-                                size: 6 * imageSizeMultiplier
-                              ),
-                              hintText: 'Search Restaurant',
-                              border: InputBorder.none,
-                              hintStyle: TextStyle(
-                                fontFamily: 'Metropolis',
-                                color: Color(0xFFB6B7B7),
-                                fontSize: 1.8 * textMultiplier,
-                                fontWeight: FontWeight.normal
-                              )
-                            ).copyWith(isDense: true),
-                            style: TextStyle(
-                              fontFamily: 'Metropolis',
-                              color: Colors.black,
-                              fontSize: 1.8 * textMultiplier,
-                              fontWeight: FontWeight.normal
-                            ),
-                          )
+              if (_categories.length > 0)
+              Ink(
+                width: 100 * widthMultiplier,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(color: Color(0xFF707070).withOpacity(.2), blurRadius: 0.2 * imageSizeMultiplier, offset: Offset(0, 3))
+                  ],
+                  color: Colors.white
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier),
+                  child: Row(
+                    children: [
+                      for (var category in _categories)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: (_categories.indexOf(category) == 0?4:0) * widthMultiplier,
+                          right: (_categories.indexOf(category) == _categories.length?0:4) * widthMultiplier,
                         ),
-                      ],
-                    )
-                  ),
-                  // Padding(
-                  //   padding: EdgeInsets.zero,
-                  //   child: Container(
-                  //     width: double.infinity,
-                  //     decoration: BoxDecoration(
-                  //       borderRadius: BorderRadius.only(
-                  //           bottomLeft: Radius.circular(40.0),
-                  //           bottomRight: Radius.circular(40.0)),
-                  //       color: Color(0xFFED1F56),
-                  //     ),
-                  //     child: Column(
-                  //       children: <Widget>[
-                  //         Padding(
-                  //           padding:
-                  //               EdgeInsets.only(top: 1 * heightMultiplier),
-                  //           child: Container(
-                  //             width: 85 * widthMultiplier,
-                  //             height: 7 * heightMultiplier,
-                  //             margin: EdgeInsets.only(top: 10.0),
-                  //             padding: EdgeInsets.symmetric(
-                  //                 horizontal: 4 * widthMultiplier),
-                  //             decoration: BoxDecoration(
-                  //               color: Colors.white,
-                  //               borderRadius: BorderRadius.circular(10.0),
-                  //               border: Border.all(color: Colors.grey[800]),
-                  //             ),
-                  //             child: CustomTextBox(
-                  //               shadow: false,
-                  //               border: true,
-                  //               text: 'Search Product',
-                  //               onSubmitted: (text) {
-                  //                 FocusScope.of(context).unfocus();
-                  //                 setState(() {
-                  //                   _products.clear();
-                  //                 });
-                  //                 _searchProduts(text);
-                  //               },
-                  //               enabled: true,
-                  //               obscureText: false,
-                  //               padding: 8,
-                  //               prefixIcon: null,
-                  //               suffixIcon: null,
-                  //               focusNode: null,
-                  //               textInputAction: TextInputAction.done,
-                  //               controller: null,
-                  //               keyboardType: TextInputType.text,
-                  //             ),
-                  //           ),
-                  //         ),
-                  //         Padding(
-                  //           padding: EdgeInsets.all(1 * imageSizeMultiplier),
-                  //           child: Image.asset('assets/images/Group 22.png'),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  if (_categories.length > 0)
-                  Padding(
-                    padding: EdgeInsets.only(top: 2 * heightMultiplier, left: 4 * widthMultiplier),
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        CustomText(
-                          align: TextAlign.left,
-                          text: 'Category',
-                          size: 1.8,
-                          weight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                        if (_categories.length > 0)
-                        Padding(
-                          padding: EdgeInsets.only(left: 2 * widthMultiplier),
-                          child: DropdownButton<String>(
-                            value: dropdownValue,
-                            icon: Icon(
-                              Icons.arrow_downward,
-                              size: 6 * imageSizeMultiplier,
-                            ),
-                            iconSize: 6 * imageSizeMultiplier,
-                            underline: Container(
-                              height: .2 * heightMultiplier,
-                              color: Colors.orange[800],
-                            ),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                dropdownValue = newValue;
-                              });
-                              _category(_categoriesNames.indexOf(newValue));
-                            },
-                            items: _categoriesNames
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: CustomText(
-                                  align: TextAlign.left,
-                                  text: value,
-                                  color: Colors.black,
-                                  size: 1.8,
-                                  weight: FontWeight.normal,
-                                ),
-                              );
-                            }).toList()
-                          ),
-                        )
-                      ],
-                    )
-                  ),
-                  Container(
-                    child: Expanded(
-                      child: SmartRefresher(
-                        enablePullDown: !_loading,
-                        onRefresh: () {
-                          _getProducts();
-                          Shimmer.fromColors(
-                              child: ListView.builder(
-                                itemCount: 3,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    leading: Icon(Icons.image, size: 50.0),
-                                    title: SizedBox(
-                                      child: Container(
-                                        color: Colors.green,
-                                      ),
-                                      height: 20.0,
-                                    ),
-                                  );
-                                },
-                              ),
-                              period: Duration(seconds: 2),
-                              baseColor: Colors.grey,
-                              highlightColor: appColor);
-                        },
-                        physics: BouncingScrollPhysics(),
-                        header: CustomHeader(builder: (context, status) {
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                size: 10 * imageSizeMultiplier,
-                                color: appColor
-                              ),
-                              SizedBox(
-                                height: 3 * imageSizeMultiplier,
-                                width: 3 * imageSizeMultiplier,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: .2 * imageSizeMultiplier,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                )
-                              )
-                            ]
-                          );
-                        }),
-                        controller: _refreshController,
-                        child: _products.length < 0
-                            ? Center(
-                              child: CustomText(
-                                align: TextAlign.left,
-                                text: 'No products available',
-                                color: Colors.black,
-                                size: 1.8,
-                                weight: FontWeight.normal,
+                        child: TextButton(
+                          style: ButtonStyle(
+                            overlayColor: MaterialStateProperty.all(_selectedCategoryIndex == _categories.indexOf(category)?Colors.black.withOpacity(0.05):lightAppColor),
+                            backgroundColor: MaterialStateProperty.all(_selectedCategoryIndex == _categories.indexOf(category)?appColor:Colors.white),
+                            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                side: BorderSide(color: _selectedCategoryIndex == _categories.indexOf(category)?appColor:Colors.white),
+                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
                               )
                             )
-                            : GridView.builder(
-                                shrinkWrap: true,
-                                itemCount: _products.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2),
-                                itemBuilder: (BuildContext context, int index) {
-                                  return CustomButton(
-                                    height: 0,
-                                    minWidth: 0,
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 2 * widthMultiplier),
-                                      child: TextButton(
-                                        style: ButtonStyle(
-                                          padding: MaterialStateProperty.all(EdgeInsets.zero)
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            PageTransition(
-                                              type: PageTransitionType.rightToLeft,
-                                              child: OrderWithVariants(
-                                                  details: _products[index],
-                                                  restaurantDetails: widget.details,
-                                                  specifics: widget.specifics,
-                                                  index: index),
-                                            ),
-                                          );
-                                        },
-                                        child: Ink(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(15.0)),
-                                            color: Color(0xFF484545),
-                                          ),
-                                          height: 22 * heightMultiplier,
-                                          child: Hero(
-                                            tag:
-                                                '_orderLogo$index${widget.details['variantID']}',
-                                            // tag: 'orderLogo',
-                                            child: Stack(
-                                              children: [
-                                                Container(
-                                                  height: 22 * heightMultiplier,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _selectedCategoryIndex = _categories.indexOf(category);
+                            });
+                            _category(_categories.indexOf(category));
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 1 * widthMultiplier),
+                            child: CustomText(
+                              align: TextAlign.left,
+                              text: category['name'],
+                              size: 1.8,
+                              weight: FontWeight.normal,
+                              color: _selectedCategoryIndex == _categories.indexOf(category)?Colors.white:Color(0xFF9D9C9C),
+                            ),
+                          )
+                        )
+                      )
+                    ],
+                  )
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                  child: SmartRefresher(
+                    enablePullDown: !_loading,
+                    onRefresh: () {
+                      _getProducts();
+                    },
+                    physics: BouncingScrollPhysics(),
+                    header: CustomHeader(builder: (context, status) {
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: 10 * imageSizeMultiplier,
+                            color: appColor
+                          ),
+                          SizedBox(
+                            height: 3 * imageSizeMultiplier,
+                            width: 3 * imageSizeMultiplier,
+                            child: CircularProgressIndicator(
+                              strokeWidth: .2 * imageSizeMultiplier,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          )
+                        ]
+                      );
+                    }),
+                    controller: _refreshController,
+                    child: _products.length < 0
+                        ? Center(
+                          child: CustomText(
+                            align: TextAlign.left,
+                            text: 'No products available',
+                            color: Colors.black,
+                            size: 1.8,
+                            weight: FontWeight.normal,
+                          )
+                        )
+                        : Column(
+                          children: [
+                            for (var product in _products)
+                            if (product['variants'].length>0)
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                              child: CustomButton(
+                                height: 0,
+                                minWidth: 0,
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                    overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                                      ),
+                                    ),
+                                    padding: MaterialStateProperty.all(EdgeInsets.zero),
+                                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                                    alignment: Alignment.center,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.rightToLeft,
+                                        child: OrderWithVariants(
+                                            details: product,
+                                            restaurantDetails: widget.details,
+                                            specifics: widget.specifics,
+                                            index: _products.indexOf(product)),
+                                      ),
+                                    ).then((value) {
+                                      setState(() {
+                                        _cartQuantity = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['total_items']:0;
+                                        _cart = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart')):{};
+                                      });
+                                    });
+                                  },
+                                  child: Hero(
+                                    tag: '_orderLogo${product['id']}',
+                                    // tag: 'orderLogo',
+                                    child: Container(
+                                      height: 26 * imageSizeMultiplier,
+                                      width: 100 * widthMultiplier,
+                                      child: Row(
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl: product['image'],
+                                            placeholder: (context, string) {
+                                              return Shimmer.fromColors(
+                                                baseColor: Colors.black12,
+                                                highlightColor: Colors.black26,
+                                                child: Container(
+                                                  height: 26 * imageSizeMultiplier,
+                                                  width: 30 * imageSizeMultiplier,
                                                   decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.all(
-                                                        Radius.circular(15.0)),
-                                                    color: Colors.green,
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(15),
-                                                    child: Image.network(
-                                                      _products[index]['image'],
-                                                      width: MediaQuery.of(context).size.width,
-                                                      fit: BoxFit.fill,
-                                                    ),
+                                                    borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                    color: Color(0xFF363636),
                                                   ),
                                                 ),
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    // Padding(
-                                                    //   padding: EdgeInsets.only(top: 4 *heightMultiplier),
-                                                    //   child: Container(
-                                                    //     padding: EdgeInsets.symmetric(vertical: .4 * heightMultiplier),
-                                                    //     width: 20 * widthMultiplier,
-                                                    //     alignment: Alignment.center,
-                                                    //     decoration: BoxDecoration(
-                                                    //       color: Colors.red,
-                                                    //       borderRadius:
-                                                    //           BorderRadius.only(
-                                                    //         topRight: Radius.circular(5 * imageSizeMultiplier),
-                                                    //         bottomRight: Radius.circular(5 * imageSizeMultiplier),
-                                                    //       ),
-                                                    //     ),
-                                                    //     //Product Name
-                                                    //     child: CustomText(
-                                                    //       text: _products[index]['productName'],
-                                                    //       align: TextAlign.center,
-                                                    //       size: 1.8,
-                                                    //       weight: FontWeight.bold,
-                                                    //       color: Colors.white,
-                                                    //     ),
-                                                    //   ),
-                                                    // ),
-                                                    Spacer(),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 1 *
-                                                              heightMultiplier),
-                                                      child: Container(
-                                                        alignment: Alignment.center,
-                                                        height:
-                                                            3 * heightMultiplier,
-                                                        width: double.infinity,
-                                                        decoration: BoxDecoration(
-                                                          color: Color(0xff484545),
-                                                          borderRadius:
-                                                              BorderRadius.only(
-                                                            bottomLeft: Radius.circular(4 * imageSizeMultiplier),
-                                                            bottomRight: Radius.circular(4 * imageSizeMultiplier),
-                                                          ),
-                                                        ),
-                                                        //Product Description
-                                                        child: CustomText(
-                                                          text: _products[index]['name'],
-                                                          // text: _products[index]['productDescription'],
-                                                          align: TextAlign.center,
-                                                          size: 1.8,
-                                                          weight: FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ]
-                                                )
-                                              ],
-                                            ),
+                                              );
+                                            },
+                                            imageBuilder: (context, provider) {
+                                              return Container(
+                                                height: 26 * imageSizeMultiplier,
+                                                width: 30 * imageSizeMultiplier,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                                  color: Color(0xFF363636),
+                                                  image: DecorationImage(
+                                                    image: provider,
+                                                    fit: BoxFit.cover
+                                                  )
+                                                ),
+                                              );
+                                            },
                                           ),
-                                        ),
+                                          Expanded(
+                                            child:  Padding(
+                                              padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  CustomText(
+                                                    text: product['name'],
+                                                    // text: _products[index]['productDescription'],
+                                                    align: TextAlign.center,
+                                                    size: 1.8,
+                                                    weight: FontWeight.normal,
+                                                    color: Colors.black,
+                                                  ),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(top: 1 * heightMultiplier),
+                                                    child: CustomText(
+                                                      text: 'From ₱ ${double.parse(product['variants'][0]['price'].toString()).toStringAsFixed(2)}',
+                                                      // text: _products[index]['productDescription'],
+                                                      align: TextAlign.center,
+                                                      size: 1.4,
+                                                      weight: FontWeight.normal,
+                                                      color: Color(0xFF9D9C9C),
+                                                    )
+                                                  ),
+                                                ],
+                                              )
+                                            )
+                                          )
+                                        ]
                                       )
                                     )
-                                  );
-                                },
-                              ),
-                      ),
-                    ),
+                                  )
+                                )
+                              )
+                            )
+                          ],
+                        )
                   ),
-                ],
+                ),
               ),
             ],
           ),
+        ),
+        bottomSheet: _cartQuantity>0?
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
+          child: TextButton(
+            onPressed: () {
+              Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeft, child: BasketScren()))
+              .then((value) {
+                setState(() {
+                  _cartQuantity = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['total_items']:0;
+                  _cart = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart')):{};
+                });
+              });
+            },
+            style: ButtonStyle(
+              overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+              minimumSize: MaterialStateProperty.all(Size.zero),
+              padding: MaterialStateProperty.all(EdgeInsets.zero)
+            ),
+            child: Ink(
+              height: 6 * heightMultiplier,
+              width: 100 * widthMultiplier,
+              padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                color: appColor
+              ),
+              // color: appColor,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 6 * imageSizeMultiplier,
+                      height: 6 * imageSizeMultiplier,
+                      padding: EdgeInsets.symmetric(horizontal: 1 * widthMultiplier),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                        border: Border.all(color: Colors.white)
+                        // color: Colors.white
+                      ),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          text: '$_cartQuantity',
+                          // text: _products[index]['productDescription'],
+                          align: TextAlign.center,
+                          size: 1.4,
+                          weight: FontWeight.normal,
+                          color: Colors.white,
+                        )
+                      )
+                    )
+                  ),
+                  CustomText(
+                    text: 'Review basket',
+                    // text: _products[index]['productDescription'],
+                    align: TextAlign.center,
+                    size: 1.4,
+                    weight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: CustomText(
+                      text: '₱ ${double.parse(_cart['total_price'].toString()).toStringAsFixed(2)}',
+                      // text: _products[index]['productDescription'],
+                      align: TextAlign.center,
+                      size: 1.4,
+                      weight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              ),
+            )
+          )
         )
+        :
+        null,
       )
     );
   }

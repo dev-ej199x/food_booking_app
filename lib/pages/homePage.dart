@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:food_booking_app/defaults/button.dart';
+import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/defaults/textbox.dart';
+import 'package:food_booking_app/pages/notification.dart';
 import 'package:intl/intl.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
@@ -274,7 +276,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                       style: ButtonStyle(
                         overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
                         // shadowColor: MaterialStateProperty.all(Colors.red),
-                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
+                        elevation: MaterialStateProperty.all(1 * imageSizeMultiplier),
                         backgroundColor: MaterialStateProperty.all(
                           appColor,
                         ),
@@ -312,7 +314,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                       style: ButtonStyle(
                         overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
                         // shadowColor: MaterialStateProperty.all(Colors.red),
-                        elevation: MaterialStateProperty.all(2 * imageSizeMultiplier),
+                        elevation: MaterialStateProperty.all(1 * imageSizeMultiplier),
                         backgroundColor: MaterialStateProperty.all(
                           appColor,
                         ),
@@ -482,7 +484,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           color: appColor,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(2 * imageSizeMultiplier),
+                                BorderRadius.circular(1 * imageSizeMultiplier),
                           ),
                           child: Container(
                             child: Center(
@@ -714,7 +716,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           color: appColor,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(2 * imageSizeMultiplier),
+                                BorderRadius.circular(1 * imageSizeMultiplier),
                           ),
                           child: Container(
                             child: Center(
@@ -818,10 +820,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(7 * heightMultiplier),
+            preferredSize: Size.fromHeight(10 * heightMultiplier),
             child: SafeArea(
               child: Padding(
-                padding: EdgeInsets.only(left: 4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
+                padding: EdgeInsets.only(left: 4 * widthMultiplier, top: 2 * heightMultiplier),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -849,7 +851,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                     Spacer(),
                     IconButton(
                       onPressed: () {
-                        print('a');
+                        Navigator.push(
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.rightToLeft,
+                            child: NotificationPage()
+                          ),
+                        );
                       },
                       icon: Icon(
                         Icons.notifications_rounded,
@@ -877,26 +885,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                       _getEstablishments();
                     },
                     physics: BouncingScrollPhysics(),
-                    header: CustomHeader(builder: (context, status) {
-                      return Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 10 * imageSizeMultiplier,
-                            color: appColor
-                          ),
-                          SizedBox(
-                            height: 3 * imageSizeMultiplier,
-                            width: 3 * imageSizeMultiplier,
-                            child: CircularProgressIndicator(
-                              strokeWidth: .2 * imageSizeMultiplier,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          )
-                        ]
-                      );
-                    }),
+                    header: MaterialClassicHeader(),
+                    // header: CustomHeader(builder: (context, status) {
+                    //   return Stack(
+                    //     alignment: Alignment.center,
+                    //     children: [
+                    //       Icon(
+                    //         Icons.circle,
+                    //         size: 10 * imageSizeMultiplier,
+                    //         color: appColor
+                    //       ),
+                    //       SizedBox(
+                    //         height: 3 * imageSizeMultiplier,
+                    //         width: 3 * imageSizeMultiplier,
+                    //         child: CircularProgressIndicator(
+                    //           strokeWidth: .2 * imageSizeMultiplier,
+                    //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    //         )
+                    //       )
+                    //     ]
+                    //   );
+                    // }),
                     controller: _refreshController,
                     child:  SingleChildScrollView(
                       child: Column(
@@ -904,13 +913,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           if (_loadedBanners)
                           if (_banners.length > 0)
                           Container(
-                            padding: EdgeInsets.only(top: 2 * heightMultiplier),
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
-                              ],
+                              // boxShadow: [
+                              //   BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                              //   BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                              // ],
                               color: Colors.white
                             ),
                             child: Column(
@@ -931,7 +939,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                         return Container(
                                           width: MediaQuery.of(context).size.width,
                                           decoration: BoxDecoration(
-                                            color: Colors.amber
+                                            color: Color(0xFF363636),
                                           ),
                                           child: Stack(
                                             children: [
@@ -939,6 +947,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                 imageUrl: i['banner_image'],
                                                 fit: BoxFit.cover,
                                                 width: MediaQuery.of(context).size.width,
+                                                imageBuilder: (context, provider) {
+                                                  return Container(
+                                                    padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                                                    height: 20 * heightMultiplier,
+                                                    width: double.infinity, 
+                                                    decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        fit: BoxFit.cover,
+                                                        image: provider
+                                                      )
+                                                    ),
+                                                  );
+                                                },
                                                 placeholder: (context, string) {
                                                   return Shimmer.fromColors(
                                                     baseColor: Colors.black12,
@@ -972,7 +993,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                       child: Icon(
                                                         Icons.circle,
                                                         color: _currentBannerIndex == x?Colors.black:Colors.grey,
-                                                        size: 2 * imageSizeMultiplier
+                                                        size: 1 * imageSizeMultiplier
                                                       )
                                                     )
                                                   ],
@@ -994,11 +1015,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           if (_featuredRestaurants.length > 0)
                           Container(
                             width: double.infinity,
-                            margin: EdgeInsets.only(top: (_banners.length > 0 && _loadedBanners?2:0) * heightMultiplier),
                             decoration: BoxDecoration(
                               boxShadow: [
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                                // BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                                // BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
                               ],
                               color: Colors.white
                             ),
@@ -1058,18 +1078,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
-                                                      height: 12 * heightMultiplier,
-                                                      width: 28 * widthMultiplier,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
-                                                        image: DecorationImage(
-                                                          fit: BoxFit.cover,
-                                                          image: CachedNetworkImageProvider(
-                                                            featuredRestaurant['image'],
+                                                    CachedNetworkImage(
+                                                      imageUrl: featuredRestaurant['image'],
+                                                      placeholder: (context, string) {
+                                                        return Shimmer.fromColors(
+                                                          baseColor: Colors.black12,
+                                                          highlightColor: Colors.black26,
+                                                          child: Container(
+                                                            height: 12 * heightMultiplier,
+                                                            width: 28 * widthMultiplier,
+                                                            decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                              color: Color(0xFF363636),
+                                                            ),
                                                           ),
-                                                        )
-                                                      ),
+                                                        );
+                                                      },
+                                                      errorWidget: (context, string, _) {
+                                                        return Container(
+                                                          height: 12 * heightMultiplier,
+                                                          width: 28 * widthMultiplier,
+                                                          decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                            color: Color(0xFF363636),
+                                                            image: DecorationImage(
+                                                              fit: BoxFit.cover,
+                                                              image: AssetImage(
+                                                                Images.iconImage,
+                                                              )
+                                                            )
+                                                          ),
+                                                        );
+                                                      },
+                                                      imageBuilder: (context, provider) {
+                                                        return Container(
+                                                          height: 12 * heightMultiplier,
+                                                          width: 28 * widthMultiplier,
+                                                          decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                            image: DecorationImage(
+                                                              fit: BoxFit.cover,
+                                                              image: provider
+                                                            )
+                                                          ),
+                                                        );
+                                                      }
                                                     ),
                                                     Padding(
                                                       padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier, horizontal: 2 * widthMultiplier),
@@ -1110,7 +1163,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           if (_restaurants.length > 0)
                           Container(
                             width: double.infinity,
-                            margin: EdgeInsets.only(top: (((_banners.length > 0 && _loadedBanners) || (_featuredRestaurants.length > 0 && _loadedFeatured))?2:0) * heightMultiplier),
                             decoration: BoxDecoration(
                               boxShadow: [
                                 BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
@@ -1158,18 +1210,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                                       },
                                       child: Column(
                                         children: [
-                                          Container(
-                                            height: 26 * heightMultiplier,
-                                            width: 100 * widthMultiplier,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
-                                              image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: CachedNetworkImageProvider(
-                                                  restaurant['image'],
+                                          CachedNetworkImage(
+                                            imageUrl: restaurant['image'],
+                                            placeholder: (context, string) {
+                                              return Shimmer.fromColors(
+                                                baseColor: Colors.black12,
+                                                highlightColor: Colors.black26,
+                                                child: Container(
+                                                  height: 26 * heightMultiplier,
+                                                  width: 100 * widthMultiplier,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                    color: Color(0xFF363636),
+                                                  ),
                                                 ),
-                                              )
-                                            ),
+                                              );
+                                            },
+                                            errorWidget: (context, string, _) {
+                                              return Container(
+                                                height: 26 * heightMultiplier,
+                                                width: 100 * widthMultiplier,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                  color: Color(0xFF363636),
+                                                  image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: AssetImage(
+                                                      Images.iconImage,
+                                                    )
+                                                  )
+                                                ),
+                                              );
+                                            },
+                                            imageBuilder: (context, provider) {
+                                              return Container(
+                                                height: 26 * heightMultiplier,
+                                                width: 100 * widthMultiplier,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                                  image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: provider
+                                                  )
+                                                ),
+                                              );
+                                            }
                                           ),
                                           Padding(
                                             padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 2 * widthMultiplier),
@@ -1251,7 +1336,62 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                             ),
                           )
                           else
-                          Container()
+                          for(int x = 0; x<4; x++)
+                          Shimmer.fromColors(
+                            baseColor: Colors.black12,
+                            highlightColor: Colors.black26,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 1 * heightMultiplier,
+                                  horizontal: 4 * widthMultiplier),
+                              child: CustomButton(
+                                height: 0,
+                                minWidth: 0,
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                    overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                                      ),
+                                    ),
+                                    padding: MaterialStateProperty.all(EdgeInsets.zero),
+                                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                                    alignment: Alignment.center,
+                                  ),
+                                  onPressed: () {
+                                    // _onTheGoorBooking(restaurant);
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 26 * heightMultiplier,
+                                        width: 100 * widthMultiplier,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(topRight: Radius.circular(1 * imageSizeMultiplier), topLeft: Radius.circular(1 * imageSizeMultiplier)),
+                                          color: Color(0xFF363636),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 2 * widthMultiplier),
+                                        child: Container(
+                                          height: 1.8 * textMultiplier,
+                                          color: Color(0xFF363636),
+                                        )
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 2 * widthMultiplier),
+                                        child: Container(
+                                          height: 1.8 * textMultiplier,
+                                          color: Color(0xFF363636),
+                                        )
+                                      ),
+                                    ]
+                                  )
+                                )
+                              )
+                            )
+                          )
                         ]
                       )
                     )

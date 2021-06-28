@@ -20,6 +20,7 @@ class CustomTextBox extends StatelessWidget {
   Widget prefixIcon;
   Widget suffixIcon;
   String type;
+  int maxLine;
   
   CustomTextBox({
     Key key,
@@ -37,6 +38,7 @@ class CustomTextBox extends StatelessWidget {
     @required this.prefixIcon,
     @required this.suffixIcon,
     @required this.type,
+    this.maxLine,
   }) : super(key: key);
 
   @override
@@ -53,12 +55,13 @@ class CustomTextBox extends StatelessWidget {
             BoxShadow(color: Color(0xFF707070).withOpacity(.25), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 3))
           ]:[]
         ),
-        height: 6 * heightMultiplier,
+        height: maxLine == null?6 * heightMultiplier: 10 * heightMultiplier,
         width: 100 * widthMultiplier,
         child: Row(
           children: [
             Expanded(
               child: TextFormField(
+                maxLines: maxLine??1,
                 enabled: enabled,
                 controller: controller,
                 focusNode: focusNode,

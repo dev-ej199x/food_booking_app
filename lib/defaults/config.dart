@@ -15,7 +15,7 @@ bool isPortrait = true;
 bool isMobilePortrait = false;
 
 Color appColor = Color(0xFFED1F56);
-// Color lightAppColor = Color(0xFFED1F56);
+Color lightAppColor = Color(0xFFED1F56).withOpacity(.6);
 // Color appColor = Color(0xFFFEB4D4D);
 
 //text size / 7.2

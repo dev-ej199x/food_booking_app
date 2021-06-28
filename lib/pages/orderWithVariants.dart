@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:food_booking_app/defaults/button.dart';
 import 'package:food_booking_app/defaults/config.dart';
+import 'package:food_booking_app/defaults/filled-button.dart';
 import 'package:food_booking_app/defaults/http.dart';
+import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/defaults/textbox.dart';
 import 'package:http/http.dart';
@@ -38,20 +40,25 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  bool _loading = false;
+  bool _loading = true;
+  var _product = {};
   List _variants = [];
   List _productOptions = [];
-  List _selected = [];
+  List _selectedIndexes = [];
   List _controllers = [];
   List _productOptItems = [];
   int _cartQuantity = 0;
+  int _selectedVariantIndex = 0;
+  int _quantity = 1;
+  TextEditingController _noteController = TextEditingController();
   // List _productControllers = [];
   //
   //
   _getVariants() async {
     var response =
-        await Http(url: 'products/${widget.details['productId']}', body: {})
+        await Http(url: 'products/${widget.details['id']}', body: {})
             .getWithHeader();
+            print(response.body);
 
     if (response is String) {
       setState(() {
@@ -65,7 +72,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             align: TextAlign.left,
             text: response,
             color: Colors.white,
-            size: 1.6,
+            size: 1.4,
             weight: FontWeight.normal,
           ),
         ),
@@ -83,50 +90,26 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
               align: TextAlign.left,
               text: response.body,
               color: Colors.white,
-              size: 1.6,
+              size: 1.4,
               weight: FontWeight.normal,
             ),
           ),
         );
       } else {
-        Map<String, dynamic> product = json.decode(response.body)['product'][0];
-        List<Map<String, dynamic>> variant = [];
-        product['variants'].forEach((variants) {
-          List<Map<String, dynamic>> productoption = [];
-          variants['product_options']?.forEach((productOptions) {
-            List<Map<String, dynamic>> productoptionitem = [];
-            productOptions['product_option_items'].forEach((productOptionItem) {
-              productoptionitem.add({
-                "productOptItmId": productOptionItem['id'],
-                "productOptItmName": productOptionItem['item_name'],
-                "productOptItmPrice": productOptionItem['price'],
-              });
-            });
-            productoption.add({
-              "productOptId": productOptions['id'],
-              "productOptName": productOptions['name'],
-              "productOptType": productOptions['type'],
-              "productOptSelection": productOptions['selection'],
-              "productOptionItem": productoptionitem,
-            });
-          });
-          variant.add({
-            "variantId": variants['id'],
-            "variantName": variants['name'],
-            "variantPrice": variants['price'],
-            "variantDescription": variants['description'],
-            "variantBanner": variants['image'],
-            "vairantOption": productoption,
-          });
-        });
 
         setState(() {
+          _product = json.decode(response.body)['product'][0];
           _variants.clear();
-          _variants = new List.from(variant);
+          _variants = new List.from(_product['variants']);
           if (_variants.isNotEmpty) {
             _variants.forEach((variant) {
+              _selectedIndexes.add([]);
               variant['quantity'] = 0;
-              _selected.add([]);
+              variant['product_options'].forEach((option) {
+                if (option['selection'] == 'single') _selectedIndexes[_variants.indexOf(variant)].add(-1);
+                else _selectedIndexes[_variants.indexOf(variant)].add([]);
+              });
+              print(_selectedIndexes);
               _controllers.add([]);
               // _productControllers.add([]);
             });
@@ -141,572 +124,29 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   void initState() {
     //TODO: implement initstate
     super.initState();
-
     _getVariants();
 
     // _variants = new List.from(widget.details['productVariants']);
     // if (_variants.isNotEmpty) {
     //   _variants.forEach((variant) {
     //     variant['quantity'] = 0;
-    //     _selected.add([]);
+    //     _selectedIndexes.add([]);
     //     _controllers.add([]);
     //     // _productControllers.add([]);
     //   });
     // }
   }
 
-  _variantDialog(int count) {
-    TextEditingController _noteController = TextEditingController();
-    TextEditingController _productController = TextEditingController();
-    _productController.text = '1';
-    print(_selected[count]);
-
-    setState(() {
-      _selected[count].clear();
-      _productOptions = new List.from(_variants[count]['vairantOption']);
-      if (_productOptions.length>0)
-      _productOptItems = new List.from(_productOptions[count]['productOptionItem']);
-      else _productOptItems.clear();
-
-      if (_productOptions.length>0) {
-        _productOptions.forEach((option) {
-          if (option['productOptSelection'] == 'single')
-            _selected[count].add(-1);
-          else
-            _selected[count].add([]);
-        });
-      }
-
-      _controllers[count].clear();
-      if (_controllers[count].isEmpty) {
-        _productOptions.forEach((option) {
-          List<TextEditingController> controllers = [];
-          option['productOptionItem'].forEach((item) {
-            TextEditingController _controller = TextEditingController();
-            _controller.text = '0';
-            controllers.add(_controller);
-          });
-          _controllers[count].add(controllers);
-        });
-      }
-    });
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setstate) => AlertDialog(
-            contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(8 * imageSizeMultiplier),
-              ),
-            ),
-            content: Container(
-              width: 100 * widthMultiplier,
-              height: 60 * heightMultiplier,
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(8 * imageSizeMultiplier), topRight: Radius.circular(8 * imageSizeMultiplier),),
-                      color: Color(0xff323030),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 2.4 * heightMultiplier),
-                      child: CustomText(
-                        text: 'Variation',
-                        align: TextAlign.center,
-                        size: 3,
-                        color: appColor,
-                        weight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 3 * widthMultiplier),
-                                child: CustomText(
-                                  text: _variants[count]['variantName'],
-                                  align: TextAlign.center,
-                                  size: 2.4,
-                                  weight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 2 * widthMultiplier),
-                                child: CustomText(
-                                  text: '₱ ${_variants[count]['variantPrice'].toString()}.00',
-                                  align: TextAlign.center,
-                                  weight: FontWeight.normal,
-                                  size: 1.6,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Container(
-                                height: 10 * heightMultiplier,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        right: 2 * widthMultiplier,
-                                        bottom: 1 * heightMultiplier,
-                                      ),
-                                      child: Container(
-                                        width: 13 * widthMultiplier,
-                                        height: 4 * heightMultiplier,
-                                        child: MaterialButton(
-                                          minWidth: 2.0,
-                                          child: Icon(Icons.arrow_drop_up),
-                                          onPressed: () {
-                                            int _priceValue = int.parse(
-                                                _variants[count]['variantPrice']
-                                                    .toString());
-                                            int currentValue = int.parse(
-                                                _productController.text);
-                                            setState(() {
-                                              _priceValue =
-                                                  _priceValue + _priceValue;
-                                              currentValue++;
-                                              _productController.text =
-                                                  (currentValue)
-                                                      .toString(); // incrementing value
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 1 * widthMultiplier),
-                                      child: Container(
-                                        width: 5 * widthMultiplier,
-                                        height: 1 * heightMultiplier,
-                                        child: TextFormField(
-                                          controller: _productController,
-                                          decoration: InputDecoration(
-                                            border: InputBorder.none
-                                          ),
-                                          keyboardType:
-                                              TextInputType.numberWithOptions(
-                                                  decimal: false,
-                                                  signed: false),
-                                          inputFormatters: <TextInputFormatter>[
-                                            WhitelistingTextInputFormatter
-                                                .digitsOnly
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          right: 3 * widthMultiplier),
-                                      child: Container(
-                                        height: 3 * heightMultiplier,
-                                        width: 12 * widthMultiplier,
-                                        child: MaterialButton(
-                                          minWidth: 2.0,
-                                          child: Icon(Icons.arrow_drop_down),
-                                          onPressed: () {
-                                            int _priceValue = int.parse(
-                                                _variants[count]['variantPrice']
-                                                    .toString());
-                                            int currentValue = int.parse(
-                                                _productController.text);
-                                            setState(
-                                              () {
-                                                _priceValue =
-                                                    _priceValue - _priceValue;
-                                                currentValue--;
-                                                _productController.text =
-                                                    (currentValue)
-                                                        .toString(); // decrementing value
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (_productOptions.length>0)
-                          ListView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: _productOptions.length,
-                            itemBuilder: (context, index) => Column(
-                              children: [
-                                if (_productOptions[index]['productOptionItem'].isNotEmpty)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                                  child: Divider(
-                                    height: 0,
-                                    color: Colors.red,
-                                  )
-                                ),
-                                if (_productOptions[index]['productOptionItem'].isNotEmpty)
-                                  CustomText(
-                                    align: TextAlign.left,
-                                    text: 'Select ${_productOptions[index]['productOptName']}${_productOptions[index]['productOptSelection'] == 'single' ? '' : '(s)'}',
-                                    size: 2,
-                                    weight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                if (_productOptions[index]['productOptSelection'] ==
-                                    'single')
-                                  Container(
-                                    child: ListView.builder(
-                                      physics:
-                                          NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemCount: _productOptions[
-                                                  index]
-                                              ['productOptionItem']
-                                          .length,
-                                      itemBuilder:
-                                          (context, itemindex) => Row(
-                                        children: [
-                                          Expanded(
-                                              child: RadioListTile(
-                                            // value: _productOptions[index]['productOptionItem'][itemindex]['productOptItmId'] + itemindex,
-                                            value: itemindex,
-                                            groupValue:
-                                                _selected[count]
-                                                    [index],
-                                            title: CustomText(
-                                              align: TextAlign.left,
-                                              text: _productOptions[index]['productOptionItem'][itemindex]['productOptItmName'],
-                                              color: Colors.black,
-                                              size: 1.8,
-                                              weight: FontWeight.normal,
-                                            ),
-                                            secondary: CustomText(
-                                              align: TextAlign.left,
-                                              text: '₱ ${double.parse(_productOptions[index]['productOptionItem'][itemindex]['productOptItmPrice'].toString()).toStringAsFixed(2)}',
-                                              color: Colors.black,
-                                              size: 1.6,
-                                              weight: FontWeight.normal,
-                                            ),
-                                            onChanged:
-                                                (valuechanged) {
-                                              setstate(() {
-                                                _selected[count]
-                                                        [index] =
-                                                    valuechanged;
-                                              });
-                                              setState(() {
-                                                _selected[count]
-                                                        [index] =
-                                                    valuechanged;
-                                              });
-                                            },
-                                          )),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  ListView.builder(
-                                    physics:
-                                        NeverScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: _productOptions[index]
-                                            ['productOptionItem']
-                                        .length,
-                                    itemBuilder:
-                                        (context, itemindex) =>
-                                            CheckboxListTile(
-                                      value: _selected[count][index]
-                                          .asMap()
-                                          .containsValue(itemindex),
-                                      title: CustomText(
-                                        align: TextAlign.left,
-                                        text: _productOptions[index]['productOptionItem'][itemindex]['productOptItmName'],
-                                        color: Colors.black,
-                                        size: 1.8,
-                                        weight: FontWeight.normal,
-                                      ),
-                                      onChanged: (valuechanged) {
-                                        if (valuechanged) {
-                                          setstate(
-                                            () {
-                                              _selected[count][index]
-                                                  .add(itemindex);
-                                            },
-                                          );
-
-                                          // setState(
-                                          //   () {
-                                          //     _selected[count][index]
-                                          //         .add(itemindex);
-                                          //   },
-                                          // );
-                                        } else {
-                                          setstate(
-                                            () {
-                                              _selected[count][index]
-                                                  .remove(itemindex);
-                                            },
-                                          );
-                                          // setState(
-                                          //   () {
-                                          //     _selected[count][index]
-                                          //         .remove(itemindex);
-                                          //   },
-                                          // );
-                                        }
-                                      },
-                                    ),
-                                  )
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
-                            child: Divider(
-                              height: 0,
-                              color: Colors.red,
-                            )
-                          ),
-                          CustomText(
-                            align: TextAlign.left,
-                            text: 'Add delivery note',
-                            size: 2,
-                            weight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier),
-                            child: CustomTextBox(
-                              type: 'roundedbox',
-                              shadow: false,
-                              border: true,
-                              controller: _noteController,
-                              text: 'NOTE',
-                              enabled: true,
-                              obscureText: false,
-                              padding: 8,
-                              prefixIcon: null,
-                              suffixIcon: null,
-                              focusNode: null,
-                              onSubmitted: (value) {},
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.text,
-                            )
-                          ),
-                          // Spacer(),
-                        ],
-                      ),
-                    )
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(
-                            8 * imageSizeMultiplier),
-                        bottomLeft: Radius.circular(
-                            8 * imageSizeMultiplier),
-                      ),
-                      color: Color(0xff323030),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 2 * heightMultiplier,
-                          horizontal: 7 * widthMultiplier),
-                      child: CustomButton(
-                        height: 0,
-                        minWidth: 0,
-                        child: TextButton(
-                          onPressed: () {
-                            List product_options = [];
-                            bool proceed = true;
-                            double price = 0;
-                            _selected[count]
-                                .asMap()
-                                .forEach((index, selected) {
-                              if (proceed) {
-                                if (_productOptions[index]
-                                        ['productOptSelection'] ==
-                                    'single') {
-                                  //pag required tapos walang pinili
-                                  if (_productOptions[index]
-                                              ['productOptType'] ==
-                                          'required' &&
-                                      selected <= -1) {
-                                    _scaffoldKey.currentState
-                                        .showSnackBar(new SnackBar(
-                                      content: CustomText(
-                                        align: TextAlign.left,
-                                        text: '${_productOptions[index]['productOptName']} Selection is Required!',
-                                        color: Colors.white,
-                                        size: 1.8,
-                                        weight: FontWeight.normal,
-                                      ),
-                                      duration: Duration(
-                                          seconds: 2, milliseconds: 155),
-                                      behavior: SnackBarBehavior.floating,
-                                    ));
-                                    proceed = false;
-                                    return;
-                                  }
-                                  //pag may pinili
-                                  else if (selected > -1) {
-                                    proceed = true;
-                                    product_options.add({
-                                      'id': _productOptions[index]
-                                          ['productOptId'],
-                                      'name': _productOptions[index]
-                                          ['productOptName'],
-                                      'selection': _productOptions[index]
-                                          ['productOptSelection'],
-                                      'type': _productOptions[index]
-                                          ['productOptType'],
-                                      'product_option_items': [
-                                        {
-                                          'id': _productOptions[index][
-                                                      'productOptionItem']
-                                                  [selected]
-                                              ['productOptItmId'],
-                                          'name': _productOptions[index][
-                                                      'productOptionItem']
-                                                  [selected]
-                                              ['productOptItmName'],
-                                        }
-                                      ]
-                                    });
-                                    price += double.parse(_productOptions[index]
-                                            ['productOptionItem']
-                                        [selected]['productOptItmPrice'].toString());
-                                  }
-                                  //pag walang pinili pero d naman sya required
-                                  else {
-                                    proceed = true;
-                                  }
-                                }
-                                if (_productOptions[index]
-                                        ['productOptSelection'] ==
-                                    'multiple') {
-                                  //pag required tapos walang pinili
-                                  if (_productOptions[index]
-                                              ['productOptType'] ==
-                                          'required' &&
-                                      selected.length == 0) {
-                                    _scaffoldKey.currentState
-                                        .showSnackBar(new SnackBar(
-                                      content: CustomText(
-                                        align: TextAlign.left,
-                                        text: '${_productOptions[index]['productOptName']} Selection is Required!',
-                                        color: Colors.white,
-                                        size: 1.8,
-                                        weight: FontWeight.normal,
-                                      ),
-                                      duration: Duration(
-                                          seconds: 2, milliseconds: 155),
-                                      behavior: SnackBarBehavior.floating,
-                                    ));
-                                    proceed = false;
-                                    return;
-                                  }
-                                  //pag may pinili
-                                  else if (selected.length > 0) {
-                                    proceed = true;
-                                    List product_option_items = [];
-                                    selected.forEach((id) {
-                                      product_option_items.add({
-                                        'id': _productOptions[index]
-                                                ['productOptionItem'][id]
-                                            ['productOptItmId'],
-                                        'name': _productOptions[index]
-                                                ['productOptionItem'][id]
-                                            ['productOptItmName']
-                                      });
-                                      price += double.parse(_productOptions[index]
-                                              ['productOptionItem'][id]
-                                          ['productOptItmPrice'].toString());
-                                    });
-                                    product_options.add({
-                                      'id': _productOptions[index]
-                                          ['productOptId'],
-                                      'name': _productOptions[index]
-                                          ['productOptName'],
-                                      'selection': _productOptions[index]
-                                          ['productOptSelection'],
-                                      'type': _productOptions[index]
-                                          ['productOptType'],
-                                      'product_option_items':
-                                          product_option_items
-                                    });
-                                  }
-                                  //pag walang pinili pero d naman sya required
-                                  else {
-                                    proceed = true;
-                                  }
-                                }
-                              }
-                            });
-                            if (proceed) {
-                              _addToCart(
-                                _variants[count]['variantName'],
-                                _variants[count]['variantId'],
-                                int.parse(_productController.text),
-                                _noteController.text,
-                                product_options,
-                                (price +
-                                        double.parse(_variants[count]
-                                            ['variantPrice'].toString())) *
-                                    int.parse(_productController.text),
-                              );
-                            }
-                          },
-                          // color: appColor,
-                          // shape: RoundedRectangleBorder(
-                          //   borderRadius: BorderRadius.circular(
-                          //       10 * imageSizeMultiplier),
-                          // ),
-                          child: CustomText(
-                            text: 'ADD TO CART',
-                            align: TextAlign.center,
-                            size: 2,
-                            color: Colors.white,
-                            weight: FontWeight.bold
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ]
-              )
-            )
-          )
-        );
-      },
-    );
-  }
-  
-  _addToCart(String variantName, int variantId, int quantity, String note,
-      List productOptions, double price) async {
+  _addToCart(List productOptions, double productOptionsPrice) async {
+        print('oki');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    print(sharedPreferences.getString('cart'));
     var cart = {};
-    if (sharedPreferences.getString('cart') != null &&
-        sharedPreferences.get('cart') != 'null') {
+    //may cart na
+    if (sharedPreferences.getString('cart').isNotEmpty) {
       cart = json.decode(sharedPreferences.getString('cart'));
-      if (cart['restaurants']['restaurant_id'] !=
-          widget.restaurantDetails['id']) {
+      //iba yung restaurant
+      if (cart['restaurant']['id'] != widget.restaurantDetails['id']) {
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
@@ -714,45 +154,59 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             align: TextAlign.left,
             text: 'The Cart has already have an order. It will Ovewrite, Proceed?',
             color: Colors.white,
-            size: 1.6,
+            size: 1.4,
             weight: FontWeight.normal,
           ),
         ));
         return;
-      } else {
-        bool samecart = false;
-        cart['order_request_products'].forEach((cart) {
-          var newcart = {
-            'product_name': widget.details['productName'],
-            'variant_id': variantId,
-            'name': variantName,
-            'note': note,
+      } 
+      //same restaurant
+      else {
+        bool sameProduct = false;
+        cart['total_price'] = 0;
+        cart['total_items'] = 0;
+        cart['order_request_products'].forEach((product) {
+          var newproduct = {
+            'product_name': widget.details['name'],
+            'product_id': widget.details['id'],
+            'variant_id': _variants[_selectedVariantIndex]['id'],
+            'name': _variants[_selectedVariantIndex]['name'],
+            'note': _noteController.text,
             'product_options': productOptions
           };
-          var oldcart = {
-            'product_name': cart['product_name'],
-            'variant_id': cart['variant_id'],
-            'name': cart['name'],
-            'note': cart['note'],
-            'product_options': cart['product_options']
+          var oldproduct = {
+            'product_name': product['product_name'],
+            'product_id': product['productide'],
+            'variant_id': product['variant_id'],
+            'name': product['name'],
+            'note': product['note'],
+            'product_options': product['product_options']
           };
-          if (oldcart.toString() == newcart.toString()) {
-            samecart = true;
-            cart['quantity'] =
-                int.parse(cart['quantity'].toString()) + quantity;
+          //same lang yung order product
+          if (oldproduct.toString() == newproduct.toString()) {
+            sameProduct = true;
+            product['quantity'] = int.parse(product['quantity'].toString()) + _quantity;
+            product['overall_price'] = (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(product['quantity'].toString());
           }
+          cart['total_price'] += product['overall_price'];
+          cart['total_items'] += product['quantity'];
         });
-        if (!samecart) {
+        //iba yung order product
+        if (!sameProduct) {
           cart['order_request_products'].add({
-            'price': price,
-            'image': widget.details['banner'],
-            'product_name': widget.details['productName'],
-            'variant_id': variantId,
-            'name': variantName,
-            'quantity': quantity,
-            'note': note,
+            'overall_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
+            'specific_price': productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString()),
+            'image': widget.details['image'],
+            'product_name': widget.details['name'],
+            'product_id': widget.details['id'],
+            'variant_id': _variants[_selectedVariantIndex]['id'],
+            'name': _variants[_selectedVariantIndex]['name'],
+            'quantity': _quantity,
+            'note': _noteController.text,
             'product_options': productOptions,
           });
+          cart['total_price'] += (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString());
+          cart['total_items'] += _quantity;
         }
 
         Navigator.pop(context);
@@ -763,7 +217,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             align: TextAlign.left,
             text: 'Added to cart',
             color: Colors.white,
-            size: 1.6,
+            size: 1.4,
             weight: FontWeight.normal,
           ),
         ));
@@ -771,23 +225,28 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         sharedPreferences.setString('cart', json.encode(cart));
         log(sharedPreferences.getString('cart'));
       }
-    } else {
+    }
+    //wala pang cart
+    else {
       cart = {
-        'restaurants': {
-          'restaurant_id': widget.restaurantDetails['id'],
-          'conciergePercentage':
-              widget.restaurantDetails['concierge_percentage'],
-          'markupPercentage': widget.restaurantDetails['markup_percentage'],
+        'total_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
+        'total_items': _quantity,
+        'restaurant': {
+          'id': widget.restaurantDetails['id'],
+          'concierge_percentage': widget.restaurantDetails['concierge_percentage'],
+          'markup_percentage': widget.restaurantDetails['markup_percentage'],
         },
         'order_request_products': [
           {
-            'price': price,
-            'image': widget.details['banner'],
-            'product_name': widget.details['productName'],
-            'variant_id': variantId,
-            'name': variantName,
-            'quantity': quantity,
-            'note': note,
+            'overall_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
+            'specific_price': productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString()),
+            'image': widget.details['image'],
+            'product_name': widget.details['name'],
+            'product_id': widget.details['id'],
+            'variant_id': _variants[_selectedVariantIndex]['id'],
+            'name': _variants[_selectedVariantIndex]['name'],
+            'quantity': _quantity,
+            'note': _noteController.text,
             'product_options': productOptions,
           }
         ]
@@ -801,7 +260,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
           align: TextAlign.left,
           text: 'Added to cart',
           color: Colors.white,
-          size: 1.6,
+          size: 1.4,
           weight: FontWeight.normal,
         ),
       ));
@@ -819,125 +278,43 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(32 * heightMultiplier),
-          child: Column(
-            children: [
-              AppBar(
-                backgroundColor: appColor,
-                elevation: 0,
-                leading: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 6 * imageSizeMultiplier,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.shopping_cart_rounded,
-                      size: 6 * imageSizeMultiplier,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: OrderCart(specifics: widget.specifics)
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.topCenter,
-                height: 24 * heightMultiplier,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40.0),
-                    bottomRight: Radius.circular(40.0)
-                  ),
-                  color: appColor,
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      width: 50 * widthMultiplier,
-                      height: 16 * heightMultiplier,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4 * imageSizeMultiplier),
-                        color: Color(0xffe8971d),
+          preferredSize: Size.fromHeight(10 * heightMultiplier),
+          child: Ink(
+            width: 100 * widthMultiplier,
+            color: Colors.white,
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(right: 4 * widthMultiplier, top: 2 * heightMultiplier),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      splashColor: Colors.black12.withOpacity(0.05),
+                      hoverColor: Colors.black12.withOpacity(0.05),
+                      icon: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 6 * imageSizeMultiplier,
+                        color: appColor,
                       ),
-                      // Insert Hero() with tag :'_orderLogo${_products[index]['productId']}
-                      child: Hero(
-                        tag: '_orderLogo${widget.index}${widget.details['variantID']}',
-                        child: Stack(
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(4 * imageSizeMultiplier)),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4 * imageSizeMultiplier),
-                                child: Image.network(
-                                  widget.details['banner'],
-                                  width: MediaQuery.of(context).size.width,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Spacer(),
-                                Container(
-                                  alignment: Alignment.center,
-                                  height: 3 * heightMultiplier,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xff484545),
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(4 * imageSizeMultiplier),
-                                      bottomRight: Radius.circular(4 * imageSizeMultiplier),
-                                    ),
-                                  ),
-                                  //Product Description
-                                  child: CustomText(
-                                    // 'Chicken Meal with Regular Coke',
-                                    text: widget.details['productName'],
-                                    align: TextAlign.center,
-                                    size: 2,
-                                    weight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ]
-                            )
-                          ],
-                        ),
-                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: CustomText(
-                          // 'Chicken Meal with Regular Coke',
-                          text: widget.details['productDescription'],
-                          align: TextAlign.center,
-                          size: 1.8,
-                          weight: FontWeight.normal,
-                          color: Colors.white,
-                        ),
-                      )
-                    )
-                  ],
-                ),
-              ),
-            ]
+                    // Expanded(
+                    //   child: CustomText(
+                    //     text: widget.details['name'],
+                    //     // text: _products[index]['productDescription'],
+                    //     align: TextAlign.center,
+                    //     size: 3,
+                    //     weight: FontWeight.bold,
+                    //     color: Colors.black,
+                    //   ),
+                    // )
+                  ]
+                )
+              )
+            ),
           )
         ),
         body: GestureDetector(
@@ -946,96 +323,626 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             FocusScope.of(context).unfocus();
             _scaffoldKey.currentState.removeCurrentSnackBar();
           },
-          child: SmartRefresher(
-            enablePullDown: !_loading,
-            onRefresh: () {
-              _getVariants();
-            },
-            physics: BouncingScrollPhysics(),
-            header: CustomHeader(builder: (context, status) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.circle,
-                    size: 10 * imageSizeMultiplier,
-                    color: appColor
+          child: Padding(
+            padding: EdgeInsets.only(top: 2 * heightMultiplier),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  if (!_loading)
+                  Row(
+                    children: [
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.only(left: 4 * widthMultiplier),
+                        height: 66 * imageSizeMultiplier,
+                        width: 70 * imageSizeMultiplier,
+                        child: CachedNetworkImage(
+                          imageUrl: _product['variants'][_selectedVariantIndex]['image'],
+                          placeholder: (context, string) {
+                            return Shimmer.fromColors(
+                              baseColor: Colors.black12,
+                              highlightColor: Colors.black26,
+                              child: Container(
+                                height: 66 * imageSizeMultiplier,
+                                width: 66 * imageSizeMultiplier,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                  color: Color(0xFF363636),
+                                ),
+                              ),
+                            );
+                          },
+                          errorWidget: (context, string, _) {
+                            return Container(
+                              height: 66 * imageSizeMultiplier,
+                              width: 66 * imageSizeMultiplier,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                color: Color(0xFF363636),
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: AssetImage(
+                                    Images.iconImage,
+                                  )
+                                )
+                              ),
+                            );
+                          },
+                          imageBuilder: (context, provider) {
+                            return Container(
+                              height: 66 * imageSizeMultiplier,
+                              width: 66 * imageSizeMultiplier,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: provider
+                                )
+                              ),
+                            );
+                          }
+                        )
+                      ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.topCenter,
+                          height: 66 * imageSizeMultiplier,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                for (var variant in _product['variants'])
+                                TextButton(
+                                  style: ButtonStyle(
+                                    minimumSize: MaterialStateProperty.all(Size.zero),
+                                    overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                      ),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedVariantIndex = _product['variants'].indexOf(variant);
+                                    });
+                                  },
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl: variant['image'],
+                                        placeholder: (context, string) {
+                                          return Shimmer.fromColors(
+                                            baseColor: Colors.black12,
+                                            highlightColor: Colors.black26,
+                                            child: Container(
+                                              height: 14 * imageSizeMultiplier,
+                                              width: 14 * imageSizeMultiplier,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                                color: Color(0xFF363636),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        errorWidget: (context, string, _) {
+                                          return Container(
+                                            height: 14 * imageSizeMultiplier,
+                                            width: 14 * imageSizeMultiplier,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                              color: Color(0xFF363636),
+                                              image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: AssetImage(
+                                                  Images.iconImage,
+                                                )
+                                              )
+                                            ),
+                                          );
+                                        },
+                                        imageBuilder: (context, provider) {
+                                          return Container(
+                                            height: 14 * imageSizeMultiplier,
+                                            width: 14 * imageSizeMultiplier,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                                              image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: provider
+                                              )
+                                            ),
+                                          );
+                                        }
+                                      ),
+                                      Container(
+                                        height: 16 * imageSizeMultiplier,
+                                        width: 16 * imageSizeMultiplier,
+                                        child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: Icon(
+                                            Icons.check_circle,
+                                            color: (_selectedVariantIndex == _product['variants'].indexOf(variant))?Colors.black:Colors.transparent,
+                                            size: 4 * imageSizeMultiplier,
+                                          ),
+                                        )
+                                      )
+                                    ]
+                                  )
+                                ),
+                              ],
+                            )
+                          ),
+                        )
+                      )
+                    ],
+                  ),
+                  if (!_loading)
+                  Padding(
+                    padding: EdgeInsets.only(top: 2 * heightMultiplier, left:  4 * widthMultiplier, bottom: 1 * heightMultiplier, right: 4 * widthMultiplier),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                text: _variants[_selectedVariantIndex]['name'],
+                                // text: _variants[_selectedVariantIndex]s[index]['productDescription'],
+                                align: TextAlign.left,
+                                size: 2.4,
+                                weight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 1 * heightMultiplier),
+                                child: CustomText(
+                                  text: _variants[_selectedVariantIndex]['description'],
+                                  // text: _variants[_selectedVariantIndex]s[index]['productDescription'],
+                                  align: TextAlign.left,
+                                  size: 1.8,
+                                  weight: FontWeight.normal,
+                                  color: Colors.black54,
+                                )
+                              )
+                            ]
+                          )
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier),
+                          child: CustomText(
+                            text: '₱ ${double.parse(_variants[_selectedVariantIndex]['price'].toString()).toStringAsFixed(2)}',
+                            // text: _products[index]['productDescription'],
+                            align: TextAlign.left,
+                            size: 2.4,
+                            weight: FontWeight.bold,
+                            color: appColor,
+                          )
+                        )
+                      ]
+                    )
+                  ),
+                  if (!_loading)
+                  for (var option in _variants[_selectedVariantIndex]['product_options'])
+                  Padding(
+                    padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    text: option['name'],
+                                    // text: _products[index]['productDescription'],
+                                    align: TextAlign.left,
+                                    size: 1.8,
+                                    weight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  CustomText(
+                                    text: option['selection'] == 'single'?'Select one':'Select as many as you want',
+                                    // text: _products[index]['productDescription'],
+                                    align: TextAlign.left,
+                                    size: 1.4,
+                                    weight: FontWeight.normal,
+                                    color: Colors.black54,
+                                  ),
+                                ]
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10 * imageSizeMultiplier),
+                                color: lightAppColor
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 0.4 * heightMultiplier, horizontal: 1.2 * widthMultiplier),
+                              child: CustomText(
+                                text: option['type'] == 'required'?'Required':'Optional',
+                                // text: _products[index]['productDescription'],
+                                align: TextAlign.left,
+                                size: 1.2,
+                                weight: FontWeight.normal,
+                                color: Colors.white,
+                              ),
+                            )
+                          ]
+                        ),
+                        for (var item in option['product_option_items'])
+                        Row(
+                          children: [
+                            if (option['selection'] == 'single')
+                            Expanded(
+                              child: RadioListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                value: option['product_option_items'].indexOf(item), 
+                                groupValue: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)], 
+                                activeColor: appColor,
+                                onChanged: (value) {
+                                  print(value);
+                                  setState(() {
+                                    _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
+                                    print(_selectedIndexes);
+                                  });
+                                },
+                                title: CustomText(
+                                  text: item['item_name'],
+                                  // text: _products[index]['productDescription'],
+                                  align: TextAlign.left,
+                                  size: 1.4,
+                                  weight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              )
+                            )
+                            else
+                            Expanded(
+                              child: CheckboxListTile(
+                                controlAffinity: ListTileControlAffinity.leading,
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                value: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)), 
+                                activeColor: appColor,
+                                onChanged: (value) {
+                                  // 
+                                  print(value);
+                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)]);
+                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)));
+                                  if (value) {
+                                    setState(() {
+                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
+                                      print(_selectedIndexes);
+                                    });
+                                  }
+                                  else {
+                                    setState(() {
+                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
+                                      print(_selectedIndexes);
+                                    });
+                                  }
+                                },
+                                title: CustomText(
+                                  text: item['item_name'],
+                                  // text: _products[index]['productDescription'],
+                                  align: TextAlign.left,
+                                  size: 1.4,
+                                  weight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              )
+                            ),
+                            CustomText(
+                              text: '+ ${double.parse(item['price'].toString()).toStringAsFixed(2)}',
+                              // text: _products[index]['productDescription'],
+                              align: TextAlign.left,
+                              size: 1.4,
+                              weight: FontWeight.normal,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  ),
+                  if (!_loading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                    child: CustomText(
+                      text: 'Special Instructions',
+                      // text: _products[index]['productDescription'],
+                      align: TextAlign.left,
+                      size: 1.8,
+                      weight: FontWeight.bold,
+                      color: Colors.black,
+                    )
+                  ),
+                  if (!_loading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4 * widthMultiplier),
+                    child: CustomText(
+                      maxLine: 2,
+                      text: 'Please tell us which foods or ingredients to avoid (such as foods that can cause allergic reactions)',
+                      // text: _products[index]['productDescription'],
+                      align: TextAlign.left,
+                      size: 1.4,
+                      weight: FontWeight.normal,
+                      color: Colors.black54,
+                    )
+                  ),
+                  if (!_loading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier),
+                    child: CustomTextBox(
+                      maxLine: 3,
+                      focusNode: null,
+                      type: 'roundedbox',
+                      border: true,
+                      textInputAction: TextInputAction.next,
+                      controller: _noteController,
+                      onSubmitted: (value) {
+                        FocusScope.of(context).unfocus();
+                      },
+                      text: "e.g No pork/No shrimp",
+                      obscureText: false,
+                      padding: 4,
+                      prefixIcon: null,
+                      suffixIcon: null,
+                      enabled: true,
+                      shadow: false,
+                      keyboardType: TextInputType.text,
+                    ),
                   ),
                   SizedBox(
-                    height: 3 * imageSizeMultiplier,
-                    width: 3 * imageSizeMultiplier,
-                    child: CircularProgressIndicator(
-                      strokeWidth: .2 * imageSizeMultiplier,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    )
+                    height: MediaQuery.of(context).viewInsets.bottom,
                   )
                 ]
-              );
-            }),
-            controller: _refreshController,
-            child: 
-            _variants.length == 0?
-            Center(
-              child: CustomText(
-                align: TextAlign.left,
-                text: 'No products available',
-                color: Colors.black,
-                size: 1.8,
-                weight: FontWeight.normal,
               )
             )
-            :
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: _variants.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 1 * imageSizeMultiplier,
-                  child: ListTile(
-                    leading: _variants[index]['variantBanner'] != null? 
-                    CachedNetworkImage(
-                      imageUrl: _variants[index]['variantBanner'],
-                      width: 20 * imageSizeMultiplier,
-                      fit: BoxFit.fill,
+          )
+        ),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.symmetric(horizontal:  4 * widthMultiplier, vertical: 2 * heightMultiplier),
+          child: Row(
+            children: [
+              Container(
+                width: 32 * widthMultiplier,
+                height: 6 * heightMultiplier,
+                padding: EdgeInsets.symmetric(horizontal: 1 * widthMultiplier),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                  color: Colors.white
+                ),
+                child: Row(
+                  children: [
+                    CustomButton(
+                      height: 0,
+                      minWidth: 0,
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _quantity--;
+                          });
+                        },
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: MaterialStateProperty.all(Size.zero),
+                          padding: MaterialStateProperty.all(EdgeInsets.zero),
+                        ),
+                        child: Ink(
+                          width: 8 * imageSizeMultiplier,
+                          height: 8 * imageSizeMultiplier,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                            color: appColor
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.remove_rounded,
+                              color: Colors.white,
+                              size: 6 * imageSizeMultiplier,
+                            )
+                          )
+                        )
+                      )
+                    ),
+                    Expanded(
+                      child: CustomText(
+                        text: _quantity.toString(),
+                        // text: _products[index]['productDescription'],
+                        align: TextAlign.center,
+                        size: 1.4,
+                        weight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                    CustomButton(
+                      height: 0,
+                      minWidth: 0,
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _quantity++;
+                          });
+                        },
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: MaterialStateProperty.all(Size.zero),
+                          padding: MaterialStateProperty.all(EdgeInsets.zero),
+                        ),
+                        child: Ink(
+                          width: 8 * imageSizeMultiplier,
+                          height: 8 * imageSizeMultiplier,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                            color: appColor
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.add_rounded,
+                              color: Colors.white,
+                              size: 6 * imageSizeMultiplier,
+                            )
+                          )
+                        )
+                      )
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4 * widthMultiplier),
+                  child: CustomButton(
+                    height: 0,
+                    minWidth: 0,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        List product_options = [];
+                        bool proceed = true;
+                        double price = 0;
+                        _selectedIndexes[_selectedVariantIndex].asMap().forEach((index, selected) {
+                          if (proceed){
+                            if (_variants[_selectedVariantIndex]['product_options'][index]['selection'] == 'single') {
+                              if (_variants[_selectedVariantIndex]['product_options'][index]['type'] == 'required' && selected == -1) {
+                                _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                                  content: CustomText(
+                                    align: TextAlign.left,
+                                    text: '${_variants[_selectedVariantIndex]['product_options'][index]['name']} selection is Required!',
+                                    color: Colors.white,
+                                    size: 1.8,
+                                    weight: FontWeight.normal,
+                                  ),
+                                  duration: Duration(seconds: 2, milliseconds: 155),
+                                  behavior: SnackBarBehavior.floating,
+                                ));
+                                proceed = false;
+                                return;
+                              }
+                              else if (selected > -1) {
+                                proceed = true;
+                                product_options.add({
+                                  'id': _variants[_selectedVariantIndex]['product_options'][index]['id'],
+                                  'name': _variants[_selectedVariantIndex]['product_options'][index]['name'],
+                                  'selection': _variants[_selectedVariantIndex]['product_options'][index]['selection'],
+                                  'type': _variants[_selectedVariantIndex]['product_options'][index]['type'],
+                                  'product_option_items': [
+                                    {
+                                      'id': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['id'],
+                                      'name': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['item_name'],
+                                    }
+                                  ]
+                                });
+                                price += double.parse(_variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['price'].toString());
+                              }
+                              else {
+                                proceed = true;
+                              }
+                              print('1 $proceed');
+                            }
+                            else {
+                              if (_variants[_selectedVariantIndex]['product_options'][index]['type'] == 'required' && selected.isEmpty) {
+                                _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                                  content: CustomText(
+                                    align: TextAlign.left,
+                                    text: '${_variants[_selectedVariantIndex]['product_options'][index]['name']} selection is Required!',
+                                    color: Colors.white,
+                                    size: 1.8,
+                                    weight: FontWeight.normal,
+                                  ),
+                                  duration: Duration(seconds: 2, milliseconds: 155),
+                                  behavior: SnackBarBehavior.floating,
+                                ));
+                                proceed = false;
+                                return;
+                              }
+                              else if (selected.isNotEmpty) {
+                                proceed = true;
+                                selected.forEach((id) {
+                                  product_options.add({
+                                    'id': _variants[_selectedVariantIndex]['product_options'][index]['id'],
+                                    'name': _variants[_selectedVariantIndex]['product_options'][index]['name'],
+                                    'selection': _variants[_selectedVariantIndex]['product_options'][index]['selection'],
+                                    'type': _variants[_selectedVariantIndex]['product_options'][index]['type'],
+                                    'product_option_items': [
+                                      {
+                                        'id': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['id'],
+                                        'name': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['item_name'],
+                                      }
+                                    ]
+                                  });
+                                  price += double.parse(_variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['price'].toString());
+                                });
+                              }
+                              else {
+                                proceed = true;
+                              }
+                              print('2 $proceed');
+                            }
+                          }
+                        });
+                        if (proceed) {
+                          print('3 $proceed');
+                          _addToCart(
+                            product_options, 
+                            price
+                          );
+                          print(price);
+                        }
+                      },
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                          )
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: MaterialStateProperty.all(Size.zero),
+                        padding: MaterialStateProperty.all(EdgeInsets.zero),
+                      ),
+                      child: Ink(
+                        padding: EdgeInsets.symmetric(horizontal: 4 * widthMultiplier),
+                        height: 6 * heightMultiplier,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                          color: appColor
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: CustomText(
+                            text: 'Add to basket',
+                            // text: _products[index]['productDescription'],
+                            align: TextAlign.center,
+                            size: 1.4,
+                            weight: FontWeight.normal,
+                            color: Colors.white,
+                          ),
+                        )
+                      )
                     )
-                    : 
-                    CustomText(
-                      align: TextAlign.left,
-                      text: 'No Image Loaded',
-                      color: Colors.black,
-                      size: 1.8,
-                      weight: FontWeight.normal,
-                    ),
-                    title: CustomText(
-                      text: _variants[index]['variantName'],
-                      color: Colors.black,
-                      size: 1.8,
-                      weight: FontWeight.normal,
-                      align: TextAlign.center
-                    ),
-                    subtitle: CustomText(
-                      text: _variants[index]['variantDescription'],
-                      color: Colors.black,
-                      size: 1.8,
-                      weight: FontWeight.normal,
-                      align: TextAlign.center,
-                    ),
-                    trailing: CustomText(
-                      align: TextAlign.left,
-                      text: '₱ ${_variants[index]['variantPrice'].toString()}.00',
-                      color: Colors.black,
-                      size: 1.8,
-                      weight: FontWeight.normal,
-                    ),
-                    onTap: () {
-                      _variantDialog(index);
-                    },
-                  ),
-                );
-              },
-            )
-          ),
-        )
+                  )
+                ),
+              )
+            ],
+          )
+        ),
       )
     );
   }

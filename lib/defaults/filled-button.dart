@@ -48,7 +48,7 @@ class FilledCustomButton extends StatelessWidget {
               text: text,
               align: TextAlign.center,
               color: Colors.white,
-              size: 1.9,
+              size: 1.6,
               weight: FontWeight.normal,
             ),
           )
