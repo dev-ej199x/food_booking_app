@@ -84,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } else if (response is Response) {
+      print(response.body);
       if (response.statusCode != 200) {
         Navigator.pop(context);
         _scaffoldKey.currentState.showSnackBar(
@@ -114,8 +115,8 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           _sharedPreferences.setString('username', body['user']['username']);
           _sharedPreferences.setString('role', body['user']['role']);
-          // _sharedPreferences.setInt('role-id', body['user']['profile']['id']);
-          // await FirebaseSettings().updateToken();
+          _sharedPreferences.setInt('role-id', body['user']['customer']['id']);
+          print('ROLE ID NYA TO: ${body['user']['customer']['id']}');
           Navigator.of(context).pop();
           Navigator.push(
             context,

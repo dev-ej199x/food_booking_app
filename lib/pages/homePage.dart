@@ -914,6 +914,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           if (_banners.length > 0)
                           Container(
                             width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 1 * heightMultiplier),
                             decoration: BoxDecoration(
                               // boxShadow: [
                               //   BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
@@ -1028,7 +1029,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                               children: [
                                 Padding(
                                   padding: EdgeInsets.only(
-                                  left: 4 * widthMultiplier, right: 4 * widthMultiplier, top: 1 * heightMultiplier,),
+                                  left: 4 * widthMultiplier, right: 4 * widthMultiplier,),
                                   child: CustomText(
                                     text: 'Featured Restaurants', 
                                     color: Colors.black, 
@@ -1164,10 +1165,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
-                                BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
-                              ],
+                              // boxShadow: _banners.length > 0?[
+                              //   BoxShadow(color: Color(0xFF707070).withOpacity(.3), blurRadius: 0.6 * imageSizeMultiplier, offset: Offset(0, -0.6)),
+                              //   BoxShadow(color: Color(0xFF707070).withOpacity(.5), blurRadius: 1 * imageSizeMultiplier, offset: Offset(0, 2))
+                              // ]:null,
                               color: Colors.white
                             ),
                             child: Column(

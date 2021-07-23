@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/appbar.dart';
 import 'package:food_booking_app/defaults/config.dart';
+import 'package:food_booking_app/defaults/firebase_settings.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/pages/homePage.dart';
 import 'package:food_booking_app/pages/navigation.dart';
@@ -24,19 +25,10 @@ class _DashBoardState extends State<DashBoard> {
   int _selectedItemIndex = 0;
   PageController _dashBoardController = PageController(initialPage: 0);
 
-  _logout() async {
-    SharedPreferences _sharedPreference = await SharedPreferences.getInstance();
-    _sharedPreference.clear();
-    Navigator.pushAndRemoveUntil(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: LoginScreen(
-            from: null,
-          )
-        ),
-        (route) => false
-      );
+  @override
+  void initState() { 
+    super.initState();
+    FirebaseSettings().updateToken();
   }
 
   @override

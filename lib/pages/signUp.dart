@@ -303,6 +303,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _sharedPreferences.setInt('id', int.parse(body['user']['id'].toString()));
           _sharedPreferences.setString('username', body['user']['username']);
           _sharedPreferences.setString('role', body['user']['role']);
+          _sharedPreferences.setInt('role-id', body['user']['customer']['id']);
+          print('ROLE ID NYA TO: ${body['user']['profile']['id']}');
           Navigator.of(context).pop();
           Navigator.of(context).pop();
           Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeft, child: DashBoard()));

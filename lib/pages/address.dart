@@ -86,7 +86,7 @@ class _AddressScreenState extends State<AddressScreen> {
                             align: TextAlign.left,
                           ),
                           CustomText(
-                          text: 'Want\'s to know your location',
+                          text: 'Wants to know your location',
                             size: 2,
                             color: Colors.white,
                             weight: FontWeight.bold,

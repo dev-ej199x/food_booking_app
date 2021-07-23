@@ -63,7 +63,7 @@ class FirebaseSettings {
     FirebaseMessaging _firebaseMessaging;
     _firebaseMessaging = FirebaseMessaging.instance;
     _firebaseMessaging.getToken().then((value) async {
-      response = await Http(url: 'fcm', body: {'fcm': value}).putWithHeader();
+      response = await Http(url: 'fcm/update', body: {'fcm_token': value}).putWithHeader();
     });
     return response;
   }

@@ -29,6 +29,8 @@ class _NotificationPageState extends State<NotificationPage> {
         await Http(url: 'notifications', body: {})
             .getWithHeader();
 
+            print(response.body);
+
     if (response is String) {
       setState(() {
         _loading = false;
@@ -47,6 +49,7 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       );
     } else if (response is Response) {
+      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;
@@ -68,7 +71,7 @@ class _NotificationPageState extends State<NotificationPage> {
         print(response.body);
 
         setState(() {
-          _notifications = json.decode(response.body)['orderRequest'];
+          _notifications = List.from(json.decode(response.body));
           _loading = false;
         });
         print(_notifications);
@@ -84,19 +87,42 @@ class _NotificationPageState extends State<NotificationPage> {
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(10 * heightMultiplier),
+          preferredSize: Size.fromHeight(6 * heightMultiplier),
           child: Ink(
             width: 100 * widthMultiplier,
             color: Colors.white,
             child: SafeArea(
               child: Padding(
-                padding: EdgeInsets.only(top: 2 * heightMultiplier),
-                child: CustomText(
-                  color: appColor,
-                  align: TextAlign.center,
-                  size: 2,
-                  text: 'NOTIFICATIONS',
-                  weight: FontWeight.bold,
+                padding: EdgeInsets.only(right: 4 * widthMultiplier),
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    IconButton(
+                      splashColor: Colors.black12.withOpacity(0.05),
+                      hoverColor: Colors.black12.withOpacity(0.05),
+                      icon: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 6 * imageSizeMultiplier,
+                        color: appColor,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 4 * widthMultiplier,),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          color: appColor,
+                          align: TextAlign.center,
+                          size: 3,
+                          text: 'Notification',
+                          weight: FontWeight.bold,
+                        )
+                      )
+                    )
+                  ]
                 )
               )
             ),
@@ -118,26 +144,27 @@ class _NotificationPageState extends State<NotificationPage> {
               _getNotifications();
             },
             physics: BouncingScrollPhysics(),
-            header: CustomHeader(builder: (context, status) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.circle,
-                    size: 10 * imageSizeMultiplier,
-                    color: appColor
-                  ),
-                  SizedBox(
-                    height: 3 * imageSizeMultiplier,
-                    width: 3 * imageSizeMultiplier,
-                    child: CircularProgressIndicator(
-                      strokeWidth: .2 * imageSizeMultiplier,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    )
-                  )
-                ]
-              );
-            }),
+            header: MaterialClassicHeader(),
+            // header: CustomHeader(builder: (context, status) {
+            //   return Stack(
+            //     alignment: Alignment.center,
+            //     children: [
+            //       Icon(
+            //         Icons.circle,
+            //         size: 10 * imageSizeMultiplier,
+            //         color: appColor
+            //       ),
+            //       SizedBox(
+            //         height: 3 * imageSizeMultiplier,
+            //         width: 3 * imageSizeMultiplier,
+            //         child: CircularProgressIndicator(
+            //           strokeWidth: .2 * imageSizeMultiplier,
+            //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            //         )
+            //       )
+            //     ]
+            //   );
+            // }),
             controller: _refreshController,
             child: SingleChildScrollView(
               child: Column(
@@ -165,14 +192,14 @@ class _NotificationPageState extends State<NotificationPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomText(
-                          text: 'Header',
+                          text: notif['data']['title'],
                           align: TextAlign.left,
                           color: Colors.black,
                           size: 2,
                           weight: FontWeight.bold,
                         ),
                         CustomText(
-                          text: 'Body',
+                          text: notif['data']['body'],
                           align: TextAlign.left,
                           color: Color(0xFF222455).withOpacity(.5),
                           size: 1.8,

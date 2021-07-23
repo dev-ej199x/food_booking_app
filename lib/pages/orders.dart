@@ -91,7 +91,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(10 * heightMultiplier),
+            preferredSize: Size.fromHeight(6 * heightMultiplier),
             child: Ink(
               width: 100 * widthMultiplier,
               color: Colors.white,
@@ -101,7 +101,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   child: CustomText(
                     color: appColor,
                     align: TextAlign.center,
-                    size: 2,
+                    size: 3,
                     text: 'ORDERS',
                     weight: FontWeight.bold,
                   )
@@ -121,26 +121,27 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 _getOrders();
               },
               physics: BouncingScrollPhysics(),
-              header: CustomHeader(builder: (context, status) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      size: 10 * imageSizeMultiplier,
-                      color: appColor
-                    ),
-                    SizedBox(
-                      height: 3 * imageSizeMultiplier,
-                      width: 3 * imageSizeMultiplier,
-                      child: CircularProgressIndicator(
-                        strokeWidth: .2 * imageSizeMultiplier,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    )
-                  ]
-                );
-              }),
+              header: MaterialClassicHeader(),
+              // header: CustomHeader(builder: (context, status) {
+              //   return Stack(
+              //     alignment: Alignment.center,
+              //     children: [
+              //       Icon(
+              //         Icons.circle,
+              //         size: 10 * imageSizeMultiplier,
+              //         color: appColor
+              //       ),
+              //       SizedBox(
+              //         height: 3 * imageSizeMultiplier,
+              //         width: 3 * imageSizeMultiplier,
+              //         child: CircularProgressIndicator(
+              //           strokeWidth: .2 * imageSizeMultiplier,
+              //           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              //         )
+              //       )
+              //     ]
+              //   );
+              // }),
               controller: _refreshController,
               child: SingleChildScrollView(
                 child: Column(
@@ -164,13 +165,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     for (var order in _orders)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                        width: 100 * widthMultiplier,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
-                          color: Color(0xFF2D2A2A)
-                        ),
+                      child: Card(
+                        // padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
+                        // width: 100 * widthMultiplier,
+                        // decoration: BoxDecoration(
+                        //   borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
+                        //   color: Colors.white
+                        // ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -198,30 +199,36 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   CustomText(
                                     text: order['restaurant']['name'],
                                     align: TextAlign.left,
-                                    color: Colors.white,
-                                    size: 2,
+                                    color: Colors.black,
+                                    size: 1.8,
                                     weight: FontWeight.bold,
                                   ),
-                                  CustomText(
-                                    text: '₱  ${order['grand_total'].toStringAsFixed(2)}',
-                                    align: TextAlign.left,
-                                    color: Colors.white,
-                                    size: 1.6,
-                                    weight: FontWeight.normal,
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
+                                    child: CustomText(
+                                      text: '₱  ${order['grand_total'].toStringAsFixed(2)}',
+                                      align: TextAlign.left,
+                                      color: Colors.black,
+                                      size: 1.4,
+                                      weight: FontWeight.normal,
+                                    )
                                   ),
                                   CustomText(
-                                    text: '${order['booking_date']} ${order['booking_time']}',
+                                    text: '${DateFormat('MMMM dd, yyyy').format(DateFormat('yyyy-MM-dd').parse(order['booking_date'].toString()))} ${DateFormat('hh:mm a').format(DateFormat('HH:mm:ss').parse(order['booking_time'].toString()))}',
                                     align: TextAlign.left,
-                                    color: Colors.white,
-                                    size: 1.6,
+                                    color: Colors.black,
+                                    size: 1.4,
                                     weight: FontWeight.normal,
                                   ),
-                                  CustomText(
-                                    text: order['status']['name'],
-                                    align: TextAlign.left,
-                                    color: order['status']['name'] == 'DELIVERED'?Colors.green:Colors.red,
-                                    size: 1.6,
-                                    weight: FontWeight.normal,
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
+                                    child: CustomText(
+                                      text: order['status']['name'],
+                                      align: TextAlign.left,
+                                      color: order['status']['name'] == 'DELIVERED'?Colors.green:Colors.red,
+                                      size: 1.6,
+                                      weight: FontWeight.normal,
+                                    )
                                   ),
                                 ]
                               )

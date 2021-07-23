@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:food_booking_app/defaults/button.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/filled-button.dart';
+import 'package:food_booking_app/defaults/firebase_settings.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/images.dart';
 import 'package:food_booking_app/defaults/text.dart';
 import 'package:food_booking_app/defaults/textbox.dart';
 import 'package:http/http.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'login.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -16,7 +21,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  SharedPreferences _sharedPreferences;
+  GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _numberController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
@@ -36,6 +42,7 @@ class _ProfileState extends State<Profile> {
   }
 
   _getCustomers() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
     Http().showLoadingOverlay(context);
     var response = await Http(url: 'user/profile', body: {}).getWithHeader();
     if (response is String) {
@@ -104,13 +111,14 @@ class _ProfileState extends State<Profile> {
   }
 
   _update() async {
-    var response = await Http(url: 'user/profile', body: {
+    var response = await Http(url: 'profile/${_sharedPreferences.getInt('role-id')}/update', body: {
       'name': _nameController.text,
       'number': _numberController.text,
       'address': _addressController.text
     }).putWithHeader();
+    print(response.body);
     if (response is String) {
-      Navigator.pop(context);
+      // Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Color(0xFF323232),
@@ -126,7 +134,7 @@ class _ProfileState extends State<Profile> {
     } else if (response is Response) {
       if (response.statusCode != 200) {
         Map<String, dynamic> body = json.decode(response.body);
-        Navigator.pop(context);
+        // Navigator.pop(context);
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
@@ -140,240 +148,279 @@ class _ProfileState extends State<Profile> {
             )
           )
         );
-      } else {}
+      } else {
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Color(0xFF323232),
+            content: CustomText(
+              align: TextAlign.left,
+              text: 'Successfully Updated!',
+              color: Colors.white,
+              size: 1.6,
+              weight: FontWeight.normal,
+            )
+          )
+        );
+        setState(() {
+          _edit = false;
+        });
+      }
     }
+  }
+
+  // _logout() {
+  //   FirebaseSettings().revokeToken();
+  //   Http().logout();
+  //   print('oki');
+  //   Navigator.pushAndRemoveUntil(context, PageTransition(type: PageTransitionType.rightToLeft, child: LoginScreen(from: null,)), (route) => false);
+  // }
+
+  _showLogoutDialog() {
+    showDialog(context: context,
+      barrierColor: Colors.black.withOpacity(.4),
+      builder: (_) => new AlertDialog(
+        backgroundColor: Colors.white,
+        title: CustomText(
+          text: 'Logout',
+          size: 1.8,
+          align: TextAlign.left,
+          color: Colors.black,
+          weight: FontWeight.bold,
+        ),
+        content: CustomText(
+          text: 'Are you sure?',
+          size: 1.6,
+          align: TextAlign.left,
+          color: Colors.black,
+          weight: FontWeight.normal,
+        ),
+        actions: [
+          FlatButton(
+            child: CustomText(
+              text: 'No',
+              size: 1.5,
+              align: TextAlign.left,
+              color: appColor,
+              weight: FontWeight.bold,
+            ),
+            onPressed:  () {
+              FocusScope.of(context).unfocus();
+              _scaffoldKey.currentState.removeCurrentSnackBar();
+              Navigator.pop(context);
+            },
+          ),
+          FlatButton(
+            child: CustomText(
+              text: 'Yes',
+              size: 1.5,
+              align: TextAlign.left,
+              color: appColor,
+              weight: FontWeight.bold,
+            ),
+            onPressed:  () {
+              FocusScope.of(context).unfocus();
+              _scaffoldKey.currentState.removeCurrentSnackBar();
+              _logout();
+            },
+          ),
+        ],
+      )
+    );
+  }
+
+  _logout() async {
+    FirebaseSettings().revokeToken();
+    SharedPreferences _sharedPreference = await SharedPreferences.getInstance();
+    _sharedPreference.clear();
+    Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(
+            type: PageTransitionType.rightToLeft,
+            child: LoginScreen(
+              from: null,
+            )),
+        (route) => false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(30 * heightMultiplier),
-        child: Column(
-          children: [
-            AppBar(
-              backgroundColor: appColor,
-              elevation: 0,
-              title: Padding(
-                padding: EdgeInsets.only(top: 2 * heightMultiplier),
-                child: Center(
-                  child: CustomText(
-                    text: 'Profile',
-                    align:TextAlign.center,
-                    color: Colors.white,
-                    size: 5,
-                    weight: FontWeight.bold,
-                  ),
-                ),
+    return WillPopScope(
+      onWillPop: () {},
+      child: ScaffoldMessenger(
+        key: _scaffoldKey,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: false,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(6 * heightMultiplier),
+            child: Ink(
+              width: 100 * widthMultiplier,
+              color: Colors.white,
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 2 * heightMultiplier),
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          color: appColor,
+                          align: TextAlign.center,
+                          size: 3,
+                          text: 'PROFILE',
+                          weight: FontWeight.bold,
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          splashColor: Colors.black12.withOpacity(0.05),
+                          hoverColor: Colors.black12.withOpacity(0.05),
+                          icon: Icon(
+                            Icons.logout,
+                            size: 6 * imageSizeMultiplier,
+                            color: appColor,
+                          ),
+                          onPressed: () {
+                            _showLogoutDialog();
+                          },
+                        ),
+                      )
+                    ]
+                  )
+                )
               ),
-            ),
-            Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Container(
-                  height: 13 * heightMultiplier,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(40.0),
-                        bottomRight: Radius.circular(40.0)),
+            )
+          ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 2 * heightMultiplier),
+                child: CustomButton(
+                  height: 0,
+                  minWidth: 0,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _edit = !_edit;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomText(
+                          align: TextAlign.center,
+                          color: Colors.black,
+                          size: 1.6,
+                          text: _edit?'Cancle Edit':'Edit Profile',
+                          weight: FontWeight.bold,
+                        ),
+                        Icon(
+                          _edit?Icons.close_rounded:Icons.edit,
+                          size: 4 * imageSizeMultiplier,
+                          color: Colors.black,
+                        )
+                      ]
+                    )
+                  )
+                )
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                    bottom: 2 * heightMultiplier),
+                child: CustomTextBox(
+                  type: 'roundedbox',
+                  enabled: _edit ? true : false,
+                  controller: _nameController,
+                  focusNode: _nameFocus,
+                  onSubmitted: (text) {
+                    FocusScope.of(context)
+                        .requestFocus(_numberFocus);
+                  },
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  border: true,
+                  obscureText: false,
+                  padding: 8,
+                  prefixIcon: Icon(
+                    Icons.person_outline_rounded,
+                    size: 6 * imageSizeMultiplier,
                     color: appColor,
                   ),
+                  shadow: _edit,
+                  suffixIcon: null,
+                  text: 'Name',
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: 4 * heightMultiplier),
-                  height: 18 * heightMultiplier,
-                  width: 18 * heightMultiplier,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 3, color: Colors.red),
-                    boxShadow: [
-                      BoxShadow(
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        color: Colors.white.withOpacity(.4),
-                      ),
-                    ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                    bottom: 2 * heightMultiplier),
+                child: CustomTextBox(
+                  type: 'roundedbox',
+                  enabled: _edit ? true : false,
+                  controller: _numberController,
+                  onSubmitted: (text) {
+                    FocusScope.of(context)
+                        .requestFocus(_addressFocus);
+                  },
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  border: true,
+                  obscureText: false,
+                  padding: 8,
+                  prefixIcon: Icon(
+                    Icons.contact_phone_rounded,
+                    size: 6 * imageSizeMultiplier,
+                    color: appColor,
                   ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: Colors.red,
-                    size: 14 * imageSizeMultiplier,
-                  ),
+                  shadow: _edit,
+                  suffixIcon: null,
+                  text: 'Contact Number',
+                  focusNode: _numberFocus,
                 ),
-                // Align(
-                //   alignment: Alignment.bottomRight,
-                //   child: Container(
-                //     margin: EdgeInsets.only(top: 10 * heightMultiplier, right: 4 * widthMultiplier),
-                //     width: 6 * heightMultiplier,
-                //     height: 6 * heightMultiplier,
-                //     decoration: BoxDecoration(
-                //         shape: BoxShape.circle,
-                //         border: Border.all(width: 3, color: !_edit ? Colors.white : Colors.red),
-                //         color: !_edit ? Colors.red : Colors.white),
-                //     child: IconButton(
-                //         padding: EdgeInsets.only(
-                //             bottom: 0 * heightMultiplier,
-                //             right: 0 * widthMultiplier),
-                //         iconSize: 18,
-                //         onPressed: () {
-                //           _edit = !_edit;
-                //           setState(() {
-                //             // _edit
-                //             //     ? FocusScope.of(context)
-                //             //         .requestFocus(_nameFocus)
-                //             //     :
-                //             FocusScope.of(context).unfocus();
-                //           });
-                //           _check();
-                //           // if (_edit == true) {
-                //           //   FocusScope.of(context)
-                //           //       .requestFocus(_nameFocus);
-                //           //   _edit = !_edit;
-                //           // } else {
-                //           //   FocusScope.of(context).unfocus();
-                //           //   _edit = _edit;
-                //           // }
-                //         },
-                //         icon: Icon(Icons.edit, size: 3 * heightMultiplier,),
-                //         color: !_edit ? Colors.white : Colors.red)
-                //   ),
-                // ),
-              ],
-            ),
-          ]
-        ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 2 * heightMultiplier),
-            child: CustomButton(
-              height: 0,
-              minWidth: 0,
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    _edit = !_edit;
-                  });
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomText(
-                      align: TextAlign.center,
-                      color: Colors.red,
-                      size: 1.8,
-                      text: _edit?'Cancle Edit':'Edit Profile',
-                      weight: FontWeight.bold,
-                    ),
-                    Icon(
-                      _edit?Icons.close_rounded:Icons.edit,
-                      size: 4 * imageSizeMultiplier,
-                      color: Colors.red,
-                    )
-                  ]
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                    bottom: 2 * heightMultiplier),
+                child: CustomTextBox(
+                  type: 'roundedbox',
+                  enabled: _edit ? true : false,
+                  controller: _addressController,
+                  onSubmitted: (text) {
+                    FocusScope.of(context).unfocus();
+                  },
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  border: true,
+                  obscureText: false,
+                  padding: 8,
+                  prefixIcon: Icon(
+                    Icons.location_city,
+                    size: 6 * imageSizeMultiplier,
+                    color: appColor,
+                  ),
+                  shadow: _edit,
+                  suffixIcon: null,
+                  text: 'Address',
+                  focusNode: _addressFocus,
                 )
+              ),
+              if (_edit)
+              FilledCustomButton(
+                type: 'roundedbox',
+                text: 'Save',
+                color: appColor,
+                onPressed: () {
+                  _check();
+                },
+                padding: 8,
               )
-            )
+            ],
           ),
-          Padding(
-            padding: EdgeInsets.only(
-                bottom: 2 * heightMultiplier),
-            child: CustomTextBox(
-              type: 'roundedbox',
-              enabled: _edit ? true : false,
-              controller: _nameController,
-              focusNode: _nameFocus,
-              onSubmitted: (text) {
-                FocusScope.of(context)
-                    .requestFocus(_numberFocus);
-              },
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              border: true,
-              obscureText: false,
-              padding: 8,
-              prefixIcon: Icon(
-                Icons.person_outline_rounded,
-                size: 6 * imageSizeMultiplier,
-                color: Colors.red,
-              ),
-              shadow: true,
-              suffixIcon: null,
-              text: 'Name',
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-                bottom: 2 * heightMultiplier),
-            child: CustomTextBox(
-              type: 'roundedbox',
-              enabled: _edit ? true : false,
-              controller: _numberController,
-              onSubmitted: (text) {
-                FocusScope.of(context)
-                    .requestFocus(_addressFocus);
-              },
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              border: true,
-              obscureText: false,
-              padding: 8,
-              prefixIcon: Icon(
-                Icons.contact_phone_rounded,
-                size: 6 * imageSizeMultiplier,
-                color: Colors.red,
-              ),
-              shadow: true,
-              suffixIcon: null,
-              text: 'Contact Number',
-              focusNode: _numberFocus,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-                bottom: 2 * heightMultiplier),
-            child: CustomTextBox(
-              type: 'roundedbox',
-              enabled: _edit ? true : false,
-              controller: _addressController,
-              onSubmitted: (text) {
-                FocusScope.of(context).unfocus();
-              },
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              border: true,
-              obscureText: false,
-              padding: 8,
-              prefixIcon: Icon(
-                Icons.location_city,
-                size: 6 * imageSizeMultiplier,
-                color: Colors.red,
-              ),
-              shadow: true,
-              suffixIcon: null,
-              text: 'Address',
-              focusNode: _addressFocus,
-            )
-          ),
-          if (_edit)
-          FilledCustomButton(
-            type: 'roundedbox',
-            text: 'Save',
-            color: appColor,
-            onPressed: () {
-
-            },
-            padding: 8,
-          )
-        ],
-      ),
+        )
+      )
     );
   }
 }

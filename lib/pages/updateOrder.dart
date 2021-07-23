@@ -20,35 +20,27 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 import 'orderCart.dart';
 
-class OrderWithVariants extends StatefulWidget {
+class UpdateOrderScreen extends StatefulWidget {
   Map<String, dynamic> details;
-  Map<String, dynamic> restaurantDetails;
   int index;
-  var specifics;
-  OrderWithVariants(
+  UpdateOrderScreen(
       {Key key,
       @required this.details,
-      @required this.restaurantDetails,
-      @required this.specifics,
-      @required this.index})
+      @required this.index
+      })
       : super(key: key);
   @override
-  _OrderWithVariantsState createState() => _OrderWithVariantsState();
+  _UpdateOrderScreenState createState() => _UpdateOrderScreenState();
 }
 
-class _OrderWithVariantsState extends State<OrderWithVariants> {
+class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   bool _loading = true;
   var _product = {};
-  List _variants = [];
-  List _productOptions = [];
-  List _selectedIndexes = [];
-  List _controllers = [];
-  List _productOptItems = [];
-  int _cartQuantity = 0;
-  int _selectedVariantIndex = 0;
+  var _variant = {};
+  List _selected = [];
   int _quantity = 1;
   TextEditingController _noteController = TextEditingController();
   // List _productControllers = [];
@@ -56,8 +48,10 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   //
   _getVariants() async {
     var response =
-        await Http(url: 'products/${widget.details['id']}', body: {})
+        await Http(url: 'products/${widget.details['product_id']}', body: {})
             .getWithHeader();
+            log(widget.details.toString());
+            print(response.request);
             print(response.body);
 
     if (response is String) {
@@ -99,21 +93,50 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
 
         setState(() {
           _product = json.decode(response.body)['product'][0];
-          _variants.clear();
-          _variants = new List.from(_product['variants']);
-          if (_variants.isNotEmpty) {
-            _variants.forEach((variant) {
-              _selectedIndexes.add([]);
-              variant['quantity'] = 0;
-              variant['product_options'].forEach((option) {
-                if (option['selection'] == 'single') _selectedIndexes[_variants.indexOf(variant)].add(-1);
-                else _selectedIndexes[_variants.indexOf(variant)].add([]);
-              });
-              print(_selectedIndexes);
-              _controllers.add([]);
-              // _productControllers.add([]);
+          new List.from(_product['variants']).forEach((variant) {
+            if (variant['id'] == widget.details['variant_id']) {
+              _variant = variant;
+            }
+          });
+          List selectedProductOptionIds = [];
+          List selectedProductOptions = [];
+          widget.details['product_options'].forEach((option) {
+            selectedProductOptionIds.add(option['id']);
+            selectedProductOptions.add(option);
+          });
+          _variant['product_options'].forEach((option) {
+            bool found = false;
+            List selectedItems = [];
+            selectedProductOptionIds.forEach((selectedOption) {
+              if (!found) {
+                if (selectedOption == option['id']) {
+                  found = true;
+                  List itemIds = [];
+                  option['product_option_items'].forEach((item) {
+                    itemIds.add(item['id']);
+                  });
+                  print('${option['name']} $itemIds');
+                  selectedProductOptions[selectedProductOptionIds.indexOf(selectedOption)]['product_option_items'].forEach((selectedItem) {
+                    itemIds.forEach((id) {
+                      if (id == selectedItem['id']) {
+                        print('found $id');
+                        print('index ${itemIds.indexOf(id)}');
+                        selectedItems.add(itemIds.indexOf(id));
+                      }
+                    });
+                  });
+                  if (option['selection'] == 'single') _selected.add(selectedItems[0]);
+                  else _selected.add(selectedItems);
+                }
+              }
             });
-          }
+            if (!found) {
+              if (option['selection'] == 'single') _selected.add(-1);
+              else _selected.add([]);
+            }
+          });
+          print(' selected $_selected');
+          // _productControllers.add([]);
           _loading = false;
           _refreshController.refreshCompleted();
         });
@@ -124,13 +147,15 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   void initState() {
     //TODO: implement initstate
     super.initState();
+    _noteController.text = widget.details['note'];
+    _quantity = widget.details['quantity'];
     _getVariants();
 
     // _variants = new List.from(widget.details['productVariants']);
     // if (_variants.isNotEmpty) {
     //   _variants.forEach((variant) {
     //     variant['quantity'] = 0;
-    //     _selectedIndexes.add([]);
+    //     _selected.add([]);
     //     _controllers.add([]);
     //     // _productControllers.add([]);
     //   });
@@ -145,114 +170,25 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     //may cart na
     if (sharedPreferences.getString('cart').isNotEmpty) {
       cart = json.decode(sharedPreferences.getString('cart'));
-      //iba yung restaurant
-      if (cart['restaurant']['id'] != widget.restaurantDetails['id']) {
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: CustomText(
-            align: TextAlign.left,
-            text: 'The Cart has already have an order. It will Ovewrite, Proceed?',
-            color: Colors.white,
-            size: 1.4,
-            weight: FontWeight.normal,
-          ),
-        ));
-        return;
-      } 
-      //same restaurant
-      else {
-        bool sameProduct = false;
-        cart['total_price'] = 0;
-        cart['total_items'] = 0;
-        cart['order_request_products'].forEach((product) {
-          var newproduct = {
-            'product_name': widget.details['name'],
-            'product_id': widget.details['id'],
-            'variant_id': _variants[_selectedVariantIndex]['id'],
-            'name': _variants[_selectedVariantIndex]['name'],
-            'note': _noteController.text,
-            'product_options': productOptions
-          };
-          var oldproduct = {
-            'product_name': product['product_name'],
-            'product_id': product['productide'],
-            'variant_id': product['variant_id'],
-            'name': product['name'],
-            'note': product['note'],
-            'product_options': product['product_options']
-          };
-          //same lang yung order product
-          if (oldproduct.toString() == newproduct.toString()) {
-            sameProduct = true;
-            product['quantity'] = int.parse(product['quantity'].toString()) + _quantity;
-            product['overall_price'] = (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(product['quantity'].toString());
-          }
-          cart['total_price'] += product['overall_price'];
-          cart['total_items'] += product['quantity'];
-        });
-        //iba yung order product
-        if (!sameProduct) {
-          cart['order_request_products'].add({
-            'overall_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
-            'specific_price': productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString()),
-            'product_image': widget.details['image'],
-            'variant_image': _variants[_selectedVariantIndex]['image'],
-            'product_name': widget.details['name'],
-            'product_id': widget.details['id'],
-            'variant_id': _variants[_selectedVariantIndex]['id'],
-            'name': _variants[_selectedVariantIndex]['name'],
-            'quantity': _quantity,
-            'note': _noteController.text,
-            'product_options': productOptions,
-          });
-          cart['total_price'] += (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString());
-          cart['total_items'] += _quantity;
-        }
-
-        Navigator.pop(context);
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Color(0xFF323232),
-          content: CustomText(
-            align: TextAlign.left,
-            text: 'Added to cart',
-            color: Colors.white,
-            size: 1.4,
-            weight: FontWeight.normal,
-          ),
-        ));
-
-        sharedPreferences.setString('cart', json.encode(cart));
-        log(sharedPreferences.getString('cart'));
-      }
-    }
-    //wala pang cart
-    else {
-      cart = {
-        'total_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
-        'total_items': _quantity,
-        'restaurant': {
-          'id': widget.restaurantDetails['id'],
-          'concierge_percentage': widget.restaurantDetails['concierge_percentage'],
-          'markup_percentage': widget.restaurantDetails['markup_percentage'],
-        },
-        'order_request_products': [
-          {
-            'overall_price': (productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString())) * int.parse(_quantity.toString()),
-            'specific_price': productOptionsPrice + double.parse(_variants[_selectedVariantIndex]['price'].toString()),
-            'product_image': widget.details['image'],
-            'variant_image': _variants[_selectedVariantIndex]['image'],
-            'product_name': widget.details['name'],
-            'product_id': widget.details['id'],
-            'variant_id': _variants[_selectedVariantIndex]['id'],
-            'name': _variants[_selectedVariantIndex]['name'],
-            'quantity': _quantity,
-            'note': _noteController.text,
-            'product_options': productOptions,
-          }
-        ]
+      
+      bool sameProduct = false;
+      cart['total_price'] = cart['total_price'] - cart['order_request_products'][widget.index]['overall_price'];
+      cart['total_items'] = cart['total_items'] - cart['order_request_products'][widget.index]['quantity'];
+      cart['order_request_products'][widget.index] = {
+        'overall_price': (productOptionsPrice + double.parse(_variant['price'].toString())) * int.parse(_quantity.toString()),
+        'specific_price': productOptionsPrice + double.parse(_variant['price'].toString()),
+        'product_image': widget.details['product_image'],
+        'variant_image': _variant['image'],
+        'product_name': widget.details['product_name'],
+        'product_id': widget.details['product_id'],
+        'variant_id': _variant['id'],
+        'name': _variant['name'],
+        'quantity': _quantity,
+        'note': _noteController.text,
+        'product_options': productOptions,
       };
+      cart['total_price'] += cart['order_request_products'][widget.index]['overall_price'];
+      cart['total_items'] += cart['order_request_products'][widget.index]['quantity'];
 
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -260,7 +196,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         backgroundColor: Color(0xFF323232),
         content: CustomText(
           align: TextAlign.left,
-          text: 'Added to cart',
+          text: 'Updated basket',
           color: Colors.white,
           size: 1.4,
           weight: FontWeight.normal,
@@ -310,7 +246,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                           color: appColor,
                           align: TextAlign.center,
                           size: 3,
-                          text: widget.details['name'],
+                          text: widget.details['product_name'],
                           weight: FontWeight.bold,
                         )
                       )
@@ -331,157 +267,61 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
             padding: EdgeInsets.only(top: 2 * heightMultiplier),
             child: SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   if (!_loading)
-                  Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.only(left: 4 * widthMultiplier),
-                        height: 66 * imageSizeMultiplier,
-                        width: 70 * imageSizeMultiplier,
-                        child: CachedNetworkImage(
-                          imageUrl: _product['variants'][_selectedVariantIndex]['image'],
-                          placeholder: (context, string) {
-                            return Shimmer.fromColors(
-                              baseColor: Colors.black12,
-                              highlightColor: Colors.black26,
-                              child: Container(
-                                height: 66 * imageSizeMultiplier,
-                                width: 66 * imageSizeMultiplier,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                  color: Color(0xFF363636),
-                                ),
-                              ),
-                            );
-                          },
-                          errorWidget: (context, string, _) {
-                            return Container(
-                              height: 66 * imageSizeMultiplier,
-                              width: 66 * imageSizeMultiplier,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                color: Color(0xFF363636),
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage(
-                                    Images.iconImage,
-                                  )
-                                )
-                              ),
-                            );
-                          },
-                          imageBuilder: (context, provider) {
-                            return Container(
-                              height: 66 * imageSizeMultiplier,
-                              width: 66 * imageSizeMultiplier,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: provider
-                                )
-                              ),
-                            );
-                          }
-                        )
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.topCenter,
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(left: 4 * widthMultiplier),
+                    height: 66 * imageSizeMultiplier,
+                    width: 70 * imageSizeMultiplier,
+                    child: CachedNetworkImage(
+                      imageUrl: _variant['image'],
+                      placeholder: (context, string) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.black12,
+                          highlightColor: Colors.black26,
+                          child: Container(
+                            height: 66 * imageSizeMultiplier,
+                            width: 66 * imageSizeMultiplier,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                              color: Color(0xFF363636),
+                            ),
+                          ),
+                        );
+                      },
+                      errorWidget: (context, string, _) {
+                        return Container(
                           height: 66 * imageSizeMultiplier,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                for (var variant in _product['variants'])
-                                TextButton(
-                                  style: ButtonStyle(
-                                    minimumSize: MaterialStateProperty.all(Size.zero),
-                                    overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
-                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                      ),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedVariantIndex = _product['variants'].indexOf(variant);
-                                    });
-                                  },
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      CachedNetworkImage(
-                                        imageUrl: variant['image'],
-                                        placeholder: (context, string) {
-                                          return Shimmer.fromColors(
-                                            baseColor: Colors.black12,
-                                            highlightColor: Colors.black26,
-                                            child: Container(
-                                              height: 14 * imageSizeMultiplier,
-                                              width: 14 * imageSizeMultiplier,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                                color: Color(0xFF363636),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        errorWidget: (context, string, _) {
-                                          return Container(
-                                            height: 14 * imageSizeMultiplier,
-                                            width: 14 * imageSizeMultiplier,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                              color: Color(0xFF363636),
-                                              image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: AssetImage(
-                                                  Images.iconImage,
-                                                )
-                                              )
-                                            ),
-                                          );
-                                        },
-                                        imageBuilder: (context, provider) {
-                                          return Container(
-                                            height: 14 * imageSizeMultiplier,
-                                            width: 14 * imageSizeMultiplier,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
-                                              image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: provider
-                                              )
-                                            ),
-                                          );
-                                        }
-                                      ),
-                                      Container(
-                                        height: 16 * imageSizeMultiplier,
-                                        width: 16 * imageSizeMultiplier,
-                                        child: Align(
-                                          alignment: Alignment.topRight,
-                                          child: Icon(
-                                            Icons.check_circle,
-                                            color: (_selectedVariantIndex == _product['variants'].indexOf(variant))?Colors.black:Colors.transparent,
-                                            size: 4 * imageSizeMultiplier,
-                                          ),
-                                        )
-                                      )
-                                    ]
-                                  )
-                                ),
-                              ],
+                          width: 66 * imageSizeMultiplier,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                            color: Color(0xFF363636),
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: AssetImage(
+                                Images.iconImage,
+                              )
                             )
                           ),
-                        )
-                      )
-                    ],
+                        );
+                      },
+                      imageBuilder: (context, provider) {
+                        return Container(
+                          height: 66 * imageSizeMultiplier,
+                          width: 66 * imageSizeMultiplier,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(1 * imageSizeMultiplier),
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: provider
+                            )
+                          ),
+                        );
+                      }
+                    )
                   ),
                   if (!_loading)
                   Padding(
@@ -496,8 +336,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CustomText(
-                                text: _variants[_selectedVariantIndex]['name'],
-                                // text: _variants[_selectedVariantIndex]s[index]['productDescription'],
+                                text: _variant['name'],
+                                // text: _variants[index]['productDescription'],
                                 align: TextAlign.left,
                                 size: 2.4,
                                 weight: FontWeight.bold,
@@ -506,8 +346,8 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               Padding(
                                 padding: EdgeInsets.only(top: 1 * heightMultiplier),
                                 child: CustomText(
-                                  text: _variants[_selectedVariantIndex]['description'],
-                                  // text: _variants[_selectedVariantIndex]s[index]['productDescription'],
+                                  text: _variant['description'],
+                                  // text: _variants[index]['productDescription'],
                                   align: TextAlign.left,
                                   size: 1.8,
                                   weight: FontWeight.normal,
@@ -520,7 +360,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         Padding(
                           padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier),
                           child: CustomText(
-                            text: '₱ ${double.parse(_variants[_selectedVariantIndex]['price'].toString()).toStringAsFixed(2)}',
+                            text: '₱ ${double.parse(_variant['price'].toString()).toStringAsFixed(2)}',
                             // text: _products[index]['productDescription'],
                             align: TextAlign.left,
                             size: 2.4,
@@ -532,7 +372,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                     )
                   ),
                   if (!_loading)
-                  for (var option in _variants[_selectedVariantIndex]['product_options'])
+                  for (var option in _variant['product_options'])
                   Padding(
                     padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
                     child: Column(
@@ -593,13 +433,13 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
                                 value: option['product_option_items'].indexOf(item), 
-                                groupValue: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)], 
+                                groupValue: _selected[_variant['product_options'].indexOf(option)], 
                                 activeColor: appColor,
                                 onChanged: (value) {
                                   print(value);
                                   setState(() {
-                                    _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
-                                    print(_selectedIndexes);
+                                    _selected[_variant['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
+                                    print(_selected);
                                   });
                                 },
                                 title: CustomText(
@@ -618,23 +458,23 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 controlAffinity: ListTileControlAffinity.leading,
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
-                                value: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)), 
+                                value: _selected[_variant['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)), 
                                 activeColor: appColor,
                                 onChanged: (value) {
                                   // 
                                   print(value);
-                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)]);
-                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)));
+                                  print(_selected[_variant['product_options'].indexOf(option)]);
+                                  print(_selected[_variant['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)));
                                   if (value) {
                                     setState(() {
-                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
-                                      print(_selectedIndexes);
+                                      _selected[_variant['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
+                                      print(_selected);
                                     });
                                   }
                                   else {
                                     setState(() {
-                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
-                                      print(_selectedIndexes);
+                                      _selected[_variant['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
+                                      print(_selected);
                                     });
                                   }
                                 },
@@ -664,13 +504,16 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                   if (!_loading)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                    child: CustomText(
-                      text: 'Special Instructions',
-                      // text: _products[index]['productDescription'],
-                      align: TextAlign.left,
-                      size: 1.8,
-                      weight: FontWeight.bold,
-                      color: Colors.black,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CustomText(
+                        text: 'Special Instructions',
+                        // text: _products[index]['productDescription'],
+                        align: TextAlign.left,
+                        size: 1.8,
+                        weight: FontWeight.bold,
+                        color: Colors.black,
+                      )
                     )
                   ),
                   if (!_loading)
@@ -821,14 +664,14 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         List product_options = [];
                         bool proceed = true;
                         double price = 0;
-                        _selectedIndexes[_selectedVariantIndex].asMap().forEach((index, selected) {
+                        _selected.asMap().forEach((index, selected) {
                           if (proceed){
-                            if (_variants[_selectedVariantIndex]['product_options'][index]['selection'] == 'single') {
-                              if (_variants[_selectedVariantIndex]['product_options'][index]['type'] == 'required' && selected == -1) {
+                            if (_variant['product_options'][index]['selection'] == 'single') {
+                              if (_variant['product_options'][index]['type'] == 'required' && selected == -1) {
                                 _scaffoldKey.currentState.showSnackBar(new SnackBar(
                                   content: CustomText(
                                     align: TextAlign.left,
-                                    text: '${_variants[_selectedVariantIndex]['product_options'][index]['name']} selection is Required!',
+                                    text: '${_variant['product_options'][index]['name']} selection is Required!',
                                     color: Colors.white,
                                     size: 1.8,
                                     weight: FontWeight.normal,
@@ -842,18 +685,18 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               else if (selected > -1) {
                                 proceed = true;
                                 product_options.add({
-                                  'id': _variants[_selectedVariantIndex]['product_options'][index]['id'],
-                                  'name': _variants[_selectedVariantIndex]['product_options'][index]['name'],
-                                  'selection': _variants[_selectedVariantIndex]['product_options'][index]['selection'],
-                                  'type': _variants[_selectedVariantIndex]['product_options'][index]['type'],
+                                  'id': _variant['product_options'][index]['id'],
+                                  'name': _variant['product_options'][index]['name'],
+                                  'selection': _variant['product_options'][index]['selection'],
+                                  'type': _variant['product_options'][index]['type'],
                                   'product_option_items': [
                                     {
-                                      'id': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['id'],
-                                      'name': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['item_name'],
+                                      'id': _variant['product_options'][index]['product_option_items'][selected]['id'],
+                                      'name': _variant['product_options'][index]['product_option_items'][selected]['item_name'],
                                     }
                                   ]
                                 });
-                                price += double.parse(_variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][selected]['price'].toString());
+                                price += double.parse(_variant['product_options'][index]['product_option_items'][selected]['price'].toString());
                               }
                               else {
                                 proceed = true;
@@ -861,11 +704,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               print('1 $proceed');
                             }
                             else {
-                              if (_variants[_selectedVariantIndex]['product_options'][index]['type'] == 'required' && selected.isEmpty) {
+                              if (_variant['product_options'][index]['type'] == 'required' && selected.isEmpty) {
                                 _scaffoldKey.currentState.showSnackBar(new SnackBar(
                                   content: CustomText(
                                     align: TextAlign.left,
-                                    text: '${_variants[_selectedVariantIndex]['product_options'][index]['name']} selection is Required!',
+                                    text: '${_variant['product_options'][index]['name']} selection is Required!',
                                     color: Colors.white,
                                     size: 1.8,
                                     weight: FontWeight.normal,
@@ -881,16 +724,16 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                                 List items = [];
                                 selected.forEach((id) {
                                   items.add({
-                                    'id': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['id'],
-                                    'name': _variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['item_name'],
+                                    'id': _variant['product_options'][index]['product_option_items'][id]['id'],
+                                    'name': _variant['product_options'][index]['product_option_items'][id]['item_name'],
                                   });
-                                  price += double.parse(_variants[_selectedVariantIndex]['product_options'][index]['product_option_items'][id]['price'].toString());
+                                  price += double.parse(_variant['product_options'][index]['product_option_items'][id]['price'].toString());
                                 });
                                 product_options.add({
-                                  'id': _variants[_selectedVariantIndex]['product_options'][index]['id'],
-                                  'name': _variants[_selectedVariantIndex]['product_options'][index]['name'],
-                                  'selection': _variants[_selectedVariantIndex]['product_options'][index]['selection'],
-                                  'type': _variants[_selectedVariantIndex]['product_options'][index]['type'],
+                                  'id': _variant['product_options'][index]['id'],
+                                  'name': _variant['product_options'][index]['name'],
+                                  'selection': _variant['product_options'][index]['selection'],
+                                  'type': _variant['product_options'][index]['type'],
                                   'product_option_items': items
                                 });
                               }
@@ -931,7 +774,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                         child: Align(
                           alignment: Alignment.center,
                           child: CustomText(
-                            text: 'Add to basket',
+                            text: 'Update basket',
                             // text: _products[index]['productDescription'],
                             align: TextAlign.center,
                             size: 1.4,
