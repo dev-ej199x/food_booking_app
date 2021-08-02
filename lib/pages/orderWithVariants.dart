@@ -58,7 +58,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
     var response =
         await Http(url: 'products/${widget.details['id']}', body: {})
             .getWithHeader();
-            print(response.body);
 
     if (response is String) {
       setState(() {
@@ -109,7 +108,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                 if (option['selection'] == 'single') _selectedIndexes[_variants.indexOf(variant)].add(-1);
                 else _selectedIndexes[_variants.indexOf(variant)].add([]);
               });
-              print(_selectedIndexes);
               _controllers.add([]);
               // _productControllers.add([]);
             });
@@ -138,9 +136,7 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
   }
 
   _addToCart(List productOptions, double productOptionsPrice) async {
-        print('oki');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    print(sharedPreferences.getString('cart'));
     var cart = {};
     //may cart na
     if (sharedPreferences.getString('cart').isNotEmpty) {
@@ -533,134 +529,128 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                   ),
                   if (!_loading)
                   for (var option in _variants[_selectedVariantIndex]['product_options'])
-                  Padding(
-                    padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CustomText(
-                                    text: option['name'],
-                                    // text: _products[index]['productDescription'],
-                                    align: TextAlign.left,
-                                    size: 1.8,
-                                    weight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                  CustomText(
-                                    text: option['selection'] == 'single'?'Select one':'Select as many as you want',
+                  if (!(option['product_option_items'].length==0 && option['type'] != 'required'))
+                    Padding(
+                      padding: EdgeInsets.only(left:  4 * widthMultiplier, right: 4 * widthMultiplier, top: 2 * heightMultiplier),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CustomText(
+                                      text: option['name'],
+                                      // text: _products[index]['productDescription'],
+                                      align: TextAlign.left,
+                                      size: 1.8,
+                                      weight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                    CustomText(
+                                      text: option['selection'] == 'single'?'Select one':'Select as many as you want',
+                                      // text: _products[index]['productDescription'],
+                                      align: TextAlign.left,
+                                      size: 1.4,
+                                      weight: FontWeight.normal,
+                                      color: Colors.black54,
+                                    ),
+                                  ]
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10 * imageSizeMultiplier),
+                                  color: lightAppColor
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 0.4 * heightMultiplier, horizontal: 1.2 * widthMultiplier),
+                                child: CustomText(
+                                  text: option['type'] == 'required'?'Required':'Optional',
+                                  // text: _products[index]['productDescription'],
+                                  align: TextAlign.left,
+                                  size: 1.2,
+                                  weight: FontWeight.normal,
+                                  color: Colors.white,
+                                ),
+                              )
+                            ]
+                          ),
+                          for (var item in option['product_option_items'])
+                          Row(
+                            children: [
+                              if (option['selection'] == 'single')
+                              Expanded(
+                                child: RadioListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  value: option['product_option_items'].indexOf(item), 
+                                  groupValue: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)], 
+                                  activeColor: appColor,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
+                                    });
+                                  },
+                                  title: CustomText(
+                                    text: item['item_name'],
                                     // text: _products[index]['productDescription'],
                                     align: TextAlign.left,
                                     size: 1.4,
                                     weight: FontWeight.normal,
-                                    color: Colors.black54,
+                                    color: Colors.black,
                                   ),
-                                ]
+                                )
+                              )
+                              else
+                              Expanded(
+                                child: CheckboxListTile(
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  value: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)), 
+                                  activeColor: appColor,
+                                  onChanged: (value) {
+                                    // 
+                                    if (value) {
+                                      setState(() {
+                                        _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
+                                      });
+                                    }
+                                    else {
+                                      setState(() {
+                                        _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
+                                      });
+                                    }
+                                  },
+                                  title: CustomText(
+                                    text: item['item_name'],
+                                    // text: _products[index]['productDescription'],
+                                    align: TextAlign.left,
+                                    size: 1.4,
+                                    weight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                )
                               ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10 * imageSizeMultiplier),
-                                color: lightAppColor
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 0.4 * heightMultiplier, horizontal: 1.2 * widthMultiplier),
-                              child: CustomText(
-                                text: option['type'] == 'required'?'Required':'Optional',
+                              CustomText(
+                                text: '+ ${double.parse(item['price'].toString()).toStringAsFixed(2)}',
                                 // text: _products[index]['productDescription'],
                                 align: TextAlign.left,
-                                size: 1.2,
+                                size: 1.4,
                                 weight: FontWeight.normal,
-                                color: Colors.white,
+                                color: Colors.black54,
                               ),
-                            )
-                          ]
-                        ),
-                        for (var item in option['product_option_items'])
-                        Row(
-                          children: [
-                            if (option['selection'] == 'single')
-                            Expanded(
-                              child: RadioListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                value: option['product_option_items'].indexOf(item), 
-                                groupValue: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)], 
-                                activeColor: appColor,
-                                onChanged: (value) {
-                                  print(value);
-                                  setState(() {
-                                    _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
-                                    print(_selectedIndexes);
-                                  });
-                                },
-                                title: CustomText(
-                                  text: item['item_name'],
-                                  // text: _products[index]['productDescription'],
-                                  align: TextAlign.left,
-                                  size: 1.4,
-                                  weight: FontWeight.normal,
-                                  color: Colors.black,
-                                ),
-                              )
-                            )
-                            else
-                            Expanded(
-                              child: CheckboxListTile(
-                                controlAffinity: ListTileControlAffinity.leading,
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                value: _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)), 
-                                activeColor: appColor,
-                                onChanged: (value) {
-                                  // 
-                                  print(value);
-                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)]);
-                                  print(_selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)));
-                                  if (value) {
-                                    setState(() {
-                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
-                                      print(_selectedIndexes);
-                                    });
-                                  }
-                                  else {
-                                    setState(() {
-                                      _selectedIndexes[_selectedVariantIndex][_variants[_selectedVariantIndex]['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
-                                      print(_selectedIndexes);
-                                    });
-                                  }
-                                },
-                                title: CustomText(
-                                  text: item['item_name'],
-                                  // text: _products[index]['productDescription'],
-                                  align: TextAlign.left,
-                                  size: 1.4,
-                                  weight: FontWeight.normal,
-                                  color: Colors.black,
-                                ),
-                              )
-                            ),
-                            CustomText(
-                              text: '+ ${double.parse(item['price'].toString()).toStringAsFixed(2)}',
-                              // text: _products[index]['productDescription'],
-                              align: TextAlign.left,
-                              size: 1.4,
-                              weight: FontWeight.normal,
-                              color: Colors.black54,
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
-                  ),
+                            ],
+                          ),
+                        ],
+                      )
+                    ),
                   if (!_loading)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 1 * heightMultiplier, horizontal: 4 * widthMultiplier),
@@ -736,9 +726,11 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                       minWidth: 0,
                       child: TextButton(
                         onPressed: () {
-                          setState(() {
-                            _quantity--;
-                          });
+                          if (_quantity > 1) {
+                            setState(() {
+                              _quantity--;
+                            });
+                          }
                         },
                         style: ButtonStyle(
                           overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
@@ -858,7 +850,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               else {
                                 proceed = true;
                               }
-                              print('1 $proceed');
                             }
                             else {
                               if (_variants[_selectedVariantIndex]['product_options'][index]['type'] == 'required' && selected.isEmpty) {
@@ -897,17 +888,14 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
                               else {
                                 proceed = true;
                               }
-                              print('2 $proceed');
                             }
                           }
                         });
                         if (proceed) {
-                          print('3 $proceed');
                           _addToCart(
                             product_options, 
                             price
                           );
-                          print(price);
                         }
                       },
                       style: ButtonStyle(

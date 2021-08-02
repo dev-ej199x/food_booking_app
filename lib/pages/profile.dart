@@ -116,7 +116,6 @@ class _ProfileState extends State<Profile> {
       'number': _numberController.text,
       'address': _addressController.text
     }).putWithHeader();
-    print(response.body);
     if (response is String) {
       // Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -168,13 +167,6 @@ class _ProfileState extends State<Profile> {
       }
     }
   }
-
-  // _logout() {
-  //   FirebaseSettings().revokeToken();
-  //   Http().logout();
-  //   print('oki');
-  //   Navigator.pushAndRemoveUntil(context, PageTransition(type: PageTransitionType.rightToLeft, child: LoginScreen(from: null,)), (route) => false);
-  // }
 
   _showLogoutDialog() {
     showDialog(context: context,

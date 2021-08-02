@@ -49,24 +49,12 @@ class _OrderScreenState extends State<OrderScreen> {
     // TODO: implement initState
     super.initState();
     _getProducts();
-    // _categories = new List.from(widget.details['productCategories']);
-    // if (_categories.isNotEmpty) {
-    //   _products = new List.from(_categories[0]['products']);
-    //   _selectedCategoryIndex = _categories[0]['categoriesName'];
-    //   _categories.forEach((category) {
-    //     _categoriesNames.add(category['categoriesName']);
-    //   });
-    //   print(_categories.toString());
-    // }
   }
 
   _searchProduts(String search) {
     List products = [];
-    print('HAHSHA ${_products.length}');
     
     _products.forEach((product) {
-      print('HAHSHA $product');
-      print('HAHSHA $search');
       if (product['name']
           .toString()
           .toLowerCase()
@@ -91,9 +79,6 @@ class _OrderScreenState extends State<OrderScreen> {
   _getProducts() async {
     _sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
-      print(_sharedPreferences.getString('cart'));
-      print(_sharedPreferences.getString('cart').isNotEmpty);
-      print(_sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['order_request_products'].length:0);
       _cartQuantity = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart'))['total_items']:0;
       _selectedProductIds.clear();
       if (_sharedPreferences.getString('cart').isNotEmpty) {
@@ -102,7 +87,6 @@ class _OrderScreenState extends State<OrderScreen> {
         });
       }
       _cart = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart')):{};
-      print(_cartQuantity);
     });
     var response =
         await Http(url: 'restaurants/${widget.details['id']}', body: {})
@@ -125,7 +109,6 @@ class _OrderScreenState extends State<OrderScreen> {
         ),
       );
     } else if (response is Response) {
-      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;

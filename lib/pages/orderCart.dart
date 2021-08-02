@@ -101,7 +101,6 @@ class _OrderCartState extends State<OrderCart> {
       'latitude': '6.999',
       'order_request_products': order_request_products
     };
-    print(request);
     var response =
         await Http(url: 'orderRequests', body: request).postWithHeader();
     if (response is String) {

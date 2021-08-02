@@ -454,15 +454,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            print({'details': restaurant, 
-                                  'specifics': {
-                                    'type': 'otg',
-                                    'people': int.parse(_quantity.text),
-                                  }});
                             try{
                             _sharedPreferences.setString('cart', '');
                             Navigator.pop(context);
-                            // print(_restaurants[index]);
                             Navigator.push(
                               context,
                               PageTransition(
@@ -693,9 +687,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            print(_sharedPreferences.getString('token'));
                             _sharedPreferences.setString('cart', '');
-                            print(_timeController.text);
                             Navigator.pop(context);
                             Navigator.push(
                               context,
@@ -840,7 +832,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
                           align: TextAlign.center
                         ),
                         CustomText(
-                          text: 'Username !', 
+                          text: '${_sharedPreferences?.getString('username')??''}', 
                           color: Colors.black, 
                           size: 2.2, 
                           weight: FontWeight.bold, 

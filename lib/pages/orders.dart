@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:food_booking_app/defaults/button.dart';
 import 'package:food_booking_app/defaults/config.dart';
 import 'package:food_booking_app/defaults/http.dart';
 import 'package:food_booking_app/defaults/text.dart';
+import 'package:food_booking_app/pages/viewOrder.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -23,10 +27,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() { 
     super.initState();
-    _getOrders();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _getOrders();
+    });
   }
   
   _getOrders() async {
+    Http().showLoadingOverlay(context);
     var response =
         await Http(url: 'orderRequests', body: {})
             .getWithHeader();
@@ -34,6 +41,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     if (response is String) {
       setState(() {
         _loading = false;
+        Navigator.pop(context);
       });
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -49,10 +57,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       );
     } else if (response is Response) {
-      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;
+          Navigator.pop(context);
         });
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
@@ -68,15 +76,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         );
       } else {
-        print(response.body);
 
         setState(() {
           _orders.clear();
           _orders = json.decode(response.body)['orderRequest'];
+          log(_orders[0].toString());
           _loading = false;
+          Navigator.pop(context);
           _refreshController.refreshCompleted();
         });
-        print(_orders[0]['status']);
       }
     }
   }
@@ -147,6 +155,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_loading)
+                    Container()
+                    else
                     if (_orders.isEmpty)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
@@ -165,76 +176,94 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     for (var order in _orders)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                      child: Card(
-                        // padding: EdgeInsets.symmetric(vertical: 2 * heightMultiplier, horizontal: 4 * widthMultiplier),
-                        // width: 100 * widthMultiplier,
-                        // decoration: BoxDecoration(
-                        //   borderRadius: BorderRadius.circular(2 * imageSizeMultiplier),
-                        //   color: Colors.white
-                        // ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 4 * widthMultiplier),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CachedNetworkImage(
-                                    imageUrl: order['restaurant']['image'],
-                                    fit: BoxFit.cover,
-                                    height: 30 * imageSizeMultiplier,
-                                    width: 30 * imageSizeMultiplier,
-                                  ),
-                                ]
-                              )
+                      child: CustomButton(
+                        height: 0,
+                        minWidth: 0,
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
+                            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(1 * imageSizeMultiplier)
+                              ),
                             ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CustomText(
-                                    text: order['restaurant']['name'],
-                                    align: TextAlign.left,
-                                    color: Colors.black,
-                                    size: 1.8,
-                                    weight: FontWeight.bold,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
-                                    child: CustomText(
-                                      text: '₱  ${order['grand_total'].toStringAsFixed(2)}',
-                                      align: TextAlign.left,
-                                      color: Colors.black,
-                                      size: 1.4,
-                                      weight: FontWeight.normal,
-                                    )
-                                  ),
-                                  CustomText(
-                                    text: '${DateFormat('MMMM dd, yyyy').format(DateFormat('yyyy-MM-dd').parse(order['booking_date'].toString()))} ${DateFormat('hh:mm a').format(DateFormat('HH:mm:ss').parse(order['booking_time'].toString()))}',
-                                    align: TextAlign.left,
-                                    color: Colors.black,
-                                    size: 1.4,
-                                    weight: FontWeight.normal,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
-                                    child: CustomText(
-                                      text: order['status']['name'],
-                                      align: TextAlign.left,
-                                      color: order['status']['name'] == 'DELIVERED'?Colors.green:Colors.red,
-                                      size: 1.6,
-                                      weight: FontWeight.normal,
-                                    )
-                                  ),
-                                ]
-                              )
-                            )
-                          ],
-                        ),
+                            padding: MaterialStateProperty.all(EdgeInsets.zero),
+                            backgroundColor: MaterialStateProperty.all(Colors.white),
+                            alignment: Alignment.center,
+                          ),
+                          onPressed: () {
+                            Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeft, child: ViewOrderScren(details: order,)))
+                            .then((response) {
+                              _getOrders();
+                            });
+                          },
+                          child: Ink(
+                            color: Colors.white,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(right: 4 * widthMultiplier),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl: order['restaurant']['image'],
+                                        fit: BoxFit.cover,
+                                        height: 30 * imageSizeMultiplier,
+                                        width: 30 * imageSizeMultiplier,
+                                      ),
+                                    ]
+                                  )
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      CustomText(
+                                        text: order['restaurant']['name'],
+                                        align: TextAlign.left,
+                                        color: Colors.black,
+                                        size: 1.8,
+                                        weight: FontWeight.bold,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
+                                        child: CustomText(
+                                          text: '₱  ${order['grand_total'].toStringAsFixed(2)}',
+                                          align: TextAlign.left,
+                                          color: Colors.black,
+                                          size: 1.4,
+                                          weight: FontWeight.normal,
+                                        )
+                                      ),
+                                      CustomText(
+                                        text: '${DateFormat('MMMM dd, yyyy').format(DateFormat('yyyy-MM-dd').parse(order['booking_date'].toString()))} ${DateFormat('hh:mm a').format(DateFormat('HH:mm:ss').parse(order['booking_time'].toString()))}',
+                                        align: TextAlign.left,
+                                        color: Colors.black,
+                                        size: 1.4,
+                                        weight: FontWeight.normal,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 0.5 * heightMultiplier),
+                                        child: CustomText(
+                                          text: order['status']['name'],
+                                          align: TextAlign.left,
+                                          color: order['status']['name'] == 'DELIVERED'?Colors.green:Colors.red,
+                                          size: 1.6,
+                                          weight: FontWeight.normal,
+                                        )
+                                      ),
+                                    ]
+                                  )
+                                )
+                              ],
+                            ),
+                          )
+                        )
                       )
                     )
                   ]

@@ -51,8 +51,6 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
         await Http(url: 'products/${widget.details['product_id']}', body: {})
             .getWithHeader();
             log(widget.details.toString());
-            print(response.request);
-            print(response.body);
 
     if (response is String) {
       setState(() {
@@ -115,12 +113,9 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                   option['product_option_items'].forEach((item) {
                     itemIds.add(item['id']);
                   });
-                  print('${option['name']} $itemIds');
                   selectedProductOptions[selectedProductOptionIds.indexOf(selectedOption)]['product_option_items'].forEach((selectedItem) {
                     itemIds.forEach((id) {
                       if (id == selectedItem['id']) {
-                        print('found $id');
-                        print('index ${itemIds.indexOf(id)}');
                         selectedItems.add(itemIds.indexOf(id));
                       }
                     });
@@ -135,7 +130,6 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
               else _selected.add([]);
             }
           });
-          print(' selected $_selected');
           // _productControllers.add([]);
           _loading = false;
           _refreshController.refreshCompleted();
@@ -163,9 +157,7 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
   }
 
   _addToCart(List productOptions, double productOptionsPrice) async {
-        print('oki');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    print(sharedPreferences.getString('cart'));
     var cart = {};
     //may cart na
     if (sharedPreferences.getString('cart').isNotEmpty) {
@@ -436,10 +428,8 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                                 groupValue: _selected[_variant['product_options'].indexOf(option)], 
                                 activeColor: appColor,
                                 onChanged: (value) {
-                                  print(value);
                                   setState(() {
                                     _selected[_variant['product_options'].indexOf(option)] = option['product_option_items'].indexOf(item);
-                                    print(_selected);
                                   });
                                 },
                                 title: CustomText(
@@ -462,19 +452,14 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                                 activeColor: appColor,
                                 onChanged: (value) {
                                   // 
-                                  print(value);
-                                  print(_selected[_variant['product_options'].indexOf(option)]);
-                                  print(_selected[_variant['product_options'].indexOf(option)].contains(option['product_option_items'].indexOf(item)));
                                   if (value) {
                                     setState(() {
                                       _selected[_variant['product_options'].indexOf(option)].add(option['product_option_items'].indexOf(item));
-                                      print(_selected);
                                     });
                                   }
                                   else {
                                     setState(() {
                                       _selected[_variant['product_options'].indexOf(option)].remove(option['product_option_items'].indexOf(item));
-                                      print(_selected);
                                     });
                                   }
                                 },
@@ -579,9 +564,11 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                       minWidth: 0,
                       child: TextButton(
                         onPressed: () {
-                          setState(() {
-                            _quantity--;
-                          });
+                          if (_quantity > 1) {
+                            setState(() {
+                              _quantity--;
+                            });
+                          }
                         },
                         style: ButtonStyle(
                           overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
@@ -701,7 +688,6 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                               else {
                                 proceed = true;
                               }
-                              print('1 $proceed');
                             }
                             else {
                               if (_variant['product_options'][index]['type'] == 'required' && selected.isEmpty) {
@@ -740,17 +726,14 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
                               else {
                                 proceed = true;
                               }
-                              print('2 $proceed');
                             }
                           }
                         });
                         if (proceed) {
-                          print('3 $proceed');
                           _addToCart(
                             product_options, 
                             price
                           );
-                          print(price);
                         }
                       },
                       style: ButtonStyle(

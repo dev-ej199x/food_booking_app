@@ -16,7 +16,7 @@ _showNotification(RemoteNotification notification) {
     'channel id',
     'channel name',
     'channel desc',
-    icon: '@mipmap/ic_launcher',
+    icon: '@mipmap/launcher_icon',
     importance: Importance.max,
     priority: Priority.high,
     styleInformation: BigTextStyleInformation('')

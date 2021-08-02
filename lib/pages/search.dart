@@ -76,7 +76,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       );
     } else if (response is Response) {
-      print(response.body);
       if (response.statusCode != 200) {
         // if (!_loading) Navigator.pop(context);
         setState(() {
@@ -97,7 +96,6 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       } else {
         Map<String, dynamic> body = json.decode(response.body);
-        print(body);
         setState(() {
           _restaurants.clear();
           _restaurants = new List.from(body['restaurant']);
@@ -317,15 +315,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            print({'details': restaurant, 
-                                  'specifics': {
-                                    'type': 'otg',
-                                    'people': int.parse(_quantity.text),
-                                  }});
                             try{
                             _sharedPreferences.setString('cart', '');
                             Navigator.pop(context);
-                            // print(_restaurants[index]);
                             Navigator.push(
                               context,
                               PageTransition(
@@ -341,7 +333,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             );
                             }
                             catch(e) {
-                              print(e);
                             }
                           },
                           color: appColor,
@@ -556,9 +547,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 4 * widthMultiplier),
                           onPressed: () {
-                            print(_sharedPreferences.getString('token'));
                             _sharedPreferences.setString('cart', '');
-                            print(_timeController.text);
                             Navigator.pop(context);
                             Navigator.push(
                               context,
@@ -697,7 +686,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       onPressed: () {
                         if (_searchController.text.length>0) {
                           _searchController.clear();
-                          _searchRestaurant();
+                          setState(() {
+                            _restaurants.clear();
+                          });
+                          // _searchRestaurant();
                           // _getProducts();
                         }
                       },

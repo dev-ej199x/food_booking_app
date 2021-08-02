@@ -191,16 +191,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   _signUp() async {
     Http().showLoadingOverlay(context);
-    print({
-      'username': _usernameController.text,
-      'password': _passwordController.text,
-      'password_confirmation': _passwordController.text,
-      'name': _nameController.text,
-      'number': _numberController.text,
-      'address': _addressController.text.toString(),
-      'longitude': _locationData.longitude.toString(),
-      'latitude': _locationData.latitude.toString(),
-    });
     var response = await Http(url: 'signup', body: {
       'username': _usernameController.text,
       'password': _passwordController.text,
@@ -211,7 +201,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'longitude': _locationData.longitude.toString(),
       'latitude': _locationData.latitude.toString(),
     }).postNoHeader();
-    print(response);
     if (response is String) {
       Navigator.pop(context);
       _scaffoldKey.currentState.showSnackBar(
@@ -228,7 +217,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       );
     } else if (response is Response) {
-      print('AHAHAH ${response.body}');
       Map<String, dynamic> body = json.decode(response.body);
       if (response.statusCode == 200) {
         _login();
@@ -258,7 +246,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   _login() async {
-    print('hoyaa');
     var response = await Http(url: 'login', body: {
       'username': _usernameController.text,
       'password': _passwordController.text
@@ -304,7 +291,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _sharedPreferences.setString('username', body['user']['username']);
           _sharedPreferences.setString('role', body['user']['role']);
           _sharedPreferences.setInt('role-id', body['user']['customer']['id']);
-          print('ROLE ID NYA TO: ${body['user']['profile']['id']}');
           Navigator.of(context).pop();
           Navigator.of(context).pop();
           Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeft, child: DashBoard()));

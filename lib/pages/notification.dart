@@ -29,7 +29,6 @@ class _NotificationPageState extends State<NotificationPage> {
         await Http(url: 'notifications', body: {})
             .getWithHeader();
 
-            print(response.body);
 
     if (response is String) {
       setState(() {
@@ -49,7 +48,6 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       );
     } else if (response is Response) {
-      print(response.body);
       if (response.statusCode != 200) {
         setState(() {
           _loading = false;
@@ -68,13 +66,11 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         );
       } else {
-        print(response.body);
 
         setState(() {
           _notifications = List.from(json.decode(response.body));
           _loading = false;
         });
-        print(_notifications);
       }
     }
   }
