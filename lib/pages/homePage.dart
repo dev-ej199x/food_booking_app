@@ -506,8 +506,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
 
   _bookingDialog(var restaurant) {
     _quantity.text = '1';
-    _datedPick.text = DateFormat('MMMM dd, yyyy').format(DateTime.now().add(Duration(days: 1)));
-    _timeController.text = DateFormat('HH:mm a').format(DateTime.now());
+    _datedPick.text = DateFormat('MMMM dd, yyyy').format(DateTime.now());
+    _timeController.text = DateFormat('HH:mm a').format(DateTime.now().add(Duration(hours: 1)));
     return showDialog(
         context: context,
         builder: (context) {
