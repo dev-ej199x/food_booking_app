@@ -27,30 +27,6 @@ class _LandingScreenState extends State<LandingScreen> {
   GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   SharedPreferences _sharedPreferences;
 
-  _configure() async {
-    _sharedPreferences = await SharedPreferences.getInstance();
-    _sharedPreferences.setBool('not-first-open', false);
-    if (_sharedPreferences.getString('token') != null) {
-      Navigator.of(context).pop();
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: DashBoard(),
-        ),
-      );
-    }
-    else {
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: LoginScreen(from: null),
-        ),
-      );
-    }
-  }
-
   @override
   void initState() {
     // TODO: implement initState
@@ -62,7 +38,14 @@ class _LandingScreenState extends State<LandingScreen> {
         count++;
         if (count == 3) {
           timer.cancel();
-          _configure();
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: LoginScreen(from: null),
+            ),
+          );
         }
       }
     );

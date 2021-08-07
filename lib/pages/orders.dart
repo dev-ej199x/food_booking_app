@@ -80,7 +80,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
         setState(() {
           _orders.clear();
           _orders = json.decode(response.body)['orderRequest'];
-          log(_orders[0].toString());
           _loading = false;
           Navigator.pop(context);
           _refreshController.refreshCompleted();

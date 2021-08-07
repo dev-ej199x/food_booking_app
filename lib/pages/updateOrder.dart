@@ -50,7 +50,6 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
     var response =
         await Http(url: 'products/${widget.details['product_id']}', body: {})
             .getWithHeader();
-            log(widget.details.toString());
 
     if (response is String) {
       setState(() {
@@ -196,7 +195,6 @@ class _UpdateOrderScreenState extends State<UpdateOrderScreen> {
       ));
 
       sharedPreferences.setString('cart', json.encode(cart));
-      log(sharedPreferences.getString('cart'));
     }
   }
 

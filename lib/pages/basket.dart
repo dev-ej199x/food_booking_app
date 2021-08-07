@@ -52,7 +52,6 @@ class _BasketScrenState extends State<BasketScren> {
       _cart = _sharedPreferences.getString('cart').isNotEmpty?json.decode(_sharedPreferences.getString('cart')):{};
       _loading = false;
     });
-    log(_cart.toString());
   }
 
 
@@ -104,7 +103,6 @@ class _BasketScrenState extends State<BasketScren> {
         ),
       );
     } else if (response is Response) {
-      log(response.body);
       if (response.statusCode != 200) {
         Navigator.pop(context);
         _scaffoldKey.currentState
@@ -309,7 +307,6 @@ class _BasketScrenState extends State<BasketScren> {
                                                       _cart['total_items']--;
                                                     });
                                                     _sharedPreferences.setString('cart', json.encode(_cart));
-                                                    log(_cart.toString());
                                                   }
                                                 },
                                                 style: ButtonStyle(
@@ -361,7 +358,6 @@ class _BasketScrenState extends State<BasketScren> {
                                                       _cart['total_items']++;
                                                     });
                                                     _sharedPreferences.setString('cart', json.encode(_cart));
-                                                    log(_cart.toString());
                                                   },
                                                   style: ButtonStyle(
                                                     overlayColor: MaterialStateProperty.all(Colors.black12.withOpacity(0.05)),
@@ -411,7 +407,6 @@ class _BasketScrenState extends State<BasketScren> {
                                             _cart['order_request_products'].removeAt(_cart['order_request_products'].indexOf(product));
                                           });
                                           _sharedPreferences.setString('cart', json.encode(_cart));
-                                          log(_cart.toString());
                                           if (_cart['order_request_products'].length == 0) {
                                             Navigator.pop(context);
                                           }

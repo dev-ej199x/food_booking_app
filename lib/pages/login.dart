@@ -160,17 +160,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _configure() async {
     _sharedPreferences = await SharedPreferences.getInstance();
-    _sharedPreferences.setBool('not-first-open', false);
-    if (_sharedPreferences.getString('token') != null) {
-      Navigator.of(context).pop();
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: DashBoard(),
-        ),
-      );
-    }
   }
 
   @override

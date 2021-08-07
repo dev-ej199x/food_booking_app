@@ -220,7 +220,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
         ));
 
         sharedPreferences.setString('cart', json.encode(cart));
-        log(sharedPreferences.getString('cart'));
       }
     }
     //wala pang cart
@@ -264,7 +263,6 @@ class _OrderWithVariantsState extends State<OrderWithVariants> {
       ));
 
       sharedPreferences.setString('cart', json.encode(cart));
-      log(sharedPreferences.getString('cart'));
     }
   }
 

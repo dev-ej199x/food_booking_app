@@ -48,7 +48,6 @@ class _ViewOrderScrenState extends State<ViewOrderScren> {
       _cart = widget.details;
       _loading = false;
     });
-    log(_cart.toString());
   }
 
 
@@ -174,7 +173,6 @@ class _ViewOrderScrenState extends State<ViewOrderScren> {
         ),
       );
     } else if (response is Response) {
-      log(response.body);
       if (response.statusCode != 200) {
         Navigator.pop(context);
         _scaffoldKey.currentState

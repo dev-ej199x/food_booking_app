@@ -45,7 +45,6 @@ class _OrderScreenState extends State<OrderScreen> {
   var _cart = {};
 
   void initState() {
-    // log(widget.details.toString());
     // TODO: implement initState
     super.initState();
     _getProducts();

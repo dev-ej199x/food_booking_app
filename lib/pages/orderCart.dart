@@ -51,7 +51,6 @@ class _OrderCartState extends State<OrderCart> {
     setState(() {
       _cart = json.decode(_sharedPreferences.getString('cart'));
     });
-    log(_cart.toString());
     _computeTotal();
   }
 
@@ -119,7 +118,6 @@ class _OrderCartState extends State<OrderCart> {
         ),
       );
     } else if (response is Response) {
-      log(response.body);
       if (response.statusCode != 200) {
         Navigator.pop(context);
         _scaffoldKey.currentState
